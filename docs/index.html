@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Term A — University in a Box</title>
+<meta name="description" content="What to do right now: Term A 2026, PSY-101 and STA-101, fourteen weeks.">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23a63c22'/><g fill='%23fbfaf8'><rect x='7' y='9' width='18' height='2.5'/><rect x='7' y='15' width='18' height='2.5'/><rect x='7' y='21' width='11' height='2.5'/></g></svg>">
+</head>
+<body>
+
+<a class="skip" href="#now">Skip to what's due</a>
+
+<noscript>
+  <p class="banner">This page works out the current week from today's date, so it needs JavaScript. Without it, read <code>START-HERE.md</code> and <code>enrolled/PSY-101.md</code> in the repo directly.</p>
+</noscript>
+
+<header class="masthead">
+  <p class="eyebrow">University in a Box</p>
+  <h1>Term A <span class="sep">·</span> 2026</h1>
+  <p class="lede" id="mast-lede">PSY-101 and STA-101, fourteen weeks, two courses at once.</p>
+</header>
+
+<div id="storage-warning" class="banner" hidden role="status">
+  <strong>Progress can't be saved in this browser.</strong>
+  <span>Local storage is unavailable or full — everything below still works, but ticks will be gone when you close the tab. Use Export before you leave.</span>
+</div>
+
+<main>
+
+  <!-- A · NOW -->
+  <section id="now" class="now" aria-labelledby="now-h">
+    <h2 id="now-h" class="section-label">Right now</h2>
+    <div id="now-body">
+      <p class="loading">Working out what's due…</p>
+    </div>
+    <details class="preview" id="preview">
+      <summary>Preview a different date</summary>
+      <div class="preview-body">
+        <label for="preview-date">Show the plan as it will read on:</label>
+        <input type="date" id="preview-date" min="2026-08-01" max="2027-01-31">
+        <button type="button" id="preview-reset" class="btn btn-quiet">Back to today</button>
+        <p class="fine">Preview only. Nothing is saved and no tick changes.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- D · SLIPPED -->
+  <section id="slips" class="slips" aria-labelledby="slips-h">
+    <h2 id="slips-h" class="section-label">Slipped weeks</h2>
+    <div id="slips-body"></div>
+  </section>
+
+  <!-- B · SETUP -->
+  <section id="setup" aria-labelledby="setup-h">
+    <h2 id="setup-h">Before Monday</h2>
+    <p class="prose">About 90 minutes total, spread across four days. Do them in this order — step 2 is order-dependent and cannot be recovered if you get it wrong.</p>
+    <p class="meta" id="setup-progress"></p>
+    <ol class="checklist" id="setup-list"></ol>
+  </section>
+
+  <!-- C · THE 14 WEEKS -->
+  <section id="weeks" aria-labelledby="weeks-h">
+    <h2 id="weeks-h">The fourteen weeks</h2>
+    <p class="prose">Both courses, week by week. Close a week when its output is written and graded. A week whose Sunday has passed and is still open counts as slipped. Weeks 1–7 and 14 come from the boards in <code>enrolled/</code>; weeks 8–13, which the boards file as a single row reading “see course file”, come from <code>catalog/PSY-101.md</code> and <code>catalog/STA-101.md</code>.</p>
+    <div class="week-controls">
+      <button type="button" class="btn btn-quiet" id="weeks-expand">Expand all</button>
+      <button type="button" class="btn btn-quiet" id="weeks-collapse">Collapse all</button>
+    </div>
+    <div id="weeks-list"></div>
+  </section>
+
+  <!-- E · SOURCE LEDGER -->
+  <section id="ledger" aria-labelledby="ledger-h">
+    <h2 id="ledger-h">Source ledger</h2>
+    <p class="prose">Every source in both courses. Click a tag to cycle it <span class="tag tag-r">[R]</span> → <span class="tag tag-v">[V]</span> → <span class="tag tag-h">[H]</span>. Nothing gets read from an untagged row.</p>
+    <dl class="legend" id="legend"></dl>
+    <p class="meta" id="h-count"></p>
+    <div id="ledger-list"></div>
+  </section>
+
+  <!-- F · RUBRIC -->
+  <section id="rubric" aria-labelledby="rubric-h">
+    <h2 id="rubric-h">The weekly rubric</h2>
+    <div id="rubric-body"></div>
+  </section>
+
+  <!-- Data -->
+  <section id="data" aria-labelledby="data-h">
+    <h2 id="data-h">Your progress</h2>
+    <p class="prose">Ticks, closed weeks and tags live in this browser only. A cleared cache takes a year of progress with it, so export sometimes — after the Sunday close is a good habit.</p>
+    <div class="btn-row">
+      <button type="button" class="btn" id="export-btn">Export JSON</button>
+      <button type="button" class="btn" id="import-toggle">Import JSON</button>
+      <button type="button" class="btn btn-danger" id="reset-btn">Reset everything</button>
+    </div>
+    <div id="data-io" hidden>
+      <label for="io-text" id="io-label">Progress data</label>
+      <textarea id="io-text" rows="7" spellcheck="false"></textarea>
+      <div class="btn-row">
+        <button type="button" class="btn" id="import-apply">Load this data</button>
+        <button type="button" class="btn btn-quiet" id="io-close">Close</button>
+      </div>
+    </div>
+    <p class="meta" id="data-status" role="status"></p>
+  </section>
+
+  <!-- The enders -->
+  <section id="enders" aria-labelledby="enders-h">
+    <h2 id="enders-h">The four things that actually end this</h2>
+    <p class="prose">Not lack of motivation. These.</p>
+    <ol class="enders-list" id="enders-list"></ol>
+  </section>
+
+  <section id="owed" aria-labelledby="owed-h">
+    <h2 id="owed-h">Owed later, easy to forget</h2>
+    <div id="owed-list"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Source of truth is the repo, not this page: <code>REGISTRAR.md</code>, <code>ASSESSMENT.md</code>, <code>enrolled/PSY-101.md</code>, <code>enrolled/STA-101.md</code>. This page is a reader for them.</p>
+  <p class="fine">No accreditation. The transcript is a record for you, not a credential for anyone else.</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
