@@ -1,6 +1,21 @@
-# CHARTER — Human Nature & Psychology, 52 Weeks
+# PSY — Program Statement
 
-Produced by the Advisor. Owned by §1 of the Registrar. Amendable only by the Advisor, and only with a logged reason.
+The subject-wide statement for the psychology major: destination, baseline, the shape of the sequence, and the subject-wide cut list. Individual courses live in [`CATALOG.md`](../CATALOG.md) and carry their own week-by-week sequences and course-specific cuts.
+
+Produced by the Advisor. Amendable only by the Advisor, and only with a logged reason.
+
+**Course map** — this document's Terms 0–4 became the catalog's six courses:
+
+| Was | Is now |
+|---|---|
+| Term 0 — Calibration | [PSY-101](PSY-101.md), expanded 4 → 14 weeks |
+| Term 1 — The Evolved Mind | [PSY-201](PSY-201.md) |
+| Term 2 — Judgment | [PSY-202](PSY-202.md) |
+| Term 3 — The Social Animal | [PSY-301](PSY-301.md) |
+| Term 4 — The Individual | [PSY-302](PSY-302.md) |
+| Capstone | [PSY-401](PSY-401.md) |
+
+Sections §3 (Sequence) and §5 (Milestone Rule) below are superseded by the course files and by [`DEGREE.md`](../DEGREE.md). §1, §2, §4 and §6 remain live and bind every PSY course.
 
 ---
 
@@ -50,7 +65,10 @@ Set formally at the week-1 intake. Working assumption until then:
 
 ---
 
-## §3 Sequence
+## §3 Sequence — SUPERSEDED by the course catalog
+
+*Retained for the unblocking rationale, which still holds. Week numbers are historical; use the course files.*
+
 
 Five terms and a capstone. The order is not arbitrary and is not negotiable: calibration precedes content because a year of confident reading on unreplicated findings produces a very well-read person who is wrong. Biology precedes cognition because it explains why the machinery has the shape it has. Cognition precedes social because social phenomena are built out of individual inference. The individual comes last because personality and clinical work are the most theory-laden and you need the previous four terms to read them without being had.
 
@@ -131,7 +149,9 @@ Five terms and a capstone. The order is not arbitrary and is not negotiable: cal
 
 ---
 
-## §4 Cut List
+## §4 Cut List — subject-wide
+
+Binds every PSY course. Individual courses add their own on top.
 
 Refused by **all five agents**, not just the Advisor. If a source or tangent appears here, the agent that encounters it says so and moves on.
 
@@ -150,7 +170,10 @@ Refused by **all five agents**, not just the Advisor. If a source or tangent app
 
 ---
 
-## §5 Milestone Rule
+## §5 Milestone Rule — partly superseded
+
+*Word counts now scale by level (`ASSESSMENT.md`). The one-output-per-week rule and the slipped-week counter stand unchanged.*
+
 
 Every week produces one written artifact. No exceptions, no "reading week."
 

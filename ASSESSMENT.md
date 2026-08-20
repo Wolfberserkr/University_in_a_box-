@@ -1,4 +1,6 @@
-# RUBRIC — LOCKED
+# ASSESSMENT — LOCKED
+
+The standard for every course in the catalog. Written once, applies everywhere. Courses do not define their own rubric; they name only what is *specific* to them.
 
 Written in week 0, before any material is read. Read-only for all five agents and for the student.
 
@@ -8,7 +10,22 @@ Where a published standard exists, it beats one invented here. Two are adopted b
 
 ---
 
-## Part A — Weekly output (every week, 1–52)
+## Level scaling
+
+Parts A and D apply to every course at every level. What changes with level is **what the student is asked to do with a source**, and therefore what the term paper has to be.
+
+| Level | Weekly (Part A) | Midterm, wk 7 | Term paper, wk 14 | Extra criteria |
+|---|---|---|---|---|
+| **100** | all 5 | oral, cold, comprehension | 2,000 words | — |
+| **200** | all 5 | oral, cold, must argue an opposing position convincingly | 3,000 words | B1, B3 |
+| **300** | all 5 | oral, cold, must apply to own material live | 4,000 words, **original analysis on material the field hasn't seen** | B1, B2, B3, B4 |
+| **400** | all 5 | — | capstone | Part C in full; reconstruction outranks everything |
+
+A 300-level paper that summarises the literature well is a failed 300-level paper, however good the summary. The level is defined by the demand, not by the difficulty of the reading.
+
+---
+
+## Part A — Weekly output (every course, every week)
 
 Graded by the Editor. Each criterion is pass/fail. **5/5 or the week is a rewrite.** There is no partial credit and no "strong 4."
 
@@ -24,9 +41,9 @@ Graded by the Editor. Each criterion is pass/fail. **5/5 or the week is a rewrit
 
 ---
 
-## Part B — Term output (weeks 14, 24, 34, 44)
+## Part B — Term paper (week 14 of any course)
 
-Adds to Part A:
+Adds to Part A, per the level-scaling table above:
 
 | # | Criterion | Fails if |
 |---|---|---|
@@ -73,12 +90,12 @@ Adopted by reference rather than invented — the four criteria the Editor grade
 
 ---
 
-## Part D — Program-level, week 52
+## Part D — Program-level, at each award boundary
 
 Four questions. Answer honestly in the Registrar; nobody else will read them.
 
-1. Can you state, cold, which three findings you believed in week 1 that you no longer believe?
-2. Can you reconstruct the Term 2 argument chain without notes?
+1. Can you state, cold, which three findings you believed in PSY-101 week 1 that you no longer believe? *(Compare against the sealed Priors Sheet — do not read it until you've answered.)*
+2. Can you reconstruct each completed course's central argument chain without notes?
 3. Did the artifact get built, or did the reading become the point?
 4. Is there a claim in your own capstone you'd now bet against?
 

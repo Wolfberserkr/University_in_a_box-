@@ -1,63 +1,67 @@
 # University in a Box — the ALTER Framework
 
-A one-person degree program run by five agents against one shared state file.
+A one-person university: a course catalog, credit accounting, concurrent enrolment, levels, a transcript — run by five agents against a shared registrar.
 
-**Destination for this instance:** human nature and psychology, 52 weeks, solo.
-See [`curriculum/CHARTER.md`](curriculum/CHARTER.md).
+**Start here:** [`DEGREE.md`](DEGREE.md) — how it works and what it honestly isn't · [`CATALOG.md`](CATALOG.md) — courses, and the open slot · [`REGISTRAR.md`](REGISTRAR.md) — current enrolment
 
 ---
 
-## The five agents
+## Faculty and institution
 
-| Letter | Agent | Owns | Refuses to |
+The ALTER framework describes five **roles**. It does not describe an institution — which is why five good system prompts and one destination produce a thesis rather than a university.
+
+So the two layers are kept separate. **ALTER is the faculty**, and it runs *each course*. The catalog, levels, prerequisites, credit accounting, and transcript are the **institution**, and they're what let you take Statistics and Psychology in the same term and have it mean something.
+
+| Letter | Agent | Owns, per enrolled course | Refuses to |
 |---|---|---|---|
-| **A** | [Advisor](.claude/agents/advisor.md) | the map | add "foundational" material that doesn't unblock a later week |
-| **L** | [Librarian](.claude/agents/librarian.md) | the sources | present a recalled citation as a verified one |
-| **T** | [Tutor](.claude/agents/tutor.md) | comprehension | accept "yeah, that makes sense" |
-| **E** | [Editor](.claude/agents/editor.md) | the output | open with praise, or grade against anything but the locked rubric |
-| **R** | [Roommate](.claude/agents/roommate.md) | range | reach for a domain already spent in the ledger |
+| **A** | [Advisor](.claude/agents/advisor.md) | §A Week Board · plus catalog and calendar | add "foundational" material that unblocks no later week; enrol a third concurrent course |
+| **L** | [Librarian](.claude/agents/librarian.md) | §B Source Ledger | present a recalled citation as a verified one |
+| **T** | [Tutor](.claude/agents/tutor.md) | §C Gap Log · runs the week-7 midterm | accept "yeah, that makes sense" |
+| **E** | [Editor](.claude/agents/editor.md) | §D Verdict Log | open with praise, or grade against anything but the locked standard |
+| **R** | [Roommate](.claude/agents/roommate.md) | §E Cross-Domain Ledger | reach for a domain already spent |
 
 Each agent file is a complete system prompt. Two ways to run them:
 
-- **Claude Code:** they're already live as subagents — `.claude/agents/*.md`. Invoke by name.
-- **claude.ai Projects:** copy everything *below the `---` frontmatter block* into a Project's custom instructions. One Project per agent. Paste `REGISTRAR.md` into each Project's knowledge, and re-paste it whenever it changes.
+- **Claude Code:** live as subagents in `.claude/agents/`. Invoke by name.
+- **claude.ai Projects:** copy everything *below the `---` frontmatter* into a Project's custom instructions. One Project per agent, and put `REGISTRAR.md` plus the active `enrolled/<CODE>.md` in each Project's knowledge.
 
-## The spine
+Every agent binds to a course before it does anything: registrar → active enrolment → course file. That's what stops five agents from becoming five disconnected chat windows.
 
-[`REGISTRAR.md`](REGISTRAR.md) is the shared state file. Without it, five agents are five disconnected chat windows: the Tutor doesn't know what the Advisor cut, the Editor doesn't know what the rubric says, the Roommate keeps reaching for jazz.
-
-Each agent **owns exactly one section** and may write only there. Everyone reads everything. `§0 RUBRIC` is locked by all five.
-
-## Weekly loop
+## Layout
 
 ```
-Mon  Advisor    -> reads last week's Gap Log + Verdicts, sets this week's milestone
-Mon  Librarian  -> pulls sources for the milestone, tags [V]/[R], logs to §2
-Tue-Thu         -> you read. Nobody talks to you.
-Thu  Tutor      -> 45-min oral exam on what you read; writes gaps to §3
-Fri              -> you write the week's 600-word output
-Fri  Editor     -> grades vs §0 RUBRIC; writes verdict to §4
-Sat  Roommate   -> (every other week) one cross-domain collision; logs to §5
-Sun  Advisor    -> closes the week on the board, adjusts sequence
+DEGREE.md            credit math, 52-week calendar, levels, awards, the four honest gaps
+CATALOG.md           course index, open slots, how to add a subject
+ASSESSMENT.md        the standard. Locked before week 1. Level-scaled. Read-only
+REGISTRAR.md         enrolment, calendar, transcript, baseline
+catalog/             course definitions — inert, reusable
+  _TEMPLATE.md       how to add a subject
+  PSY-101 … PSY-401  the psychology major, six courses
+  PSY-major.md       subject-wide program statement and cut list
+  PSY-sources.md     the source stack, [V]/[R]/[H] tagged
+enrolled/            live per-course state, five agent sections each
+logs/<CODE>/         weekly outputs and Editor verdicts
 ```
 
-## Files
+## Cadence, per course
 
 ```
-REGISTRAR.md            shared state — the only file all five agents touch
-curriculum/CHARTER.md   destination, baseline, sequence, cut list
-curriculum/RUBRIC.md    pass criteria, locked in week 0, read-only thereafter
-curriculum/READING-LIST.md  the source stack, [V]/[R] tagged
-logs/                   weekly outputs and Editor verdicts
-.claude/agents/         the five system prompts
+Mon  Advisor    reads last week's gaps + verdicts, sets the milestone
+Mon  Librarian  pulls one primary + one supporting, tags them, logs to §B
+Tue-Thu         you read. Nobody talks to you.
+Thu  Tutor      45-min oral exam, cold; writes gaps to §C
+Fri             you write the week's output
+Fri  Editor     grades vs ASSESSMENT.md; verdict to §D
+Sat  Roommate   fortnightly; one cross-domain collision, logged to §E
+Sun  Advisor    closes the week
 ```
 
-## The honest flag
+Week 7 is the midterm. Week 14 is the term paper. Then the course is on the transcript and a new one starts.
 
-The Librarian is the weakest of the five and it isn't the prompt's fault. Curation is recall, and a language model produces confident, well-formed citations for papers that don't exist. Mitigations, in order of strength:
+## The honest flags
 
-1. Run it with web search enabled. Non-negotiable.
-2. Work from PDFs you already hold in NotebookLM — it can only cite what's uploaded.
-3. Treat every `[R]` tag as a lead to check, not a shopping list.
+**The Librarian is the weakest of the five**, and not because of the prompt. Curation is recall, and language models produce confident, well-formed citations for papers that don't exist. Run it with search enabled, or work from PDFs already in NotebookLM. In `catalog/PSY-sources.md`, 9 items are `[V]` — checked against a retrieved record — and the rest are `[R]`. That ratio is the point, not an apology.
 
-In `curriculum/READING-LIST.md`, 9 items are `[V]` — checked against an authoritative record. The rest are `[R]`. That ratio is the point, not an apology.
+**This is not accredited and the transcript is not a credential.** [`DEGREE.md`](DEGREE.md) closes with four gaps that aren't papered over: no credential, no peers, no library or lab access, and no teacher who has been wrong in public about the material and remembers how it felt.
+
+**Six courses a year, not forty.** The credit math is in `DEGREE.md` and it's done honestly: ~70 hours per course after stripping the overhead a university makes you pay and you don't. At 9–12 hours a week that's a quarter-time student who cut all the padding — a real thing to be, and not a degree in a year.
