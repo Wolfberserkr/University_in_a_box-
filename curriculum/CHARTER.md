@@ -8,7 +8,7 @@ Produced by the Advisor. Owned by §1 of the Registrar. Amendable only by the Ad
 
 > **Build a de-identified decision-audit: 12–18 real judgment calls, scored against a framework you pre-register in week 0, with a written analysis of where human judgment failed in a predictable direction and what the literature says about why.**
 
-`STATUS: PROPOSED — confirm or swap in week 1.`
+`STATUS: CONFIRMED 2026-08-20. Locked for the term. Swap conditions below are void unless access is refused by policy.`
 
 **Why this one.** Three candidate destinations were on the table: an essay series, this audit, and teaching the material to a team. This is the only one that satisfies the constraint that actually binds — you are running solo, with no human witness, so the artifact has to be gradeable by something that isn't your own opinion at 11pm on a Friday.
 
@@ -23,7 +23,9 @@ It also uses material nobody else has access to. That is not a small thing: it i
 3. **Score blind to outcome where the record allows it.** Decision-time information only, in a separate pass from the outcome data.
 4. **Nothing proprietary leaves your machine.** The artifact is the analysis and the framework, not the underlying records.
 
-**Swap conditions.** If confirming this is blocked — access, policy, or you simply don't want your job in your degree — the fallback is: *reconstruct a published finding's analysis from its open data and report where your numbers diverge from the paper's.* Same reconstruction property, no proprietary material, weaker on originality. Swapping the destination changes §5 and the Capstone only. Terms 0–4 stand either way.
+**Standing access check.** Confirmed on the student's authority. Before week 45, get an explicit read on whether your employer's policy permits this use of incident records even in de-identified, non-exported form. Do that check in Term 2, not the week you start scoring — a policy refusal in week 45 costs the capstone, in week 20 it costs nothing but a swap.
+
+**Swap conditions (void unless access is refused).** If confirming this is blocked — access, policy, or you simply don't want your job in your degree — the fallback is: *reconstruct a published finding's analysis from its open data and report where your numbers diverge from the paper's.* Same reconstruction property, no proprietary material, weaker on originality. Swapping the destination changes §5 and the Capstone only. Terms 0–4 stand either way.
 
 ---
 
