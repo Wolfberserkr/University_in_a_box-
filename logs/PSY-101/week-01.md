@@ -49,11 +49,13 @@ Four questions. Answer before Monday. They are written so they can be answered *
 
 ---
 
-## Part B — The Priors Sheet (output, due Sun 2026-08-30, 600 words)
+## Part B — The Priors Sheet (600 words · **write before Mon 08-24** · sealed Sun 08-30)
 
 > **Three findings about human behavior you currently believe. For each: what you think the evidence is, and what would change your mind.**
 
-Write this **before** the week's reading lands. Not after. The sheet is worthless if it's contaminated by knowing what's about to be debunked.
+**Write this before you open a single source.** The moment you read OSC 2015 your priors are contaminated and this measurement is gone for good — it is the one step in the whole program with an order dependency you cannot undo.
+
+The Sunday date is the **seal** date, not the write date. Write it this weekend or Monday morning; seal it when week 1 closes.
 
 Rules:
 - Pick findings you'd actually act on, not ones you have opinions about. Something you've used at work is better than something you read in a magazine.
