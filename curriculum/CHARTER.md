@@ -36,9 +36,10 @@ Set formally at the week-1 intake. Working assumption until then:
 | Dimension | Assumed level | How it changes the plan |
 |---|---|---|
 | Formal psychology training | none | Term 0 cannot be skipped or shortened |
-| Statistical literacy | reads a table, hasn't computed an effect size | Term 0 adds a hands-on week; no inferential stats coursework |
+| Statistical literacy | **unmeasured** — Q2 declined; re-measured by Tutor probe in wk 1 | Week 3 planned protectively as if absent. Compresses if the wk-1 probe comes back clean |
 | Operational exposure to behavior | high, sustained, systematic | Terms 3–4 run faster; you have referents most students don't |
 | Academic reading stamina | untested | Weeks 1–4 are deliberately light to measure it, then calibrate |
+| Weekly capacity | **9–12h at worst week** (Q3, 2026-08-20) | Second supporting source permitted in Terms 2 and 4 only |
 | Writing under critique | untested | Editor calibrates severity from the week-2 output |
 
 **Intake questions the Advisor asks in week 1** (answer in the Registrar, not from memory):

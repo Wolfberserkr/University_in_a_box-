@@ -17,7 +17,19 @@ Each agent writes **only** to the section it owns. Appending to another agent's 
 **Program start:** 2026-08-24 (Mon) · **Ends:** 2027-08-22 (Sun) · 52 weeks, fixed
 **Week now:** 1 — Term 0, Calibration
 **Destination status:** CONFIRMED 2026-08-20
-**Baseline status:** intake issued 2026-08-20, awaiting answers to Q1 and Q4
+**Baseline status:** partial. Q3 answered · Q2 unanswered, deferred to observed measurement · Q1 and Q4 open
+
+| | Question | Answer | Effect on plan |
+|---|---|---|---|
+| Q1 | Last non-fiction book finished, and what survives of it | _open_ | sets how much load the weekly output carries vs. the reading |
+| Q2 | React to *d* = 0.3, *p* = .04, *n* = 60 | **declined** → re-measured by Tutor, wk 1 | week 3 provisionally planned at the **protective** setting: assume no effect-size fluency |
+| Q3 | Worst-week hours | **9–12** | second supporting source allowed in Terms 2 and 4 only |
+| Q4 | A prediction you got right, one you got wrong, which you remember better | _open_ | supplies the Tutor's first case; likely the capstone's own bias in miniature |
+
+**Advisor note on Q2.** A declined self-report is not a baseline, and guessing one would violate the rule that opens the Advisor's brief. Two consequences, both deliberate:
+
+1. **Week 3 is planned protectively** — as if effect-size fluency is absent. Over-teaching week 3 costs one week. Under-teaching it corrupts every source-triage decision for the remaining 49, because the *n* < 100 rule and the debunked shelf both run on reading magnitudes. Asymmetric costs, so take the cheap side.
+2. **The measurement moves from self-report to performance.** The week-1 Tutor session opens cold on OSC 2015 and probes magnitude directly — *"36% replicated. Of the 64% that didn't, how many were false positives and how many were real effects reported too big? How would you tell?"* That question cannot be answered fluently without the concept, and it cannot be bluffed. It is a better instrument than the question I asked. If it comes back clean, week 3 compresses and Term 0 ends a week early.
 
 ---
 
@@ -118,7 +130,7 @@ Spent domains cannot be reused. This is what stops the Roommate from saying "jaz
 | 0 | –08-23 | setup | Rubric locked · Charter confirmed · intake issued | — | — | ☑ |
 | 1 | 08-24 → 08-30 | 0 | The replication crisis: what happened, what fraction, which subfields | OSC 2015 `[V]` + Ritchie ch. 1–2 `[R]` | Sun 08-30, 600w — **Priors Sheet** | ☐ |
 | 2 | 08-31 → 09-06 | 0 | Researcher degrees of freedom: how a true-seeming result gets manufactured without anyone lying | Simmons et al. 2011 `[V]` | Sun 09-06, 600w | ☐ |
-| 3 | 09-07 → 09-13 | 0 | Effect size, interval, power. **Compute three by hand** | Cumming ch. 1–3 `[R]` | Sun 09-13, 600w + the three computations | ☐ |
+| 3 | 09-07 → 09-13 | 0 | Effect size, interval, power. **Compute three by hand** · scoped from the wk-1 Tutor reading, not from self-report | Cumming ch. 1–3 `[R]` | Sun 09-13, 600w + the three computations | ☐ |
 | 4 | 09-14 → 09-20 | 0 | WEIRD samples · build the debunked shelf in §2 | Henrich et al. 2010 `[V]` + Many Labs 2 `[V]` | Sun 09-20, 600w — **the personal filter** | ☐ |
 
 **Week 1 output — the Priors Sheet.** Three findings about human behavior you currently believe, the evidence you think supports each, and what would change your mind. 600 words, written *before* the reading lands, sealed in `logs/week-01.md`.
@@ -130,3 +142,5 @@ This is deliberate: Rubric Part D, question 1 asks in week 52 which three findin
 **Sequence changes this term:** none.
 **Weeks slipped:** 0. _(Advisor: at 3 slipped weeks, cut scope — do not extend the calendar.)_
 **Detail horizon:** weeks 1–4 set. Weeks 5–14 stay as questions until the week-4 close, per the Advisor's one-term-ahead rule.
+
+**Capacity allowance (from Q3 = 9–12h).** Terms 2 and 4 may carry a second supporting source per week — those two terms only, because they are what the capstone is built out of. Terms 1 and 3 stay at one primary + one supporting regardless of spare hours. Spare capacity goes to the written output and the Tutor session, never to a third source. This is recorded as an allowance, not a reading list; the sources get named at each term boundary.

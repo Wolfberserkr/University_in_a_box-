@@ -21,16 +21,18 @@ Four questions. Answer before Monday. They are written so they can be answered *
 ### Q2 — Statistical baseline
 > A study reports *d* = 0.3, *p* = .04, *n* = 60. React.
 
-**Answer:** `[ selected via intake ]`
+**Answer:** `DECLINED 2026-08-20` → deferred to observed measurement, Tutor session Thu 08-27.
 
-*Reads as: whether Term 0 week 3 is a refresher or the hardest week of the year. Not "are you comfortable with statistics" — that question returns a useless yes from everyone.*
+*A declined self-report is not a baseline and won't be guessed at. Week 3 is planned protectively (assume no effect-size fluency) because the costs are asymmetric — over-teaching it wastes a week, under-teaching it corrupts source triage for the remaining 49. The Tutor measures it directly instead, which is the better instrument: the magnitude probe in Part E can't be answered fluently without the concept and can't be bluffed.*
 
 ---
 
 ### Q3 — Real weekly capacity
 > How many hours per week, honestly, at your **worst** week — not your best?
 
-**Answer:** `[ selected via intake ]`
+**Answer:** `9–12 hours` (2026-08-20)
+
+→ Allowance granted: a second supporting source in **Terms 2 and 4 only**. Terms 1 and 3 stay at one primary + one supporting whatever the spare hours. Surplus goes to the output and the Tutor session, never to a third source.
 
 *Reads as: the number the calendar is built on. Everyone answers this with their best week and then slips three weeks by October. The worst-week number is the only one that survives a year.*
 
@@ -96,3 +98,9 @@ One primary, one supporting. The Librarian's rule is a hard cap: three good sour
 ## Part E — Tutor session, Thu 2026-08-27
 
 Opens cold, no source open, on: *what was the argument?* Then boundaries — the probe you should expect first is **"which subfields, and how do you know it wasn't just the hard-to-replicate ones that got picked?"**
+
+**Second probe, standing in for declined Q2 — this one is a measurement, so don't prepare for it:**
+
+> 36% replicated. Of the 64% that didn't, how much is false positives and how much is real effects that were reported too big? How would you tell the two apart?
+
+Answer it however it comes out. A wrong answer given plainly sets week 3 correctly; a fluent-sounding one that dodges magnitude sets it wrongly, and you'd be paying for that in November.
