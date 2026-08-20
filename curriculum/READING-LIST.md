@@ -10,7 +10,7 @@ Produced by the Librarian. Feeds Registrar §2.
 | `[R]` | **Recalled.** Plausible from memory. Title, author, year, or existence may be wrong. | Lead to check, not a shopping list. |
 | `[H]` | **In hand.** You hold it and it's in NotebookLM. | Strongest. Supersedes `[V]`. Update the tag yourself as items arrive. |
 
-**7 items below are `[V]`. Everything else is `[R]`.** That ratio is the honest state of an LLM used as a librarian, and it is why this agent must run with search enabled. A model produces fluent, correctly formatted citations for work that does not exist — the failure isn't rare, it's the default mode when recall is thin.
+**9 items below are `[V]`. Everything else is `[R]`.** That ratio is the honest state of an LLM used as a librarian, and it is why this agent must run with search enabled. A model produces fluent, correctly formatted citations for work that does not exist — the failure isn't rare, it's the default mode when recall is thin.
 
 The `[V]` items cluster in Term 0 deliberately. Term 0 is the term where a fabricated citation would do the most damage, because it's the term that teaches you to detect fabrication.
 

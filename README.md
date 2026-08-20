@@ -60,4 +60,4 @@ The Librarian is the weakest of the five and it isn't the prompt's fault. Curati
 2. Work from PDFs you already hold in NotebookLM — it can only cite what's uploaded.
 3. Treat every `[R]` tag as a lead to check, not a shopping list.
 
-In `curriculum/READING-LIST.md`, 7 items are `[V]` — checked against an authoritative record. The rest are `[R]`. That ratio is the point, not an apology.
+In `curriculum/READING-LIST.md`, 9 items are `[V]` — checked against an authoritative record. The rest are `[R]`. That ratio is the point, not an apology.
