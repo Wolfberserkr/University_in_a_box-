@@ -29,7 +29,23 @@ Four questions. Answer before Monday. They are written so they can be answered *
 
 ---
 
-**STATUS: NOT YET SEALED.** The three beliefs above are final and will not be edited — they are the measurement. The three falsification clauses do not yet meet the spec set in `START-HERE.md` Part 1 step 2 ("must name an observation, not a feeling"), and sharpening those does not contaminate the priors. Seal once they are rewritten.
+### Falsification clauses, v2 — handwritten 2026-08-21, transcribed verbatim
+
+1. "if control setting demostrates only 10% of the time that the voice goes up in stressful situation i would drop this belief"
+2. "if in a different experiment we observe this behavior such as kids on stimuli for example sugar then I would change my mind about endorfine being the only contrubuting factor."
+3. "if we observe that game that do not interest us has no effect on our reward system despite designed to do so I would drop my claim."
+
+**Assessment against the spec (names an observation, not a feeling):**
+
+| | Verdict | Note |
+|---|---|---|
+| 1 | **passes** | Names a comparison (control setting) and a numeric threshold (10%). Strongest of the three. |
+| 2 | **passes** | Names a specific alternative route — a non-endorphin stimulant producing the same behaviour. Narrows the target to "only contributing factor", which is weaker than the belief as written; recorded, not corrected. |
+| 3 | **passes, weakly** | Names a real comparison — a game with reward mechanics but no personal interest. No threshold, and "effect on our reward system" is not directly observable without instrumentation. Recorded as a known weakness rather than fixed; week 52 should note whether this one was ever testable. |
+
+**OPEN — blocks sealing.** Clause 1 says *"the voice goes up"* (pitch) *"in stressful situation"* (finding 1's condition). Finding 1 is speech **rate** under nervousness; finding 2 is **pitch** under excitement. The clause takes the variable from one and the condition from the other, so as written it may falsify neither. One word from the student resolves it; recorded rather than guessed.
+
+**STATUS: NOT YET SEALED** — pending the clause-1 mapping above only.
 
 **Structural note for the week-52 comparison:** all three explanations have the same shape — *behaviour X occurs because chemical Y is released* (adrenaline, endorphins, dopamine). Whether any of them is correct is not assessed here and must not be, or the instrument is spoiled.
 *Reads as: retention, not consumption. "I read it but couldn't tell you much" is a real and useful answer and it changes the plan — it means the weekly output has to carry more of the load than the reading does.*
