@@ -81,7 +81,9 @@ A course is `complete` when its term paper passes and its weekly pass rate is re
 
 **Amendments:** none.
 
-**Agents stood up** (claude.ai Projects, 2026-08-21): Advisor ✓ · Librarian ✓ (web search enabled) · Tutor — due before Thu 08-27 · Editor — due before Sun 08-30 · Roommate — due before week 2.
+**Agents stood up** (claude.ai Projects, 2026-08-21): Advisor ✓ · Librarian ✓ (web search enabled)
+
+**Smoke-tested 2026-08-21, both passed.** Advisor refused a Freud week, applied the unblocking test, cited the cut list by file and section, priced the calendar trade and named the legitimate route. Librarian refused to bind without a course, tagged everything, verified two citations against publisher records, withheld a date it could not confirm, marked two items `[R]` with the reason, and declined to write to §B because admitting a fifth autopsy would overwrite the Advisor's §A by the back door. Every `[V]` it claimed was independently re-checked and held. · Tutor — due before Thu 08-27 · Editor — due before Sun 08-30 · Roommate — due before week 2.
 
 **Project knowledge:** attach [`AGENT-PACK.md`](AGENT-PACK.md) — one file, all eight state documents including both cut lists. Regenerate with `python3 tools/build-agent-pack.py` and re-upload at the Sunday close, never mid-week.
 
