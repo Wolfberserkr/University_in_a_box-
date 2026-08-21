@@ -111,7 +111,7 @@ window.UNIBOX = {
         "Free, verified: Cumming 2014, Psych Sci 25(1) 7–29 — doi:10.1177/0956797613504966",
         "Free, verified: Greenland et al. 2016, Eur J Epidemiol 31(4) 337–350 — PubMed 27209009",
         "Free, verified: Wasserstein & Lazar 2016, Am Stat 70(2) 129–133 — doi:10.1080/00031305.2016.1154108",
-        "Verify before buying: Ritchie, Science Fictions (2020) · Spiegelhalter, The Art of Statistics (2019). A language model produces fluent, correctly formatted citations for books that don't exist. That check is not paranoia; it is the specific failure mode of using one as a librarian.",
+        "Both books VERIFIED 2026-08-21 and safe to buy: Ritchie, Science Fictions (2020), Metropolitan Books, ISBN 978-1-250-22269-5 · Spiegelhalter, The Art of Statistics (2019), Basic Books ISBN 978-1-5416-1851-0, or UK Pelican ISBN 978-0-241-39863-0 (subtitled Learning from Data — same book).",
         "Buy nothing else yet. Not Sapolsky, not Kahneman, not Meehl. A folder of sixty unread PDFs by month nine starts with a productive-feeling afternoon in week 1."
       ]
     },
@@ -151,7 +151,7 @@ window.UNIBOX = {
       weeks: [
         { n: 1,  start: "2026-08-24", end: "2026-08-30",
           milestone: "The replication crisis: scale and shape",
-          sources: [{ text: "OSC 2015", tag: "V" }, { text: "Ritchie 1–2", tag: "R" }],
+          sources: [{ text: "OSC 2015", tag: "V" }, { text: "Ritchie 1–2", tag: "V" }],
           output: "Priors Sheet, 600w",
           note: "Advisor → Editor: the Priors Sheet will fail A2 and A4 — it cites nothing and gives no magnitudes, because in week 1 you cannot yet do either. Grade it normally, record the REWRITE, log it as baseline measured, not a slipped week. No rewrite is owed." },
         { n: 2,  start: "2026-08-31", end: "2026-09-06",
@@ -170,7 +170,7 @@ window.UNIBOX = {
           note: "Consumes STA-101 wk 3, Greenland's twenty-five misinterpretations, applied to psychology abstracts." },
         { n: 5,  start: "2026-09-21", end: "2026-09-27",
           milestone: "Publication bias, file drawer, p-curve",
-          sources: [{ text: "Ritchie 3–4", tag: "R" }],
+          sources: [{ text: "Ritchie 3–4", tag: "V" }],
           output: "600w",
           note: "Consumes STA-101 wk 6, base rates and PPV." },
         { n: 6,  start: "2026-09-28", end: "2026-10-04",
@@ -241,7 +241,7 @@ window.UNIBOX = {
       weeks: [
         { n: 1,  start: "2026-08-24", end: "2026-08-30",
           milestone: "What a number claims: population, sample, estimand",
-          sources: [{ text: "Spiegelhalter 1–2", tag: "R" }],
+          sources: [{ text: "Spiegelhalter 1–2", tag: "V" }],
           output: "600w" },
         { n: 2,  start: "2026-08-31", end: "2026-09-06",
           milestone: "Effect size and interval as the primary result → feeds PSY-101 wk 3",
