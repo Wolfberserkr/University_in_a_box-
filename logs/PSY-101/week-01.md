@@ -11,9 +11,27 @@ Four questions. Answer before Monday. They are written so they can be answered *
 > What is the last non-fiction book you finished, and what do you still remember from it?
 
 **Answer:**
-```
-[   ]
-```
+**Written 2026-08-21, before any source was opened. Recorded verbatim — not corrected, not tidied.**
+
+---
+
+**Finding 1 — People speak faster when nervous.**
+"People have the tendency of speaking faster when nervous, I've experienced this first hand and I believe this tendency is due to the body's response to fight or fight. The body is flooded by adrenaline."
+*Would change my mind:* "Should science disproof this I would change my mind but until then I will be sure this is the reason why we talk faster when under pressure."
+
+**Finding 2 — Pitch rises when excited.**
+"An other behaviour I've observed is when the pitch of our voice go up when we are excited, we can observe this in children when they are playing. i believe this is chemical releases, endorphins excites them. The evidence has been studied for years."
+*Would change my mind:* "the finding of any other chemicals that would trigger this response would change my mind."
+
+**Finding 3 — Losing yourself in gaming.**
+"An other behaviour is losing our self in gaming, this triggers our dopamine when we achieve difficulties and get rewards, this has also been extensively studied. And is observable in today's youth. I believe this to be the result of millions of evolution."
+*Would change my mind:* "if there an other reason the if plausible I would change my my mind."
+
+---
+
+**STATUS: NOT YET SEALED.** The three beliefs above are final and will not be edited — they are the measurement. The three falsification clauses do not yet meet the spec set in `START-HERE.md` Part 1 step 2 ("must name an observation, not a feeling"), and sharpening those does not contaminate the priors. Seal once they are rewritten.
+
+**Structural note for the week-52 comparison:** all three explanations have the same shape — *behaviour X occurs because chemical Y is released* (adrenaline, endorphins, dopamine). Whether any of them is correct is not assessed here and must not be, or the instrument is spoiled.
 *Reads as: retention, not consumption. "I read it but couldn't tell you much" is a real and useful answer and it changes the plan — it means the weekly output has to carry more of the load than the reading does.*
 
 ---
