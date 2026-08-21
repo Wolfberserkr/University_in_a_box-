@@ -157,8 +157,8 @@ Refused by **all five agents**, not just the Advisor. If a source or tangent app
 
 | Cut | Reason |
 |---|---|
-| Freud, Jung, and psychoanalytic theory as *content* | Historically enormous, empirically inert. One reading in Term 4 as intellectual history. Nothing more. |
-| MBTI, Enneagram, DISC, colour-coded type systems | No predictive validity worth the week. Term 4 wk 35 covers *why* in one paragraph. |
+| Freud, Jung, and psychoanalytic theory as *content* | Historically enormous, empirically inert. One reading in **PSY-302** as intellectual history. Nothing more. |
+| MBTI, Enneagram, DISC, colour-coded type systems | No predictive validity worth the week. **PSY-302 wk 3** covers *why* in one week and never again. |
 | NLP, "body-language reading," micro-expression detection as a skill | Actively harmful in your occupational context — the deception-detection literature says trained confidence rises and accuracy doesn't. |
 | Self-help and the productivity-psychology shelf | Optimizes for reader feeling, not for truth. |
 | Positive-psychology intervention literature | Among the hardest-hit areas in replication. Not worth remediating. |
