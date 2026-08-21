@@ -151,7 +151,7 @@ window.UNIBOX = {
       weeks: [
         { n: 1,  start: "2026-08-24", end: "2026-08-30",
           milestone: "The replication crisis: scale and shape",
-          sources: [{ text: "OSC 2015", tag: "V" }, { text: "Ritchie 1–2", tag: "V" }],
+          sources: [{ text: "OSC 2015", tag: "V" }, { text: "Ritchie 1–2", tag: "H" }],
           output: "Priors Sheet, 600w",
           note: "Advisor → Editor: the Priors Sheet will fail A2 and A4 — it cites nothing and gives no magnitudes, because in week 1 you cannot yet do either. Grade it normally, record the REWRITE, log it as baseline measured, not a slipped week. No rewrite is owed." },
         { n: 2,  start: "2026-08-31", end: "2026-09-06",
@@ -170,7 +170,7 @@ window.UNIBOX = {
           note: "Consumes STA-101 wk 3, Greenland's twenty-five misinterpretations, applied to psychology abstracts." },
         { n: 5,  start: "2026-09-21", end: "2026-09-27",
           milestone: "Publication bias, file drawer, p-curve",
-          sources: [{ text: "Ritchie 3–4", tag: "V" }],
+          sources: [{ text: "Ritchie 3–4", tag: "H" }],
           output: "600w",
           note: "Consumes STA-101 wk 6, base rates and PPV." },
         { n: 6,  start: "2026-09-28", end: "2026-10-04",
@@ -216,7 +216,7 @@ window.UNIBOX = {
       ],
       ledger: [
         { id: "1",  source: "Open Science Collaboration (2015), Science 349(6251) aac4716", wk: "1",   tag: "V", verified: "PubMed 26315443", status: "acquire — open" },
-        { id: "12", source: "Ritchie, Science Fictions (2020) ch. 1–2", wk: "1",  tag: "V", verified: "Metropolitan Books, ISBN 978-1-250-22269-5", status: "exists — safe to buy" },
+        { id: "12", source: "Ritchie, Science Fictions (2020) ch. 1–2", wk: "1",  tag: "H", verified: "Metropolitan Books, ISBN 978-1-250-22269-5", status: "in NotebookLM — PSY-101" },
         { id: "2",  source: "Simmons, Nelson & Simonsohn (2011), Psych Sci 22(11) 1359–1366", wk: "2", tag: "V", verified: "doi:10.1177/0956797611417632", status: "acquire — open" },
         { id: "3",  source: "Nosek et al. (2022), Annu Rev Psychol 73, 719–748", wk: "6", tag: "V", verified: "doi:10.1146/annurev-psych-020821-114157", status: "acquire" },
         { id: "5",  source: "Henrich, Heine & Norenzayan (2010), BBS 33(2–3) 61–83", wk: "8", tag: "V", verified: "PubMed 20550733", status: "acquire — open PDF" },
