@@ -81,6 +81,10 @@ A course is `complete` when its term paper passes and its weekly pass rate is re
 
 **Amendments:** none.
 
+**Agents stood up** (claude.ai Projects, 2026-08-21): Advisor ✓ · Librarian ✓ (web search enabled) · Tutor — due before Thu 08-27 · Editor — due before Sun 08-30 · Roommate — due before week 2.
+
+**Project knowledge:** attach [`AGENT-PACK.md`](AGENT-PACK.md) — one file, all eight state documents including both cut lists. Regenerate with `python3 tools/build-agent-pack.py` and re-upload at the Sunday close, never mid-week.
+
 **Slipped weeks:** 0 across all courses. _(Three slips in one course triggers a scope cut in that course. The calendar does not move.)_
 
 **Detail horizon:** Term A set. Terms B and C exist as course definitions with sequences; the Advisor does not schedule their weeks until the preceding term closes, informed by the gap and verdict logs.

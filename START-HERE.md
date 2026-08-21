@@ -56,7 +56,7 @@ I can produce a fluent, correctly formatted citation for a book that doesn't exi
 
 **Recommended: run it in Claude Code, in this repo.** The agents are already live in `.claude/agents/` — invoke by name. They read `REGISTRAR.md` and `enrolled/<CODE>.md` directly off disk, which means the shared state file stays in sync with zero effort from you.
 
-**Alternative: five claude.ai Projects.** One per agent. Copy everything *below* the `---` frontmatter block of each `.claude/agents/*.md` file into the Project's custom instructions. Add `REGISTRAR.md` and the active `enrolled/<CODE>.md` to each Project's knowledge.
+**Alternative: five claude.ai Projects.** One per agent. Copy everything *below* the `---` frontmatter block of each `.claude/agents/*.md` file into the Project's custom instructions. Add **`AGENT-PACK.md`** to each Project's knowledge — one file containing all eight state documents, including both cut lists. Attaching the state files individually is a mistake: it is easy to omit the catalog files, and without the cut lists an agent cannot refuse anything, which is the whole of what makes it an agent.
 
 Be aware of what this costs: **you re-upload the state files to five Projects every time they change**, which is roughly five times a week. That friction is small on day one and is a plausible reason the program is dead by October. If you use Projects anyway, do the re-upload as part of the Sunday close and nowhere else.
 
