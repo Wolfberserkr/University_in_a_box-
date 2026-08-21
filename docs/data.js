@@ -215,7 +215,7 @@ window.UNIBOX = {
           note: "The checks you now run on any claim before it enters your ledger, each justified by a specific case from weeks 10–13. This paper becomes the Librarian's standing instruction for the rest of the major, so it is a working document, not an essay." }
       ],
       ledger: [
-        { id: "1",  source: "Open Science Collaboration (2015), Science 349(6251) aac4716", wk: "1",   tag: "V", verified: "PubMed 26315443", status: "acquire — open" },
+        { id: "1",  source: "Open Science Collaboration (2015), Science 349(6251) aac4716", wk: "1",   tag: "H", verified: "PubMed 26315443", status: "in NotebookLM — PSY-101" },
         { id: "12", source: "Ritchie, Science Fictions (2020) ch. 1–2", wk: "1",  tag: "H", verified: "Metropolitan Books, ISBN 978-1-250-22269-5", status: "in NotebookLM — PSY-101" },
         { id: "2",  source: "Simmons, Nelson & Simonsohn (2011), Psych Sci 22(11) 1359–1366", wk: "2", tag: "V", verified: "doi:10.1177/0956797611417632", status: "acquire — open" },
         { id: "3",  source: "Nosek et al. (2022), Annu Rev Psychol 73, 719–748", wk: "6", tag: "V", verified: "doi:10.1146/annurev-psych-020821-114157", status: "acquire" },
