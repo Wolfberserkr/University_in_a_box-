@@ -74,7 +74,7 @@ p { margin: 0 0 1em; }
 .prose { max-width: var(--measure); }
 
 .section-label, .meta, .fine, .day-tag, .btn, .chip, .kicker,
-label, summary, .legend dt, .ledger-meta, .ledger-id, .mast-meta {
+label, summary, .legend dt, .ledger-meta, .mast-meta {
   font-family: var(--sans);
 }
 
@@ -91,7 +91,7 @@ a { color: var(--accent-ink); }
 
 .skip {
   position: absolute; left: -9999px; top: 0;
-  background: var(--surface); padding: .6rem 1rem; z-index: 10;
+  background: var(--surface); padding: .6rem 1rem; z-index: 30;
   font-family: var(--sans); font-size: .85rem;
 }
 .skip:focus { left: 0; }
@@ -149,6 +149,12 @@ footer p { max-width: var(--measure); }
   padding: .8rem 0;
 }
 .now-tasks li:last-child { border-bottom: 1px solid var(--rule); }
+.now-tasks li.task-block {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding-left: .85rem; padding-right: .85rem;
+}
+.now-tasks li.task-block .now-task-title { color: var(--accent-ink); }
 .now-task-title { font-weight: 600; display: block; }
 .now-task-body { color: var(--ink-2); font-size: .93rem; display: block; max-width: var(--measure); }
 .now-task-src { font-family: var(--sans); font-size: .82rem; color: var(--muted); display: block; margin-top: .2rem; }
@@ -272,6 +278,7 @@ input[type="checkbox"]:hover { border-color: var(--ink-2); }
 
 .week {
   border-top: 1px solid var(--rule);
+  scroll-margin-top: 4.5rem;
 }
 .week:last-of-type { border-bottom: 1px solid var(--rule); }
 .week > summary {
