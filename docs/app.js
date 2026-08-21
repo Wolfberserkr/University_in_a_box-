@@ -191,6 +191,15 @@
     if (text !== undefined && text !== null) { n.textContent = text; }
     return n;
   }
+  var liveTimer = null;
+  function announce(msg) {
+    var n = $("live-note");
+    if (!n) { return; }
+    if (liveTimer) { clearTimeout(liveTimer); }
+    n.textContent = "";
+    liveTimer = setTimeout(function () { n.textContent = msg; }, 60);
+  }
+
   function clear(node) { while (node && node.firstChild) { node.removeChild(node.firstChild); } }
   function $(id) { return document.getElementById(id); }
 
@@ -305,7 +314,9 @@
       if (n > 0) {
         any = true;
         strip.appendChild(el("span", n >= D.slipRule.limit ? "chip chip-accent" : "chip",
-          c.code + " · " + n + " of " + D.slipRule.limit + " slipped"));
+          n >= D.slipRule.limit
+            ? c.code + " · scope cut triggered · " + plural(n, "slipped week", "slipped weeks")
+            : c.code + " · " + n + " of " + D.slipRule.limit + " slipped"));
       }
     });
     if (!any) { strip.appendChild(el("span", "chip", "No slipped weeks")); }
@@ -507,7 +518,7 @@
     var refI = dayIndex(ref);
     var phase = phaseFor(refI);
 
-    host.appendChild(el("p", "now-date", fmtLong(ref)));
+    host.appendChild(el("p", "now-date", (previewDate ? "Previewing · " : "") + fmtLong(ref)));
 
     if (phase === "pre") {
       var days = TERM_START_I - refI;
@@ -689,6 +700,8 @@
         li.className = "check-item" + (cb.checked ? " is-done" : "");
         save();
         refreshDynamic();
+        announce("Setup step " + step.n + (cb.checked ? " done. " : " un-ticked. ") +
+          setupDone() + " of " + D.setup.length + " complete.");
       });
       row.appendChild(cb);
 
@@ -757,6 +770,10 @@
       if (cb.checked) { state.closed[k] = true; } else { delete state.closed[k]; }
       save();
       refreshDynamic();
+      var sl = slipsFor(course, refDate());
+      announce(course.code + " week " + w.n + (cb.checked ? " closed. " : " reopened. ") +
+        closedCount(course) + " of " + course.weeks.length + " weeks closed" +
+        (sl > 0 ? ", " + plural(sl, "slipped week", "slipped weeks") : "") + ".");
     });
     label.appendChild(cb);
     label.appendChild(document.createTextNode("Close " + course.code + " week " + w.n));
@@ -932,6 +949,7 @@
           if (t === "V") {
             state.tags[key] = "H";
             paint(); save(); renderHCount(); renderNow();
+            announce(row.source + " marked in hand. " + hCount().h + " of " + hCount().total + " sources in hand.");
             return;
           }
           if (t === "H") {

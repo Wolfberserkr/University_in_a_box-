@@ -17,6 +17,8 @@
   <p class="banner">This page works out the current week from today's date, so it needs JavaScript. Without it, read <code>START-HERE.md</code> and <code>enrolled/PSY-101.md</code> in the repo directly.</p>
 </noscript>
 
+<div id="preview-bar" class="preview-bar" hidden role="status" aria-live="polite"></div>
+
 <header class="masthead">
   <h1>University in a Box <span class="sep">·</span> Term A 2026</h1>
   <p class="mast-meta" id="mast-meta">PSY-101 + STA-101</p>
@@ -24,12 +26,14 @@
 
 <div id="storage-warning" class="banner" hidden role="status" aria-live="polite"></div>
 
+<p id="live-note" class="sr-only" role="status" aria-live="polite"></p>
+
 <main>
 
   <!-- A · NOW -->
   <section id="now" class="now" aria-labelledby="now-h">
     <h2 id="now-h" class="section-label">Right now</h2>
-    <div id="now-body" aria-live="polite">
+    <div id="now-body">
       <p class="loading">Working out what's due…</p>
     </div>
     <details class="preview" id="preview">
@@ -54,7 +58,7 @@
   <!-- D · SLIPPED -->
   <section id="slips" class="slips" aria-labelledby="slips-h">
     <h2 id="slips-h" class="section-label">Slipped weeks</h2>
-    <div id="slips-body" aria-live="polite"></div>
+    <div id="slips-body"></div>
   </section>
 
   <!-- C · THE 14 WEEKS -->
@@ -122,7 +126,6 @@
   <p class="fine">Ulrich · 9–12 h/week at a bad week · two concurrent courses, ~5 h each. No accreditation: the transcript is a record for you, not a credential for anyone else.</p>
 </footer>
 
-<div id="preview-bar" class="preview-bar" hidden role="status" aria-live="polite"></div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>

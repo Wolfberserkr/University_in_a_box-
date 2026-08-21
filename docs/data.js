@@ -160,7 +160,7 @@ window.UNIBOX = {
           output: "600w" },
         { n: 3,  start: "2026-09-07", end: "2026-09-13",
           milestone: "Apply effect size and interval to replication data. Compute three by hand",
-          sources: [{ text: "STA-101 wk 2", tag: "V" }, { text: "OSC 2015 supplement", tag: "V" }],
+          sources: [{ text: "STA-101 wk 2", tag: "V" }, { text: "OSC 2015 supplement", tag: null }],
           output: "600w + computations",
           note: "Consumes STA-101 wk 2. This week applies the machinery; it does not teach it — STA-101 does that, and nothing is taught twice." },
         { n: 4,  start: "2026-09-14", end: "2026-09-20",
@@ -318,7 +318,7 @@ window.UNIBOX = {
     { tag: "R", name: "recalled", body: "Recalled and unverified. Nothing gets read from an untagged row, and an [R] source leaned on in writing must say so — that is rubric A2." },
     { tag: "V", name: "verified", body: "Verified against a retrieved record — a PubMed ID, a DOI, a publisher page." },
     { tag: "H", name: "in hand", body: "In hand and uploaded to NotebookLM. The strongest tag: the notebook, not the Librarian, is now the citation authority for that source." },
-    { tag: "?", name: "no tag on the board", body: "Not a repo tag — this page marks a source the week board names without one. The Librarian owes that row a tag, and nothing gets read from an untagged row.", ui: true }
+    { tag: "?", name: "no tag on the board", body: "Not a repo tag — this page marks a source the week board names without one. The Librarian owes that row a tag, and nothing gets read from an untagged row." }
   ],
 
   rubric: {
