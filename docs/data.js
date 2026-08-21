@@ -10,6 +10,8 @@
  *   catalog/STA-101.md        weeks 8-13 detail
  *
  * Tags are load-bearing: R = recalled, V = verified, H = in hand.
+ * PSY-101 weeks 3-4 and ledger row 13 follow the corrected board (repo commit 20e4321):
+ * those weeks consume STA-101's sources and Cumming moved to the STA-101 ledger.
  */
 window.UNIBOX = {
 
@@ -157,15 +159,15 @@ window.UNIBOX = {
           sources: [{ text: "Simmons et al. 2011", tag: "V" }],
           output: "600w" },
         { n: 3,  start: "2026-09-07", end: "2026-09-13",
-          milestone: "Effect size, interval, precision — compute three by hand",
-          sources: [{ text: "Cumming 1–3", tag: "R" }],
+          milestone: "Apply effect size and interval to replication data. Compute three by hand",
+          sources: [{ text: "STA-101 wk 2", tag: "V" }, { text: "OSC 2015 supplement", tag: "V" }],
           output: "600w + computations",
-          note: "Consumes STA-101 wk 2. The course file re-scopes this week from teaching effect sizes to applying them to replication data — STA-101 now teaches the machinery." },
+          note: "Consumes STA-101 wk 2. This week applies the machinery; it does not teach it — STA-101 does that, and nothing is taught twice." },
         { n: 4,  start: "2026-09-14", end: "2026-09-20",
-          milestone: "Power; why underpowered significant results are usually wrong",
-          sources: [{ text: "Cumming, cont.", tag: null }],
+          milestone: "Apply the misinterpretation catalogue to published psychology abstracts",
+          sources: [{ text: "STA-101 wk 3", tag: "V" }],
           output: "600w",
-          note: "Consumes STA-101 wk 3, the misinterpretation catalogue." },
+          note: "Consumes STA-101 wk 3, Greenland's twenty-five misinterpretations, applied to psychology abstracts." },
         { n: 5,  start: "2026-09-21", end: "2026-09-27",
           milestone: "Publication bias, file drawer, p-curve",
           sources: [{ text: "Ritchie 3–4", tag: "R" }],
@@ -216,7 +218,6 @@ window.UNIBOX = {
         { id: "1",  source: "Open Science Collaboration (2015), Science 349(6251) aac4716", wk: "1",   tag: "V", verified: "PubMed 26315443", status: "acquire — open" },
         { id: "12", source: "Ritchie, Science Fictions (2020) ch. 1–2", wk: "1",  tag: "R", verified: "—", status: "verify before buying" },
         { id: "2",  source: "Simmons, Nelson & Simonsohn (2011), Psych Sci 22(11) 1359–1366", wk: "2", tag: "V", verified: "doi:10.1177/0956797611417632", status: "acquire — open" },
-        { id: "13", source: "Cumming, Understanding The New Statistics (2012) ch. 1–3", wk: "3–4", tag: "R", verified: "—", status: "verify before buying" },
         { id: "3",  source: "Nosek et al. (2022), Annu Rev Psychol 73, 719–748", wk: "6", tag: "V", verified: "doi:10.1146/annurev-psych-020821-114157", status: "acquire" },
         { id: "5",  source: "Henrich, Heine & Norenzayan (2010), BBS 33(2–3) 61–83", wk: "8", tag: "V", verified: "PubMed 20550733", status: "acquire — open PDF" },
         { id: "4",  source: "Klein et al. (2018), AMPPS 1(4) 443–490", wk: "9", tag: "V", verified: "doi:10.1177/2515245918810225", status: "acquire — open" },
@@ -226,7 +227,7 @@ window.UNIBOX = {
         { id: "9",  source: "Watts, Duncan & Quan (2018), Psych Sci 29(7) 1159–1177", wk: "13", tag: "V", verified: "doi:10.1177/0956797618761661", status: "acquire" },
         { id: "36", source: "Simons & Chabris (1999), Perception 28(9) 1059–1074", wk: "14", tag: "R", verified: "—", status: "verify" }
       ],
-      ledgerNote: "Ten of twelve [V] as filed. Retag [H] as each lands in NotebookLM. Nothing gets read from an untagged row."
+      ledgerNote: "Ten of eleven [V] as filed. Weeks 3–4 consume STA-101's sources rather than carrying their own — see the interlock note in REGISTRAR.md. Retag [H] as each lands in NotebookLM. Nothing gets read from an untagged row."
     },
 
     {
@@ -258,7 +259,7 @@ window.UNIBOX = {
           output: "600w" },
         { n: 5,  start: "2026-09-21", end: "2026-09-27",
           milestone: "Power; why underpowered significant results exaggerate",
-          sources: [{ text: "Cumming, cont.", tag: null }],
+          sources: [{ text: "Cumming 2014, cont.", tag: "V" }],
           output: "600w" },
         { n: 6,  start: "2026-09-28", end: "2026-10-04",
           milestone: "Base rates and positive predictive value",
@@ -316,7 +317,8 @@ window.UNIBOX = {
   tagLegend: [
     { tag: "R", name: "recalled", body: "Recalled and unverified. Nothing gets read from an untagged row, and an [R] source leaned on in writing must say so — that is rubric A2." },
     { tag: "V", name: "verified", body: "Verified against a retrieved record — a PubMed ID, a DOI, a publisher page." },
-    { tag: "H", name: "in hand", body: "In hand and uploaded to NotebookLM. The strongest tag: the notebook, not the Librarian, is now the citation authority for that source." }
+    { tag: "H", name: "in hand", body: "In hand and uploaded to NotebookLM. The strongest tag: the notebook, not the Librarian, is now the citation authority for that source." },
+    { tag: "?", name: "no tag on the board", body: "Not a repo tag — this page marks a source the week board names without one. The Librarian owes that row a tag, and nothing gets read from an untagged row.", ui: true }
   ],
 
   rubric: {

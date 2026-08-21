@@ -1,7 +1,7 @@
 /* University in a Box — Term A reader.
-   Vanilla JS, no dependencies, no network. State lives in localStorage and is
-   wrapped in try/catch everywhere: if storage throws or returns junk, the page
-   still renders and simply stops remembering. */
+   Vanilla JS, no dependencies, no network. State lives in localStorage and every
+   access is wrapped in try/catch: if storage is unavailable, full, or holds a value
+   that cannot be read, the page still renders and says which of those happened. */
 (function () {
   "use strict";
 
@@ -9,6 +9,7 @@
   if (!D) { return; }
 
   var KEY = "uib.termA.v1";
+  var SALVAGE_KEY = "uib.termA.v1.unreadable";
   var MS_DAY = 86400000;
   var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   var MON_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -31,12 +32,9 @@
   function fmtLong(d) {
     return DAYS_LONG[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
   }
-  function fmtShort(d) {
-    return d.getDate() + " " + MON_SHORT[d.getMonth()];
-  }
-  function fmtRange(a, b) {
-    return fmtShort(parseYMD(a)) + " – " + fmtShort(parseYMD(b));
-  }
+  function fmtNoDay(d) { return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear(); }
+  function fmtShort(d) { return d.getDate() + " " + MON_SHORT[d.getMonth()]; }
+  function fmtRange(a, b) { return fmtShort(parseYMD(a)) + " – " + fmtShort(parseYMD(b)); }
   function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
 
   var TERM_START = parseYMD(D.meta.term.start);
@@ -47,13 +45,20 @@
   var previewDate = null; /* Date or null — never persisted */
 
   function refDate() { return previewDate || startOfToday(); }
-  function weekNumberFor(d) {
-    return Math.floor((dayIndex(d) - TERM_START_I) / 7) + 1;
+  function weekNumberFor(d) { return Math.floor((dayIndex(d) - TERM_START_I) / 7) + 1; }
+  function reduceMotion() {
+    try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+    catch (e) { return false; }
   }
 
-  /* -------------------------------------------------------------- storage */
+  /* -------------------------------------------------------------- storage
+     Three failure modes, three messages:
+       "unavailable" — localStorage cannot be used at all
+       "unreadable"  — a value is stored but could not be parsed; it is copied to
+                       SALVAGE_KEY and never overwritten in place
+       "full"        — a write was refused (quota or a mid-session block)          */
 
-  var storageOK = true;
+  var storage = { writable: false, problem: null, salvaged: false, raw: null };
 
   function probeStorage() {
     try {
@@ -65,7 +70,7 @@
   }
 
   function defaults() {
-    var s = { v: 1, setup: {}, closed: {}, tags: {}, updated: null };
+    var s = { v: 1, setup: {}, closed: {}, tags: {}, verified: {}, updated: null };
     D.courses.forEach(function (c) {
       c.ledger.forEach(function (row) { s.tags[c.code + "|" + row.id] = row.tag; });
     });
@@ -74,8 +79,8 @@
 
   function sanitize(raw) {
     var base = defaults();
-    if (!raw || typeof raw !== "object") { return base; }
-    var out = { v: 1, setup: {}, closed: {}, tags: base.tags, updated: null };
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) { return null; }
+    var out = { v: 1, setup: {}, closed: {}, tags: base.tags, verified: {}, updated: null };
     if (raw.setup && typeof raw.setup === "object") {
       D.setup.forEach(function (step) {
         if (raw.setup[step.n] === true) { out.setup[step.n] = true; }
@@ -89,43 +94,91 @@
         });
       });
     }
-    if (raw.tags && typeof raw.tags === "object") {
-      D.courses.forEach(function (c) {
-        c.ledger.forEach(function (row) {
-          var k = c.code + "|" + row.id;
+    D.courses.forEach(function (c) {
+      c.ledger.forEach(function (row) {
+        var k = c.code + "|" + row.id;
+        if (raw.tags && typeof raw.tags === "object") {
           var t = raw.tags[k];
           if (t === "R" || t === "V" || t === "H") { out.tags[k] = t; }
-        });
+        }
+        if (raw.verified && typeof raw.verified === "object") {
+          var v = raw.verified[k];
+          if (typeof v === "string" && v.trim()) { out.verified[k] = v.trim().slice(0, 200); }
+        }
       });
-    }
+    });
     if (typeof raw.updated === "string") { out.updated = raw.updated; }
     return out;
   }
 
   function load() {
+    if (!storage.writable) { storage.problem = "unavailable"; return defaults(); }
+    var raw = null;
+    try { raw = window.localStorage.getItem(KEY); }
+    catch (e) { storage.problem = "unavailable"; storage.writable = false; return defaults(); }
+    if (!raw) { return defaults(); }
+
+    var parsed = null, clean = null;
+    try { parsed = JSON.parse(raw); clean = sanitize(parsed); }
+    catch (e) { clean = null; }
+
+    if (clean) { return clean; }
+
+    /* Unreadable. Keep the original for salvage; do not write over it. */
+    storage.problem = "unreadable";
+    storage.raw = raw;
     try {
-      var raw = window.localStorage.getItem(KEY);
-      if (!raw) { return defaults(); }
-      return sanitize(JSON.parse(raw));
-    } catch (e) {
-      storageOK = false;
-      return defaults();
-    }
+      window.localStorage.setItem(SALVAGE_KEY, raw);
+      storage.salvaged = true;
+    } catch (e) { storage.salvaged = false; }
+    return defaults();
   }
 
   function save() {
+    if (!storage.writable) { renderStorageBanner(); return; }
     state.updated = new Date().toISOString();
     try {
       window.localStorage.setItem(KEY, JSON.stringify(state));
+      if (storage.problem === "full") { storage.problem = null; renderStorageBanner(); }
     } catch (e) {
-      storageOK = false;
-      showStorageWarning();
+      storage.problem = "full";
+      renderStorageBanner();
     }
   }
 
-  function showStorageWarning() {
-    var b = document.getElementById("storage-warning");
-    if (b) { b.hidden = false; }
+  function renderStorageBanner() {
+    var b = $("storage-warning");
+    if (!b) { return; }
+    clear(b);
+    if (!storage.problem) { b.hidden = true; return; }
+    b.hidden = false;
+
+    if (storage.problem === "unavailable") {
+      b.appendChild(el("strong", null, "This browser will not save your progress."));
+      b.appendChild(el("span", null, "Local storage is switched off or blocked here — a private window and blocked site data both do this. Everything on the page still works, but every tick disappears when you close the tab. Use Export before you leave, and keep the file."));
+      return;
+    }
+    if (storage.problem === "full") {
+      b.appendChild(el("strong", null, "That change was not saved — the browser refused to write."));
+      b.appendChild(el("span", null, "Storage is full or was blocked mid-session. Nothing you have ticked since is stored. Export now, then clear space and import the file back."));
+      return;
+    }
+    /* unreadable */
+    b.appendChild(el("strong", null, "Your saved progress could not be read."));
+    b.appendChild(el("span", null, storage.salvaged
+      ? "Saving works fine — the value stored here was not valid, so the page has loaded an empty term instead. The original was left untouched and copied to the key “" + SALVAGE_KEY + "”. Recover what you can before you tick anything: from here on, new ticks save over the empty term, not over that copy."
+      : "Saving works fine — the value stored here was not valid, so the page has loaded an empty term instead. The copy for salvage could not be written, so recover the original now, before you tick anything."));
+    if (storage.raw) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-quiet";
+      btn.textContent = "Show the unreadable data";
+      btn.addEventListener("click", function () {
+        openIO(storage.raw, "The unreadable value, exactly as stored — copy it somewhere safe");
+        status("This is the raw value that could not be read. Loading it back will fail; keep it if it holds anything you need.");
+      });
+      b.appendChild(btn);
+    }
   }
 
   var state = defaults();
@@ -142,25 +195,28 @@
   function $(id) { return document.getElementById(id); }
 
   function tagLabel(t) { return "[" + t + "]"; }
-  function tagClass(t) { return "tag tag-" + String(t).toLowerCase(); }
+  function tagClass(t) {
+    var key = (t === "?" ) ? "none" : String(t).toLowerCase();
+    return "tag tag-" + key;
+  }
+  function tagChip(t) {
+    var n = el("span", tagClass(t), tagLabel(t));
+    if (t === "?") { n.title = "No tag on the board — nothing gets read from an untagged row."; }
+    return n;
+  }
 
-  /* Renders "OSC 2015 [V] + Ritchie 1–2 [R]" with real tag chips. */
+  /* Renders "OSC 2015 [V] + Ritchie 1–2 [R]" with real tag chips.
+     A source the board names without a tag is marked [?] rather than shown bare. */
   function sourceLine(sources) {
     var frag = document.createDocumentFragment();
     (sources || []).forEach(function (s, i) {
       if (i) { frag.appendChild(document.createTextNode(" + ")); }
       frag.appendChild(document.createTextNode(s.text));
-      if (s.tag) {
-        frag.appendChild(document.createTextNode(" "));
-        frag.appendChild(el("span", tagClass(s.tag), tagLabel(s.tag)));
-      }
+      if (s.text === "—") { return; }
+      frag.appendChild(document.createTextNode(" "));
+      frag.appendChild(tagChip(s.tag || "?"));
     });
     return frag;
-  }
-  function sourceText(sources) {
-    return (sources || []).map(function (s) {
-      return s.text + (s.tag ? " " + tagLabel(s.tag) : "");
-    }).join(" + ");
   }
 
   function courseByCode(code) {
@@ -193,12 +249,18 @@
     course.weeks.forEach(function (w) { if (isClosed(course.code, w.n)) { n++; } });
     return n;
   }
+  function closedHere(weekNo) {
+    var n = 0;
+    D.courses.forEach(function (c) { if (isClosed(c.code, weekNo)) { n++; } });
+    return n;
+  }
+  function tagOf(code, id, filed) { return state.tags[code + "|" + id] || filed; }
   function hCount() {
     var n = 0, total = 0;
     D.courses.forEach(function (c) {
       c.ledger.forEach(function (row) {
         total++;
-        if (state.tags[c.code + "|" + row.id] === "H") { n++; }
+        if (tagOf(c.code, row.id, row.tag) === "H") { n++; }
       });
     });
     return { h: n, total: total };
@@ -208,29 +270,12 @@
     D.setup.forEach(function (s) { if (state.setup[s.n]) { n++; } });
     return n;
   }
+  function priorsWritten() { return state.setup[2] === true; }
 
   /* =================================================== A · the NOW panel */
 
-  function nowChips(weekNo, ref) {
-    var strip = el("div", "now-strip");
-    if (weekNo >= 1 && weekNo <= D.meta.term.weeks) {
-      strip.appendChild(el("span", "chip chip-accent", "Week " + weekNo + " of " + D.meta.term.weeks));
-      var w = weekOf(D.courses[0], weekNo);
-      if (w) { strip.appendChild(el("span", "chip", "Closes Sun " + fmtShort(parseYMD(w.end)))); }
-      if (w && w.midterm) { strip.appendChild(el("span", "chip chip-accent", "Midterm week")); }
-      if (w && w.paper) { strip.appendChild(el("span", "chip chip-accent", "Term paper week")); }
-    }
-    var totalSlips = 0;
-    D.courses.forEach(function (c) { totalSlips += slipsFor(c, ref); });
-    strip.appendChild(el("span", totalSlips > 0 ? "chip chip-accent" : "chip",
-      totalSlips === 0 ? "No slipped weeks" : plural(totalSlips, "slipped week", "slipped weeks")));
-    var hc = hCount();
-    strip.appendChild(el("span", "chip", hc.h + " of " + hc.total + " sources in hand [H]"));
-    return strip;
-  }
-
-  function taskItem(title, body, src) {
-    var li = el("li");
+  function taskItem(title, body, src, kind) {
+    var li = el("li", kind ? "task-" + kind : null);
     li.appendChild(el("span", "now-task-title", title));
     if (body) { li.appendChild(el("span", "now-task-body", body)); }
     if (src) {
@@ -243,7 +288,34 @@
     return li;
   }
 
-  /* Returns {head, sub, items:[node]} for a day inside the term. */
+  function nowChips(weekNo, ref, time) {
+    var strip = el("div", "now-strip");
+    if (time && time !== "—") { strip.appendChild(el("span", "chip chip-time", "Today · " + time)); }
+    if (weekNo >= 1 && weekNo <= D.meta.term.weeks) {
+      strip.appendChild(el("span", "chip chip-accent", "Week " + weekNo + " of " + D.meta.term.weeks));
+      var w = weekOf(D.courses[0], weekNo);
+      if (w) { strip.appendChild(el("span", "chip", "Closes Sun " + fmtShort(parseYMD(w.end)))); }
+      if (w && w.midterm) { strip.appendChild(el("span", "chip chip-accent", "Midterm week")); }
+      if (w && w.paper) { strip.appendChild(el("span", "chip chip-accent", "Term paper week")); }
+    }
+    /* Slips are counted per course, because the rule is per course. */
+    var any = false;
+    D.courses.forEach(function (c) {
+      var n = slipsFor(c, ref);
+      if (n > 0) {
+        any = true;
+        strip.appendChild(el("span", n >= D.slipRule.limit ? "chip chip-accent" : "chip",
+          c.code + " · " + n + " of " + D.slipRule.limit + " slipped"));
+      }
+    });
+    if (!any) { strip.appendChild(el("span", "chip", "No slipped weeks")); }
+    var hc = hCount();
+    strip.appendChild(el("span", "chip", hc.h + " of " + hc.total + " sources in hand [H]"));
+    return strip;
+  }
+
+  /* Returns {head, sub, items, time} for a day inside the term.
+     Every branch that sets head also sets sub — they are one sentence in two sizes. */
   function planForDay(weekNo, dow) {
     var isW1 = weekNo === 1;
     var days = isW1 ? D.week1 : D.rhythm.days;
@@ -253,95 +325,129 @@
     var B = courseByCode(D.rhythm.courseB);
     var wA = weekOf(A, weekNo), wB = weekOf(B, weekNo);
     var items = [];
-    var head, sub = entry.detail;
+    var head, sub, time = entry.time;
 
     function hasSource(w) {
       return !!w && (w.sources || []).some(function (s) { return s.text && s.text !== "—"; });
-    }
-    function readSub(w) {
-      if (hasSource(w)) {
-        return isW1 ? entry.detail
-          : "One primary, one supporting, and stop. Three good sources for one week is how a folder of unread PDFs starts.";
-      }
-      if (w && w.midterm) {
-        return "Thursday is oral and cold, both courses. What helps is recall practice — saying the argument out loud without the paper — not re-reading it.";
-      }
-      return "2,000 words per course, due Sunday. When they pass, Term A goes on the transcript.";
     }
     function readItem(course, w) {
       if (!hasSource(w)) {
         return taskItem(course.code + " · " + course.title, w.milestone + " — no new source this week.");
       }
-      return taskItem(
-        course.code + " · " + course.title,
-        w.milestone,
-        { label: "Primary:", sources: w.sources }
-      );
+      return taskItem(course.code + " · " + course.title, w.milestone,
+        { label: "Primary:", sources: w.sources });
+    }
+    function outputItem(course, w) {
+      if (hasSource(w)) {
+        return taskItem(course.code + " — " + w.output, w.milestone, { label: "From:", sources: w.sources });
+      }
+      return taskItem(course.code + " — " + w.output, w.milestone);
+    }
+    function priorsBlock() {
+      return taskItem("Write the Priors Sheet — 45 minutes, before any source",
+        "600 words: three findings about human behavior you currently believe, what you think the evidence is for each, and what would change your mind. Name an observation, not a feeling. Don't look anything up. Then tick step 2 below and today's reading opens.",
+        null, "block");
+    }
+
+    /* The one irreversible step outranks the calendar for the whole of week 1. */
+    var priorsBlocks = isW1 && !priorsWritten();
+
+    if (priorsBlocks && (idx === 0 || idx === 1 || idx === 2)) {
+      head = "Write the Priors Sheet first";
+      sub = "Step 2 of the setup is not ticked, so the week's reading is held. The moment you open OSC 2015 or Spiegelhalter your priors are contaminated and this measurement is gone for good — it is the one step in the year with an order dependency you cannot undo.";
+      time = "45 min";
+      items.push(priorsBlock());
+      items.push(taskItem("Today's reading is held",
+        (idx === 0 ? "Week 1 opens once it is written" : (idx === 1 ? A.code + "'s week 1 reading opens once it is written" : B.code + "'s week 1 reading opens once it is written"))
+        + ". Forty-five minutes now buys back the whole measurement; the reading is still a " + entry.time + " job afterwards and the week has room for both."));
+      if (idx === 0) {
+        items.push(taskItem("Then, and only then", "Advisor opens the week; Librarian confirms the source rows."));
+      }
+      return { head: head, sub: sub, items: items, time: time };
     }
 
     if (idx === 0) {                       /* Monday */
-      head = "Week " + weekNo + " opens";
-      if (isW1 && !state.setup[2]) {
-        items.push(taskItem(
-          "Write the Priors Sheet first — before any source",
-          "Step 2 of the setup is still unticked. The moment you read OSC 2015 this measurement is gone for good. 600 words, three findings, what would change your mind."
-        ));
-      }
+      head = "Set week " + weekNo + "'s milestone";
+      sub = isW1 ? entry.detail
+        : "Advisor reads last week's gaps and verdicts and sets the milestone; Librarian pulls one primary and one supporting per course and tags them. Nothing else is owed today.";
       items.push(taskItem("Advisor", "Sets this week's milestone from last week's gaps and verdicts."));
       items.push(taskItem("Librarian", "Confirms one primary + one supporting per course, tagged."));
       if (wA) { items.push(readItem(A, wA)); }
       if (wB) { items.push(readItem(B, wB)); }
-    } else if (idx === 1) {                /* Tuesday */
-      head = hasSource(wA) ? "Read " + A.code
-           : (wA && wA.midterm ? "Midterm week — no new reading" : "Term paper week — writing, not reading");
-      sub = readSub(wA);
-      if (wA) { items.push(readItem(A, wA)); }
-      if (wA && wA.note) { items.push(taskItem("Note", wA.note)); }
-      items.push(taskItem("Output due Friday", wA ? wA.output : ""));
-    } else if (idx === 2) {                /* Wednesday */
-      head = hasSource(wB) ? "Read " + B.code
-           : (wB && wB.midterm ? "Midterm week — no new reading" : "Term paper week — writing, not reading");
-      sub = readSub(wB);
-      if (wB) { items.push(readItem(B, wB)); }
-      if (wB && wB.note) { items.push(taskItem("Note", wB.note)); }
-      items.push(taskItem("Output due Friday", wB ? wB.output : ""));
-    } else if (idx === 3) {                /* Thursday */
-      head = (wA && wA.midterm) ? "Midterm — oral, cold" : "Tutor — both courses, cold";
-      items.push(taskItem("Sources closed", "No PDF, no notes, no NotebookLM. The Tutor writes what you could not reconstruct to §C as a gap, and a gap closes only when you re-explain it cold in a later week."));
-      if (wA) { items.push(taskItem(A.code, wA.milestone + (wA.midterm && wA.note ? " — " + wA.note : ""))); }
-      if (wB) { items.push(taskItem(B.code, wB.milestone + (wB.midterm && wB.note ? " — " + wB.note : ""))); }
-      items.push(taskItem("Do not say “yeah, that makes sense”", "It ends the conversation socially and teaches nothing. Expect: “then say it back in a form I didn't give you, using a case from your own week.”"));
-    } else if (idx === 4) {                /* Friday */
-      var isMid = !!(wA && wA.midterm);
-      head = isMid ? "Midterm week — no written output" : "Write both outputs";
-      if (isMid) {
-        sub = "This week's artifact is the Tutor's verdict from yesterday, not 600 words. Gaps go to §C, verdicts to §D.";
-        items.push(taskItem("Nothing to write", "Both courses examined orally and cold on Thursday. The week still has to be closed on Sunday."));
+
+    } else if (idx === 1 || idx === 2) {   /* Tuesday · Wednesday — the reading days */
+      var course = (idx === 1) ? A : B;
+      var wk = (idx === 1) ? wA : wB;
+      if (hasSource(wk)) {
+        head = "Read " + course.code;
+        sub = isW1 ? entry.detail
+          : "One primary, one supporting, and stop. Three good sources for one week is how a folder of unread PDFs starts.";
+        items.push(readItem(course, wk));
+        if (wk.note) { items.push(taskItem("Note", wk.note)); }
+        items.push(taskItem("Output due Friday", wk.output));
+      } else if (wk && wk.midterm) {
+        head = "Midterm week — no new reading";
+        sub = "Thursday is oral and cold, both courses. What helps is recall practice — saying the argument out loud without the paper — not re-reading it.";
+        time = "—";
+        items.push(taskItem(course.code, "Midterm on Thursday. No source this week, and no written output is owed."));
       } else {
-        if (wA) { items.push(taskItem(A.code + " — " + wA.output, wA.milestone, { label: "From:", sources: wA.sources })); }
-        if (wB) { items.push(taskItem(B.code + " — " + wB.output, wB.milestone, { label: "From:", sources: wB.sources })); }
-        items.push(taskItem("Rubric", "Five pass/fail criteria, 5/5 or the week is a rewrite. The rubric is further down this page."));
+        head = "Term paper week — writing, not reading";
+        sub = "2,000 words per course, due Sunday. When they pass, Term A goes on the transcript.";
+        items.push(taskItem(course.code + " — " + (wk ? wk.output : ""), wk ? wk.milestone : ""));
+        if (wk && wk.note) { items.push(taskItem("Note", wk.note)); }
       }
+
+    } else if (idx === 3) {                /* Thursday */
+      var mid = !!(wA && wA.midterm);
+      head = mid ? "Midterm — oral, cold" : "Tutor — both courses, cold";
+      sub = mid
+        ? "Both courses examined orally, 45 minutes each, sources closed. This week's artifact is the Tutor's verdict; no 600 words are owed."
+        : "45 minutes per course, sources closed. Opens on cold retrieval: “without looking, what was the argument?”";
+      items.push(taskItem("Sources closed", "No PDF, no notes, no NotebookLM. The Tutor writes what you could not reconstruct to §C as a gap, and a gap closes only when you re-explain it cold in a later week."));
+      if (wA) { items.push(taskItem(A.code, wA.milestone + (mid && wA.note ? " — " + wA.note : ""))); }
+      if (wB) { items.push(taskItem(B.code, wB.milestone + (mid && wB.note ? " — " + wB.note : ""))); }
+      items.push(taskItem("Do not say “yeah, that makes sense”", "It ends the conversation socially and teaches nothing. Expect: “then say it back in a form I didn't give you, using a case from your own week.”"));
+
+    } else if (idx === 4) {                /* Friday */
+      if (wA && wA.midterm) {
+        head = "Midterm week — nothing to write";
+        sub = "This week's artifact is yesterday's Tutor verdict, not 600 words. Gaps go to §C, verdicts to §D, and the week still has to be closed on Sunday.";
+        time = "—";
+        items.push(taskItem("No written output is owed", "Both courses were examined orally and cold yesterday."));
+      } else {
+        head = "Write both outputs";
+        sub = (wA ? A.code + " " + wA.output : "") + " · " + (wB ? B.code + " " + wB.output : "") +
+          ". Graded Sunday against Part A — 5/5 or rewrite.";
+        if (wB) { items.push(outputItem(B, wB)); }
+        if (wA) { items.push(outputItem(A, wA)); }
+        items.push(taskItem("Rubric", "Five pass/fail criteria, no partial credit. The rubric is further down this page."));
+      }
+
     } else if (idx === 5) {                /* Saturday */
       var fortnight = (weekNo % 2 === 0);
       head = fortnight ? "Roommate — one collision" : "Nothing scheduled";
       if (fortnight) {
-        items.push(taskItem("Cross-domain collision", "One domain, collided with this week's material, logged to §E. Spent domains cannot be reused. Two courses are active — the best available collision is often between them."));
+        sub = "One cross-domain collision, logged to §E. Spent domains cannot be reused.";
+        items.push(taskItem("Cross-domain collision", "Two courses are active — the best available collision is often between them: a claim from PSY-101 read with STA-101's catalogue in hand is a live cross-course problem you didn't have to invent."));
       } else {
-        items.push(taskItem("Rest", "The Roommate runs fortnightly, on even weeks. This is an odd week. Nothing is owed today."));
+        sub = "The Roommate runs fortnightly, on even weeks. This is week " + weekNo + ", so nothing is owed today.";
+        time = "—";
+        items.push(taskItem("Rest", "Nothing is owed. The next Roommate session is week " + (weekNo + 1) + "."));
       }
+
     } else {                               /* Sunday */
       head = "Grade, then close week " + weekNo;
       if (wA && wA.midterm) {
         sub = "The Tutor's verdicts are this week's record — no weekly output was owed. Then the Advisor closes the week.";
-      }
-      if (wA && wA.paper) {
-        items.push(taskItem("Last Sunday of Term A", "Both term papers graded, both weeks closed, and the pass rates recorded in REGISTRAR.md. Then Term A is on the transcript."));
+      } else if (wA && wA.paper) {
+        sub = "Both term papers graded, both weeks closed, and the pass rates recorded in REGISTRAR.md. Then Term A is on the transcript.";
+      } else {
+        sub = "Editor grades both outputs against ASSESSMENT.md Part A — 5/5 or the week is a rewrite. Then the Advisor closes the week.";
       }
       items.push(taskItem("Editor", (wA && wA.midterm)
         ? "Records the Tutor's midterm verdicts. No weekly output is owed this week."
         : "Grades both outputs against ASSESSMENT.md Part A. No praise in the first paragraph, ever."));
-      items.push(taskItem("Advisor", "Closes the week. Tick both boxes in the week list below once it is graded."));
+      items.push(taskItem("Advisor", "Closes the week. Tick both boxes on the board below once it is graded."));
       if (isW1) { items.push(taskItem("Seal the Priors Sheet", "Today is the seal date, not the write date. Seal it and never revise it — not in month six when it's embarrassing.")); }
       D.courses.forEach(function (c) {
         if (!isClosed(c.code, weekNo)) {
@@ -349,22 +455,31 @@
         }
       });
     }
-    return { head: head, sub: sub, items: items, entry: entry };
+
+    /* Week 1 after the reading days: the Priors Sheet is late, and says so. */
+    if (priorsBlocks && idx > 2) {
+      items.unshift(taskItem("The Priors Sheet is still unwritten",
+        "It had to be written before any source was opened, and week 1 closes Sunday. Write it now, seal it Sunday, and tick step 2 — an amended priors sheet is worth exactly nothing.",
+        null, "block"));
+    }
+    return { head: head, sub: sub, items: items, time: time };
   }
+
+  var rhythmOpen = false;   /* survives re-renders */
 
   function rhythmBlock(weekNo, dow) {
     var wrap = el("details", "rhythm");
+    wrap.open = rhythmOpen;
+    wrap.addEventListener("toggle", function () { rhythmOpen = wrap.open; });
     var days = (weekNo === 1) ? D.week1 : D.rhythm.days;
-    var sum = el("summary", null, weekNo === 1 ? "Week 1, day by day" : "The week, day by day");
-    wrap.appendChild(sum);
+    wrap.appendChild(el("summary", null, weekNo === 1 ? "Week 1, day by day" : "The week, day by day"));
     var ul = el("ul", "rhythm-list");
     var todayIdx = (dow + 6) % 7;
     days.forEach(function (d, i) {
       var li = el("li", i === todayIdx ? "is-today" : null);
       li.appendChild(el("span", "day-tag", d.day));
       var body = el("div");
-      var what = el("span", "rhythm-what", d.label);
-      body.appendChild(what);
+      body.appendChild(el("span", "rhythm-what", d.label));
       if (d.time && d.time !== "—") {
         body.appendChild(document.createTextNode(" "));
         body.appendChild(el("span", "fine", "· " + d.time));
@@ -377,6 +492,12 @@
     return wrap;
   }
 
+  function phaseFor(refI) {
+    if (refI < TERM_START_I) { return "pre"; }
+    if (refI > TERM_END_I) { return "post"; }
+    return "term";
+  }
+
   function renderNow() {
     var host = $("now-body");
     if (!host) { return; }
@@ -384,53 +505,54 @@
 
     var ref = refDate();
     var refI = dayIndex(ref);
+    var phase = phaseFor(refI);
 
-    var dateLine = el("p", "now-date", (previewDate ? "Previewing " : "") + fmtLong(ref));
-    host.appendChild(dateLine);
+    host.appendChild(el("p", "now-date", fmtLong(ref)));
 
-    if (refI < TERM_START_I) {
-      /* ---------- before the term opens ---------- */
+    if (phase === "pre") {
       var days = TERM_START_I - refI;
-      host.appendChild(el("h3", "now-head", days === 1 ? "Term A opens tomorrow" : "Term A opens in " + plural(days, "day", "days")));
-      host.appendChild(el("p", "now-sub",
-        "Monday " + fmtLong(TERM_START).replace(/^\w+ /, "") + ". Nothing is due yet — the five setup steps are, and step 2 has a deadline that is not a date but an event: it must be written before you open a single source."));
+      var written = priorsWritten();
+      host.appendChild(el("h2", "now-head",
+        written ? (days === 1 ? "Term A opens tomorrow" : "Term A opens in " + plural(days, "day", "days"))
+                : "Write the Priors Sheet"));
+      host.appendChild(el("p", "now-sub", written
+        ? "Monday " + fmtNoDay(TERM_START) + ". The setup steps are what's owed until then."
+        : "Before Monday " + fmtNoDay(TERM_START) + ", and before you open a single source — it is the one step in the year with an order dependency you cannot undo. 45 minutes, 600 words."));
 
       var strip = el("div", "now-strip");
-      strip.appendChild(el("span", "chip chip-accent", "Pre-term setup"));
-      strip.appendChild(el("span", "chip", setupDone() + " of " + D.setup.length + " steps done"));
-      strip.appendChild(el("span", state.setup[2] ? "chip" : "chip chip-accent",
-        state.setup[2] ? "Priors Sheet written" : "Priors Sheet not written"));
+      strip.appendChild(el("span", "chip chip-accent", plural(days, "day", "days") + " to Term A"));
+      strip.appendChild(el("span", "chip", setupDone() + " of " + D.setup.length + " setup steps done"));
+      strip.appendChild(el("span", written ? "chip" : "chip chip-accent",
+        written ? "Priors Sheet written" : "Priors Sheet not written"));
       host.appendChild(strip);
 
       var ul = el("ul", "now-tasks");
       var open = D.setup.filter(function (s) { return !state.setup[s.n]; });
       if (open.length === 0) {
-        ul.appendChild(taskItem("Setup complete", "All five steps ticked. Week 1 opens Monday: read STA-101 Tuesday, PSY-101 Wednesday, Tutor Thursday, write Friday, grade and close Sunday."));
+        ul.appendChild(taskItem("Setup complete", "All five steps ticked. Week 1 opens Monday: read STA-101 Tuesday, PSY-101 Wednesday, Tutor both courses cold Thursday, write Friday, grade and seal the Priors Sheet Sunday."));
       } else {
         open.forEach(function (s) {
           ul.appendChild(taskItem(
             s.n + ". " + s.title + " · " + s.time,
-            (s.orderDependent ? "Order-dependent, cannot be undone. " : "") + s.body
+            (s.orderDependent ? "Order-dependent, cannot be undone. " : "") + s.body,
+            null, s.orderDependent ? "block" : null
           ));
         });
       }
       host.appendChild(ul);
-
-      var p = el("p", "meta", "Week 1: Tue read STA-101 (Spiegelhalter 1–2), Wed read PSY-101 (OSC 2015), Thu Tutor both courses cold, Fri write both outputs, Sun grade and seal the Priors Sheet.");
-      host.appendChild(p);
+      host.appendChild(el("p", "meta", "Week 1: Tue read STA-101 (Spiegelhalter 1–2), Wed read PSY-101 (OSC 2015), Thu Tutor both courses cold, Fri write both outputs, Sun grade and seal."));
       return;
     }
 
-    if (refI > TERM_END_I) {
-      /* ---------- after the term closes ---------- */
-      host.appendChild(el("h3", "now-head", "Term A is closed"));
+    if (phase === "post") {
+      host.appendChild(el("h2", "now-head", "Term A is closed"));
       var since = refI - TERM_END_I;
       host.appendChild(el("p", "now-sub",
-        "The term ended " + fmtLong(TERM_END).replace(/^\w+ /, "") + ", " + plural(since, "day", "days") + " ago. A course is complete when its term paper passes and its weekly pass rate is recorded in REGISTRAR.md."));
+        "The term ended " + fmtNoDay(TERM_END) + ", " + plural(since, "day", "days") + " ago. A course is complete when its term paper passes and its weekly pass rate is recorded in REGISTRAR.md."));
 
       var strip2 = el("div", "now-strip");
       D.courses.forEach(function (c) {
-        strip2.appendChild(el("span", "chip", c.code + ": " + closedCount(c) + "/" + c.weeks.length + " weeks closed"));
+        strip2.appendChild(el("span", "chip", c.code + " · " + closedCount(c) + "/" + c.weeks.length + " weeks closed"));
       });
       var hc2 = hCount();
       strip2.appendChild(el("span", "chip", hc2.h + " of " + hc2.total + " sources [H]"));
@@ -438,8 +560,7 @@
 
       var ul2 = el("ul", "now-tasks");
       D.courses.forEach(function (c) {
-        var s = slipsFor(c, ref);
-        ul2.appendChild(taskItem(c.code + " — " + plural(s, "slipped week", "slipped weeks"),
+        ul2.appendChild(taskItem(c.code + " — " + plural(slipsFor(c, ref), "slipped week", "slipped weeks"),
           "Record the weekly pass rate (weeks at 5/5 ÷ weeks attempted) in the transcript. A rate near 100% means the Editor went soft, and the Advisor should say so."));
       });
       (D.meta.afterTerm || []).forEach(function (a) { ul2.appendChild(taskItem(a.label, a.detail)); });
@@ -448,25 +569,24 @@
       return;
     }
 
-    /* ---------- inside the term ---------- */
+    /* inside the term */
     var weekNo = weekNumberFor(ref);
     if (weekNo > D.meta.term.weeks) { weekNo = D.meta.term.weeks; }
     var dow = ref.getDay();
     var plan = planForDay(weekNo, dow);
 
-    host.appendChild(el("h3", "now-head", plan.head));
+    host.appendChild(el("h2", "now-head", plan.head));
     if (plan.sub) { host.appendChild(el("p", "now-sub", plan.sub)); }
-    host.appendChild(nowChips(weekNo, ref));
+    host.appendChild(nowChips(weekNo, ref, plan.time));
 
     var list = el("ul", "now-tasks");
     plan.items.forEach(function (i) { list.appendChild(i); });
     host.appendChild(list);
 
-    /* open weeks behind you */
     var behind = [];
     D.courses.forEach(function (c) {
       c.weeks.forEach(function (w) {
-        if (dayIndex(parseYMD(w.end)) < dayIndex(ref) && !isClosed(c.code, w.n)) {
+        if (dayIndex(parseYMD(w.end)) < refI && !isClosed(c.code, w.n)) {
           behind.push(c.code + " wk " + w.n);
         }
       });
@@ -489,14 +609,14 @@
         if (weekNodes[i].n === weekNo) {
           weekNodes[i].det.open = true;
           if (weekNodes[i].det.scrollIntoView) {
-            weekNodes[i].det.scrollIntoView({ behavior: "smooth", block: "start" });
+            weekNodes[i].det.scrollIntoView(reduceMotion() ? true : { behavior: "smooth", block: "start" });
           }
+          if (weekNodes[i].sum && weekNodes[i].sum.focus) { weekNodes[i].sum.focus(); }
           break;
         }
       }
     });
     host.appendChild(jump);
-
     host.appendChild(rhythmBlock(weekNo, dow));
   }
 
@@ -507,6 +627,18 @@
     if (!host) { return; }
     clear(host);
     var ref = refDate();
+    var refI = dayIndex(ref);
+    var firstEnd = dayIndex(parseYMD(D.courses[0].weeks[0].end));
+
+    if (refI <= firstEnd) {
+      /* Nothing can have slipped yet — do not fill the screen with two zeroes. */
+      var p0 = el("p", "slip-rule");
+      p0.appendChild(document.createTextNode("Nothing can have slipped yet. The counter starts when week 1 ends on "
+        + fmtNoDay(parseYMD(D.courses[0].weeks[0].end)) + ". "));
+      p0.appendChild(el("strong", null, "Three slips in one course triggers a mandatory scope cut in that course, and the calendar does not move."));
+      host.appendChild(p0);
+      return;
+    }
 
     var hot = D.courses.filter(function (c) { return slipsFor(c, ref) >= D.slipRule.limit; });
     if (hot.length) {
@@ -534,8 +666,7 @@
     rule.appendChild(document.createTextNode(" " + D.slipRule.interlock));
     host.appendChild(rule);
 
-    var note = el("p", "fine", "Week 1 exception, logged by the Advisor: the Priors Sheet is expected to fail A2 and A4. That is recorded as baseline measured, not as a slipped week.");
-    host.appendChild(note);
+    host.appendChild(el("p", "fine", "Week 1 exception, logged by the Advisor: the Priors Sheet is expected to fail A2 and A4. That is recorded as baseline measured, not as a slipped week."));
   }
 
   /* ==================================================== B · setup checklist */
@@ -557,13 +688,13 @@
         if (cb.checked) { state.setup[step.n] = true; } else { delete state.setup[step.n]; }
         li.className = "check-item" + (cb.checked ? " is-done" : "");
         save();
-        renderNow();
-        renderSetupProgress();
+        refreshDynamic();
       });
       row.appendChild(cb);
 
       var body = el("div");
       var lab = document.createElement("label");
+      lab.className = "check-label";
       lab.setAttribute("for", cb.id);
       lab.appendChild(el("span", "check-title", step.n + ". " + step.title));
       lab.appendChild(el("span", "check-time", step.time));
@@ -590,8 +721,8 @@
   function renderSetupProgress() {
     var p = $("setup-progress");
     if (!p) { return; }
-    var n = setupDone();
-    p.textContent = n + " of " + D.setup.length + " done" + (state.setup[2] ? "" : " · the Priors Sheet is still unwritten");
+    p.textContent = setupDone() + " of " + D.setup.length + " done" +
+      (priorsWritten() ? "" : " · the Priors Sheet is still unwritten");
   }
 
   /* ========================================================= C · the weeks */
@@ -639,8 +770,7 @@
     clear(host);
     weekNodes = [];
 
-    var base = D.courses[0].weeks;
-    base.forEach(function (bw) {
+    D.courses[0].weeks.forEach(function (bw) {
       var det = el("details", "week");
       var sum = el("summary");
       sum.appendChild(el("span", "week-num", "Wk " + bw.n));
@@ -663,8 +793,11 @@
       }
       sum.appendChild(mid);
 
+      var right = el("span", "week-right");
       var status = el("span", "week-status", "");
-      sum.appendChild(status);
+      right.appendChild(status);
+      right.appendChild(el("span", "caret", "▸"));
+      sum.appendChild(right);
       det.appendChild(sum);
 
       var body = el("div", "week-body");
@@ -680,7 +813,7 @@
       det.appendChild(body);
       host.appendChild(det);
 
-      weekNodes.push({ n: bw.n, det: det, status: status, start: bw.start, end: bw.end, labels: labels });
+      weekNodes.push({ n: bw.n, det: det, sum: sum, status: status, start: bw.start, end: bw.end, labels: labels });
     });
     updateWeekStates(true);
   }
@@ -693,48 +826,39 @@
     weekNodes.forEach(function (node) {
       var endI = dayIndex(parseYMD(node.end));
       var startI = dayIndex(parseYMD(node.start));
-      var allClosed = D.courses.every(function (c) { return isClosed(c.code, node.n); });
-      var anyClosed = D.courses.some(function (c) { return isClosed(c.code, node.n); });
       var slipped = [];
-      D.courses.forEach(function (c) { if (endI < refI && !isClosed(c.code, node.n)) { slipped.push(c.code); } });
-
       D.courses.forEach(function (c) {
+        var late = (endI < refI && !isClosed(c.code, node.n));
+        if (late) { slipped.push(c.code); }
         var lab = node.labels && node.labels[c.code];
-        if (lab) {
-          var late = (endI < refI && !isClosed(c.code, node.n));
-          lab.className = "wc-close" + (late ? " is-slipped" : "");
-        }
+        if (lab) { lab.className = "wc-close" + (late ? " is-slipped" : ""); }
       });
 
+      var closedN = closedHere(node.n);
+      var isCurrent = (refI >= startI && refI <= endI);
       var cls = "week";
       var text;
+
       if (slipped.length) {
         cls += " is-slipped";
         text = slipped.length > 1 ? "Slipped ×" + slipped.length : "Slipped · " + slipped[0].split("-")[0];
-      } else if (allClosed) {
+      } else if (closedN === D.courses.length) {
         cls += " is-done";
         text = "Closed";
-      } else if (refI >= startI && refI <= endI) {
-        text = anyClosed ? "This week · 1/2" : "This week";
-      } else if (refI < startI) {
-        text = "Ahead";
+      } else if (isCurrent) {
+        text = closedN > 0 ? "This week · " + closedN + "/" + D.courses.length : "This week";
       } else {
-        text = "Closed";
-        cls += " is-done";
+        text = "Ahead";   /* not slipped, not fully closed, not current → still to come */
       }
-      if (refI >= startI && refI <= endI) { cls += " is-now"; }
+      if (isCurrent) { cls += " is-now"; }
       node.det.className = cls;
       node.status.textContent = text;
 
-      if (openCurrent && node.n === current && refI >= startI && refI <= endI) {
-        node.det.open = true;
-      }
+      if (openCurrent && node.n === current && isCurrent) { node.det.open = true; }
     });
   }
 
   /* ====================================================== E · source ledger */
-
-  var hCountNode = null;
 
   function renderLegend() {
     var host = $("legend");
@@ -743,7 +867,7 @@
     D.tagLegend.forEach(function (l) {
       var row = el("div");
       var dt = el("dt");
-      dt.appendChild(el("span", tagClass(l.tag), tagLabel(l.tag)));
+      dt.appendChild(tagChip(l.tag));
       var dd = el("dd");
       dd.appendChild(el("b", null, l.name + ". "));
       dd.appendChild(document.createTextNode(l.body));
@@ -753,8 +877,11 @@
     });
   }
 
-  var CYCLE = { R: "V", V: "H", H: "R" };
-
+  /* Tag moves the page will make:
+       [R] → [V]  only with a verification record typed in, because that is the
+                  claim the tag makes and A2 grades against it
+       [V] → [H]  the documented move, once it is in NotebookLM
+       [H] → back to whatever it was verified as                              */
   function renderLedger() {
     var host = $("ledger-list");
     if (!host) { return; }
@@ -765,37 +892,97 @@
       sec.appendChild(el("h3", null, c.code + " — " + c.title));
       sec.appendChild(el("p", "fine", c.ledgerNote));
 
-      var ul = el("ul", "ledger-list");
+      var ul = el("ul", "ledger-list-rows");
       c.ledger.forEach(function (row) {
         var key = c.code + "|" + row.id;
         var li = el("li", "ledger-row");
 
         var btn = document.createElement("button");
         btn.type = "button";
-        function paint() {
-          var t = state.tags[key] || row.tag;
-          btn.className = tagClass(t);
-          btn.textContent = tagLabel(t);
-          btn.setAttribute("aria-label",
-            "Source " + row.id + ", " + row.source + " — tagged " + tagLabel(t) + ". Activate to cycle the tag.");
-        }
-        paint();
-        btn.addEventListener("click", function () {
-          var t = state.tags[key] || row.tag;
-          state.tags[key] = CYCLE[t] || "R";
-          paint();
-          save();
-          renderHCount();
-          renderNow();
-        });
-        li.appendChild(btn);
+        btn.className = "tag-btn";
+        var chipHost = el("span");
+        btn.appendChild(chipHost);
 
         var body = el("div");
         body.appendChild(el("span", "ledger-src", row.source));
-        var meta = el("span", "ledger-meta",
-          "Week " + row.wk + " · " + row.status + (row.verified && row.verified !== "—" ? " · " + row.verified : ""));
+        var meta = el("span", "ledger-meta");
         body.appendChild(meta);
         body.appendChild(el("span", "ledger-id", "row " + row.id + " · filed as " + tagLabel(row.tag)));
+        var formHost = el("div");
+        body.appendChild(formHost);
+
+        function verifiedText() { return state.verified[key] || row.verified; }
+        function paint() {
+          var t = tagOf(c.code, row.id, row.tag);
+          clear(chipHost);
+          chipHost.appendChild(tagChip(t));
+          var v = verifiedText();
+          meta.textContent = "Week " + row.wk + " · " + row.status + (v && v !== "—" ? " · verified against " + v : "");
+          btn.setAttribute("aria-label", row.source + " — tagged " + tagLabel(t) + ". " +
+            (t === "R" ? "Activate to record a verification and set [V]."
+             : t === "V" ? "Activate to mark it in hand in NotebookLM, [H]."
+             : "Activate to drop it back from [H]."));
+        }
+        paint();
+
+        function closeForm() { clear(formHost); }
+
+        btn.addEventListener("click", function () {
+          var t = tagOf(c.code, row.id, row.tag);
+          if (t === "V") {
+            state.tags[key] = "H";
+            paint(); save(); renderHCount(); renderNow();
+            return;
+          }
+          if (t === "H") {
+            state.tags[key] = (state.verified[key] || (row.verified && row.verified !== "—")) ? "V" : "R";
+            paint(); save(); renderHCount(); renderNow();
+            return;
+          }
+          /* [R] → [V] needs the record it claims to have. */
+          if (formHost.firstChild) { closeForm(); return; }
+          var form = el("div", "verify");
+          var lid = "verify-" + c.code + "-" + row.id;
+          var lab = document.createElement("label");
+          lab.setAttribute("for", lid);
+          lab.textContent = "Verified against what? A PubMed ID, a DOI, an ISBN, a publisher page — the record you actually retrieved.";
+          var inp = document.createElement("input");
+          inp.type = "text";
+          inp.id = lid;
+          inp.placeholder = "e.g. PubMed 26315443";
+          var msg = el("p", "verify-msg", "");
+          var ok = document.createElement("button");
+          ok.type = "button";
+          ok.className = "btn";
+          ok.textContent = "Record and set [V]";
+          ok.addEventListener("click", function () {
+            var v = inp.value.trim();
+            if (!v) {
+              msg.textContent = "A tag with nothing behind it is an [R] in disguise. Name the record, or leave it [R].";
+              inp.focus();
+              return;
+            }
+            state.verified[key] = v.slice(0, 200);
+            state.tags[key] = "V";
+            closeForm(); paint(); save(); renderHCount(); renderNow();
+          });
+          var no = document.createElement("button");
+          no.type = "button";
+          no.className = "btn btn-quiet";
+          no.textContent = "Cancel";
+          no.addEventListener("click", function () { closeForm(); btn.focus(); });
+          var rowBtns = el("div", "btn-row");
+          rowBtns.appendChild(ok);
+          rowBtns.appendChild(no);
+          form.appendChild(lab);
+          form.appendChild(inp);
+          form.appendChild(msg);
+          form.appendChild(rowBtns);
+          formHost.appendChild(form);
+          inp.focus();
+        });
+
+        li.appendChild(btn);
         li.appendChild(body);
         ul.appendChild(li);
       });
@@ -871,10 +1058,10 @@
         o.appendChild(d);
       });
     }
-    var lede = $("mast-lede");
-    if (lede) {
-      lede.textContent = D.meta.term.enrolled.join(" and ") + ", " + D.meta.term.weeks +
-        " weeks, " + fmtShort(TERM_START) + " to " + fmtShort(TERM_END) + " 2026. " + D.meta.capacity + ".";
+    var meta = $("mast-meta");
+    if (meta) {
+      meta.textContent = D.meta.term.enrolled.join(" + ") + " · " +
+        fmtShort(TERM_START) + " – " + fmtShort(TERM_END) + " 2026 · " + D.meta.term.weeks + " weeks";
     }
   }
 
@@ -932,10 +1119,11 @@
       apply.addEventListener("click", function () {
         var ta = $("io-text");
         if (!ta || !ta.value.trim()) { status("Nothing to load — the box is empty."); return; }
-        var parsed;
-        try { parsed = JSON.parse(ta.value); }
-        catch (e) { status("That is not valid JSON. Nothing was changed."); return; }
-        state = sanitize(parsed);
+        var parsed, clean;
+        try { parsed = JSON.parse(ta.value); } catch (e) { status("That is not valid JSON. Nothing was changed."); return; }
+        clean = sanitize(parsed);
+        if (!clean) { status("That JSON is not a progress file. Nothing was changed."); return; }
+        state = clean;
         save();
         renderSetup();
         renderWeeks();
@@ -979,26 +1167,43 @@
 
   /* ------------------------------------------------------------- controls */
 
+  function setPreview(d) {
+    previewDate = d;
+    var pd = $("preview-date");
+    if (pd) { pd.value = d ? [d.getFullYear(), ("0" + (d.getMonth() + 1)).slice(-2), ("0" + d.getDate()).slice(-2)].join("-") : ""; }
+    refreshDynamic();
+  }
+
+  function renderPreviewBar() {
+    var bar = $("preview-bar");
+    if (!bar) { return; }
+    clear(bar);
+    if (!previewDate) { bar.hidden = true; return; }
+    bar.hidden = false;
+    var t = el("span", "preview-bar-text");
+    t.appendChild(el("strong", null, "Preview mode"));
+    t.appendChild(document.createTextNode(" — the whole page is showing " + fmtLong(previewDate) +
+      ", including the slipped-week counter. None of this is today."));
+    bar.appendChild(t);
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn btn-invert";
+    b.textContent = "Back to today";
+    b.addEventListener("click", function () { setPreview(null); });
+    bar.appendChild(b);
+  }
+
   function wireControls() {
     var pd = $("preview-date");
     if (pd) {
       pd.addEventListener("change", function () {
-        if (!pd.value) { previewDate = null; }
-        else {
-          var d = parseYMD(pd.value);
-          previewDate = isNaN(d.getTime()) ? null : d;
-        }
-        refreshDynamic();
+        if (!pd.value) { setPreview(null); return; }
+        var d = parseYMD(pd.value);
+        setPreview(isNaN(d.getTime()) ? null : d);
       });
     }
     var pr = $("preview-reset");
-    if (pr) {
-      pr.addEventListener("click", function () {
-        previewDate = null;
-        if (pd) { pd.value = ""; }
-        refreshDynamic();
-      });
-    }
+    if (pr) { pr.addEventListener("click", function () { setPreview(null); }); }
     var ex = $("weeks-expand");
     if (ex) { ex.addEventListener("click", function () { weekNodes.forEach(function (n) { n.det.open = true; }); }); }
     var co = $("weeks-collapse");
@@ -1006,19 +1211,21 @@
   }
 
   function refreshDynamic() {
+    var phase = phaseFor(dayIndex(refDate()));
+    document.body.className = "phase-" + phase + (previewDate ? " is-preview" : "");
     renderNow();
     renderSlips();
     updateWeekStates(false);
     renderHCount();
     renderSetupProgress();
+    renderPreviewBar();
+    renderStorageBanner();
   }
 
   /* ------------------------------------------------------------------ go */
 
-  storageOK = probeStorage();
-  if (!storageOK) { showStorageWarning(); }
+  storage.writable = probeStorage();
   state = load();
-  if (!storageOK) { showStorageWarning(); }
 
   renderStatic();
   renderSetup();
@@ -1026,10 +1233,9 @@
   renderLegend();
   renderLedger();
   renderRubric();
-  renderSlips();
-  renderNow();
   wireIO();
   wireControls();
+  refreshDynamic();
 
   /* If the tab is left open across midnight, recompute on return. */
   document.addEventListener("visibilitychange", function () {
