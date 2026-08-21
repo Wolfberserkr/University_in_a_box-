@@ -15,10 +15,10 @@ Per-course state lives in `enrolled/<CODE>.md` — that's where the five agent s
 
 | | Question | Answer | Effect |
 |---|---|---|---|
-| Q1 | Last non-fiction book finished, what survives of it | _open_ | how much load the output carries vs. the reading |
+| Q1 | Last non-fiction book finished, what survives of it | The psychology of money - what survive is that true happiness comes from being content with what one has, and not keep moving the goal post. | how much load the output carries vs. the reading |
 | Q2 | React to *d* = 0.3, *p* = .04, *n* = 60 | **declined** → **resolved by enrolment**, see below | STA-101 now teaches this directly; PSY-101 wk 3–4 re-scoped to application |
 | Q3 | Worst-week hours | **9–12** | 2 concurrent courses; second supporting source at 200/300 level |
-| Q4 | A prediction you got right, one you got wrong, which you remember better | _open_ | Tutor's first case; likely the capstone's own bias in miniature |
+| Q4 | A prediction you got right, one you got wrong, which you remember better | Prediction: What I got right is that I was able to influence my employer for a raise, and what I got wrong was that motivation alone was enough to reach my goals.  | Tutor's first case; likely the capstone's own bias in miniature |
 
 **On Q2.** A declined self-report is not a baseline and was not guessed at. The protective side was taken instead: over-teaching effect sizes wastes two weeks, under-teaching them corrupts source triage for the remaining fifty.
 
