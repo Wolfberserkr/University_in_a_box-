@@ -11,7 +11,7 @@ Four questions. Answer before Monday. They are written so they can be answered *
 > What is the last non-fiction book you finished, and what do you still remember from it?
 
 **Answer:**
-**Written 2026-08-21, before any source was opened. Recorded verbatim — not corrected, not tidied.**
+**Written 2026-08-21, before any source was opened. Recorded verbatim — not corrected, not tidied. SEALED 2026-08-21.**
 
 ---
 
@@ -43,9 +43,22 @@ Four questions. Answer before Monday. They are written so they can be answered *
 | 2 | **passes** | Names a specific alternative route — a non-endorphin stimulant producing the same behaviour. Narrows the target to "only contributing factor", which is weaker than the belief as written; recorded, not corrected. |
 | 3 | **passes, weakly** | Names a real comparison — a game with reward mechanics but no personal interest. No threshold, and "effect on our reward system" is not directly observable without instrumentation. Recorded as a known weakness rather than fixed; week 52 should note whether this one was ever testable. |
 
-**OPEN — blocks sealing.** Clause 1 says *"the voice goes up"* (pitch) *"in stressful situation"* (finding 1's condition). Finding 1 is speech **rate** under nervousness; finding 2 is **pitch** under excitement. The clause takes the variable from one and the condition from the other, so as written it may falsify neither. One word from the student resolves it; recorded rather than guessed.
+**Clause 1 mapping — resolved by the student 2026-08-21: option (a).**
+Clause 1 attaches to **Finding 1**. The variable is speech **rate**, not pitch; the condition is stress. Read as: *if a control setting shows speech rate rises in only 10% of stressful situations, the adrenaline explanation is dropped.* The handwritten wording ("the voice goes up") stands verbatim above; this is the mapping, not a rewrite.
 
-**STATUS: NOT YET SEALED** — pending the clause-1 mapping above only.
+Finding 2 therefore rests on clause 2 alone, and Finding 3 on clause 3 alone.
+
+---
+
+## 🔒 SEALED — 2026-08-21
+
+Three beliefs, three falsification conditions, written and fixed before any source was opened. **Not to be revised.** Not in month six when it is embarrassing, not in month eleven when the reading has moved.
+
+`ASSESSMENT.md` Part D, question 1 compares against this file at the end of the major: *which three findings did you believe in week 1 and no longer believe?* Answer it from memory first, then open this.
+
+Expected to fail rubric A2 and A4 — no citations, no magnitudes, because in week 1 neither was possible. **Recorded by the Advisor as baseline measured, not as a slipped week. No rewrite is owed.**
+
+Setup step 2 is complete. The week-1 reading is released.
 
 **Structural note for the week-52 comparison:** all three explanations have the same shape — *behaviour X occurs because chemical Y is released* (adrenaline, endorphins, dopamine). Whether any of them is correct is not assessed here and must not be, or the instrument is spoiled.
 *Reads as: retention, not consumption. "I read it but couldn't tell you much" is a real and useful answer and it changes the plan — it means the weekly output has to carry more of the load than the reading does.*

@@ -15,6 +15,8 @@ Per-course state lives in `enrolled/<CODE>.md` — that's where the five agent s
 
 **Status:** complete on the three answerable questions — Q1, Q3, Q4 answered 2026-08-21; Q2 declined and re-instrumented as a performance measure at the week-7 midterm.
 
+**Priors Sheet: SEALED 2026-08-21**, before any source was opened — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.
+
 | | Question | Answer | Effect |
 |---|---|---|---|
 | Q1 | Last non-fiction book finished, what survives of it | The psychology of money - what survive is that true happiness comes from being content with what one has, and not keep moving the goal post. | how much load the output carries vs. the reading |
