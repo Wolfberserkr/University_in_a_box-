@@ -250,7 +250,7 @@ window.UNIBOX = {
           note: "Front-loaded on purpose. If a week has to slip in Term A, slip a PSY-101 week — never STA-101 week 2 or 3. The dependency runs one way." },
         { n: 3,  start: "2026-09-07", end: "2026-09-13",
           milestone: "The misinterpretation catalogue → feeds PSY-101 wk 4",
-          sources: [{ text: "Greenland et al. 2016", tag: "V" }],
+          sources: [{ text: "Greenland et al. 2016", tag: "H" }],
           output: "600w",
           note: "Twenty-five numbered misinterpretations, each stated and corrected. Highest value-per-page item in the term; a reference for the rest of the major, not a paper you read once." },
         { n: 4,  start: "2026-09-14", end: "2026-09-20",
@@ -305,7 +305,7 @@ window.UNIBOX = {
       ledger: [
         { id: "S1", source: "Spiegelhalter, The Art of Statistics (2019) ch. 1–2", wk: "1", tag: "H", verified: "Basic Books ISBN 978-1-5416-1851-0 · Pelican 978-0-241-39863-0", status: "in NotebookLM — STA-101" },
         { id: "S2", source: "Cumming (2014), Psych Sci 25(1) 7–29", wk: "2", tag: "V", verified: "doi:10.1177/0956797613504966", status: "acquire — open PDF at UBC" },
-        { id: "S3", source: "Greenland et al. (2016), Eur J Epidemiol 31(4) 337–350", wk: "3", tag: "V", verified: "PubMed 27209009", status: "acquire — open access" },
+        { id: "S3", source: "Greenland et al. (2016), Eur J Epidemiol 31(4) 337–350", wk: "3", tag: "H", verified: "PubMed 27209009", status: "in NotebookLM — STA-101" },
         { id: "S4", source: "Wasserstein & Lazar (2016), Am Stat 70(2) 129–133", wk: "4", tag: "V", verified: "doi:10.1080/00031305.2016.1154108", status: "acquire — open access" },
         { id: "S5", source: "Ioannidis (2005), PLoS Med 2(8) e124", wk: "6", tag: "V", verified: "journals.plos.org", status: "acquire — open access" },
         { id: "S6", source: "Gelman & Loken (2014), American Scientist", wk: "8", tag: "R", verified: "—", status: "verify" }
