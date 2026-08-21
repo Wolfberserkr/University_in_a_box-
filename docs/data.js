@@ -151,7 +151,7 @@ window.UNIBOX = {
       weeks: [
         { n: 1,  start: "2026-08-24", end: "2026-08-30",
           milestone: "The replication crisis: scale and shape",
-          sources: [{ text: "OSC 2015", tag: "V" }, { text: "Ritchie 1–2", tag: "H" }],
+          sources: [{ text: "OSC 2015", tag: "H" }, { text: "Ritchie 1–2", tag: "H" }],
           output: "Priors Sheet, 600w",
           note: "Advisor → Editor: the Priors Sheet will fail A2 and A4 — it cites nothing and gives no magnitudes, because in week 1 you cannot yet do either. Grade it normally, record the REWRITE, log it as baseline measured, not a slipped week. No rewrite is owed." },
         { n: 2,  start: "2026-08-31", end: "2026-09-06",
