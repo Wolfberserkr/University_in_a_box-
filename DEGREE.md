@@ -44,8 +44,8 @@ The irreducible core of a social-science course is roughly 800–1,200 pages rea
 
 | | Weeks | Load |
 |---|---|---|
-| **Term A** | 1–14 | 2 courses concurrent, ~5 h/week each |
-| break | 15 | nothing. Actually nothing |
+| **Term A** | 1–14 | 2 courses concurrent, ~5 h/week each · 2026-09-07 → 12-13 |
+| break | 15–17 | nothing. Actually nothing — three weeks over the holidays and the resort's peak season |
 | **Term B** | 16–29 | 2 courses |
 | break | 30 | — |
 | **Term C** | 31–44 | 2 courses |

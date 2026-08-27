@@ -1,6 +1,6 @@
 # START HERE
 
-Everything that has to happen, in order. Term A opens **Monday 24 August 2026**.
+Everything that has to happen, in order. Term A opens **Monday 7 September 2026** _(postponed from 24 Aug — accounting cross-training until 4 Sept)_.
 
 ---
 
@@ -70,7 +70,7 @@ Upload the four free PDFs: OSC 2015 goes in PSY, the other three in STA. Then up
 
 ---
 
-# Part 2 — Week 1: Mon 24 → Sun 30 August
+# Part 2 — Week 1: Mon 7 → Sun 13 September
 
 | Day | Do | Time |
 |---|---|---|
@@ -98,8 +98,8 @@ Sat   Roommate — fortnightly only
 Sun   Editor grades · Advisor closes the week
 ```
 
-**Week 7** (5–11 Oct) is midterms, both courses, oral and cold.
-**Week 14** (29 Nov) is term papers, 2,000 words each. Then Term A is on the transcript.
+**Week 7** (19–25 Oct) is midterms, both courses, oral and cold.
+**Week 14** (13 Dec) is term papers, 2,000 words each. Then Term A is on the transcript.
 
 ---
 
@@ -119,6 +119,6 @@ Not lack of motivation. These:
 
 # Owed later, easy to forget
 
-**Before Term B (7 Dec)** — the **access check**. Confirm your employer's policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in December costs you a swap to the fallback destination. The same refusal at week 45 costs the entire capstone.
+**Before Term B (4 Jan 2027)** — the **access check**. Confirm your employer's policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in December costs you a swap to the fallback destination. The same refusal at week 45 costs the entire capstone.
 
 **Also before Term B** — start hunting **Meehl, *Clinical Versus Statistical Prediction* (1954)**. Highest-value single item in the major for your destination, and the hardest to obtain. Dawes, Faust & Meehl 1989 in *Science* is the accessible substitute if the monograph can't be found.

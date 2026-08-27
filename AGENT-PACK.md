@@ -1,6 +1,6 @@
 # AGENT PACK
 
-Generated 2026-08-21 from commit `4e5c577` by `tools/build-agent-pack.py`.
+Generated 2026-08-27 from commit `bf7966b` by `tools/build-agent-pack.py`.
 
 Everything the five ALTER agents need, in one file. Attach this to each claude.ai Project's
 knowledge instead of the individual files. Regenerate and re-upload at the Sunday close —
@@ -25,14 +25,14 @@ Per-course state lives in `enrolled/<CODE>.md` — that's where the five agent s
 
 ## Student
 
-**Ulrich** · Program start **2026-08-24** · Award target: **Certificate** (6 courses), then reassess
+**Ulrich** · Program start **2026-09-07** _(postponed 2026-08-21, see below)_ · Award target: **Certificate** (6 courses), then reassess
 **Capacity:** 9–12 h/week at a bad week (intake Q3, 2026-08-20) → 2 concurrent courses, ~5 h each
 
 ### Baseline
 
 **Status:** complete on the three answerable questions — Q1, Q3, Q4 answered 2026-08-21; Q2 declined and re-instrumented as a performance measure at the week-7 midterm.
 
-**Priors Sheet: SEALED 2026-08-21**, before any source was opened — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.
+**Priors Sheet: SEALED 2026-08-21**, before any source was opened. **The seal is conditional on the postponement.** It was written 17 days before week 1 now, not 3. It stays valid only if no Term A source is opened before 2026-09-07 — OSC 2015, Ritchie, Spiegelhalter and Greenland are all already in NotebookLM and all four are off-limits until then. If any is read in the gap, log the date here; the week-52 comparison is still interpretable, but only if the contamination is on the record — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.
 
 | | Question | Answer | Effect |
 |---|---|---|---|
@@ -49,14 +49,22 @@ Enrolling STA-101 makes the question moot. The machinery is now taught properly 
 
 ## Calendar 2026–27
 
+**Postponed 2026-08-21.** Start moved from 24 Aug to 7 Sept: the student is in full-time accounting cross-training until Fri 4 Sept. Ten hours a week on top of that is the plan that reaches three slipped weeks by October and triggers a mandatory scope cut in the first term.
+
+**This is a scheduling decision, not a slip.** The no-extension rule governs falling behind *inside* a term — pushing a deadline you already own. This is a start date set before week 1 against a known external constraint. The distinction matters, and it does not license moving anything once week 1 opens. Slipped-week counter stays at 0/3 per course.
+
+**Two weeks became five, and the calendar is better for it.** A straight two-week shift would have opened Term B on 21 Dec — Christmas week, in a resort and casino, at peak season. The break absorbs it instead.
+
 | | Weeks | Dates | Enrolled |
 |---|---|---|---|
-| **Term A** | 1–14 | 2026-08-24 → 2026-11-29 | **PSY-101** + **STA-101** |
-| break | 15 | 11-30 → 12-06 | — |
-| **Term B** | 16–29 | 12-07 → 2027-03-14 | PSY-201, PSY-202 |
-| break | 30 | 03-15 → 03-21 | — |
-| **Term C** | 31–44 | 03-22 → 2027-06-27 | PSY-301, PSY-302 |
-| **Capstone** | 45–52 | 06-28 → 2027-08-22 | PSY-401 |
+| **Term A** | 1–14 | 2026-09-07 → 2026-12-13 | **PSY-101** + **STA-101** |
+| break | 15–17 | 12-14 → 2027-01-03 | — · three weeks, holidays + peak season |
+| **Term B** | 1–14 | 2027-01-04 → 2027-04-11 | PSY-201, PSY-202 |
+| break | — | 04-12 → 04-18 | — |
+| **Term C** | 1–14 | 2027-04-19 → 2027-07-25 | PSY-301, PSY-302 |
+| **Capstone** | 1–8 | 2027-07-26 → 2027-09-19 | PSY-401 |
+
+Award target unchanged: Certificate, 6 courses. Ends 2027-09-19 instead of 2027-08-22.
 
 **Term A is full.** STA-101 filled slot 2 on 2026-08-20. Terms B and C are psychology-only as scheduled; a second STA course or a third subject would have to displace one, and the Advisor's two-concurrent cap is not negotiable.
 
@@ -108,7 +116,7 @@ A course is `complete` when its term paper passes and its weekly pass rate is re
 
 **Detail horizon:** Term A set. Terms B and C exist as course definitions with sequences; the Advisor does not schedule their weeks until the preceding term closes, informed by the gap and verdict logs.
 
-**Access check owed:** Term B. Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.
+**Access check owed:** Term B (now opens 2027-01-04). Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.
 
 ---
 
@@ -229,7 +237,7 @@ A "no" to #3 means the year failed regardless of everything above it. That's the
 
 Course definition: [`catalog/PSY-101.md`](../catalog/PSY-101.md) · Standard: [`ASSESSMENT.md`](../ASSESSMENT.md) · Institution: [`REGISTRAR.md`](../REGISTRAR.md)
 
-**Week 1 of 14** · 2026-08-24 → 2026-11-29 · weekly logs in `logs/PSY-101/`
+**Week 1 of 14** · 2026-09-07 → 2026-12-13 · weekly logs in `logs/PSY-101/`
 
 Each agent owns one section here and writes only there. All five read all of it.
 
@@ -247,15 +255,15 @@ Each agent owns one section here and writes only there. All five read all of it.
 
 | Wk | Dates | Milestone | Primary source | Output | Closed |
 |---|---|---|---|---|---|
-| 1 | 08-24 → 08-30 | The replication crisis: scale and shape | OSC 2015 `[H]` + Ritchie 1–2 `[H]` | **Priors Sheet**, 600w | ☐ |
-| 2 | 08-31 → 09-06 | Researcher degrees of freedom | Simmons et al. 2011 `[V]` | 600w | ☐ |
-| 3 | 09-07 → 09-13 | **Apply** effect size and interval to replication data. Compute three by hand | STA-101 wk 2 `[V]` + OSC supplement | 600w + computations | ☐ |
-| 4 | 09-14 → 09-20 | **Apply** the misinterpretation catalogue to published psychology abstracts | STA-101 wk 3 `[V]` | 600w | ☐ |
-| 5 | 09-21 → 09-27 | Publication bias, file drawer, p-curve | Ritchie 3–4 `[H]` | 600w | ☐ |
-| 6 | 09-28 → 10-04 | Preregistration: what it fixes, what it doesn't | Nosek et al. 2022 `[V]` | 600w | ☐ |
-| 7 | 10-05 → 10-11 | **MIDTERM** — oral, cold | — | Tutor verdict | ☐ |
-| 8–13 | 10-12 → 11-22 | WEIRD · heterogeneity · four autopsies | see course file | 600w each | ☐ |
-| 14 | 11-23 → 11-29 | **What survived** + term paper | Simons & Chabris 1999 `[R]` | **2,000w — the Filter** | ☐ |
+| 1 | 09-07 → 09-13 | The replication crisis: scale and shape | OSC 2015 `[H]` + Ritchie 1–2 `[H]` | **Priors Sheet**, 600w | ☐ |
+| 2 | 09-14 → 09-20 | Researcher degrees of freedom | Simmons et al. 2011 `[V]` | 600w | ☐ |
+| 3 | 09-21 → 09-27 | **Apply** effect size and interval to replication data. Compute three by hand | STA-101 wk 2 `[V]` + OSC supplement | 600w + computations | ☐ |
+| 4 | 09-28 → 10-04 | **Apply** the misinterpretation catalogue to published psychology abstracts | STA-101 wk 3 `[V]` | 600w | ☐ |
+| 5 | 10-05 → 10-11 | Publication bias, file drawer, p-curve | Ritchie 3–4 `[H]` | 600w | ☐ |
+| 6 | 10-12 → 10-18 | Preregistration: what it fixes, what it doesn't | Nosek et al. 2022 `[V]` | 600w | ☐ |
+| 7 | 10-19 → 10-25 | **MIDTERM** — oral, cold | — | Tutor verdict | ☐ |
+| 8–13 | 10-26 → 12-06 | WEIRD · heterogeneity · four autopsies | see course file | 600w each | ☐ |
+| 14 | 12-07 → 12-13 | **What survived** + term paper | Simons & Chabris 1999 `[R]` | **2,000w — the Filter** | ☐ |
 
 **Week 1 grading note (Advisor → Editor).** The Priors Sheet will fail A2 and A4 — it cites nothing and gives no magnitudes, because in week 1 the student cannot yet do either. Grade it normally, record the REWRITE, and the Advisor logs it as **baseline measured**, not a slipped week. No rewrite is owed. The standard is not amended; the failure is the instrument reading.
 
@@ -327,7 +335,7 @@ Fortnightly. Spent domains cannot be reused.
 
 Course definition: [`catalog/STA-101.md`](../catalog/STA-101.md) · Standard: [`ASSESSMENT.md`](../ASSESSMENT.md) · Institution: [`REGISTRAR.md`](../REGISTRAR.md)
 
-**Week 1 of 14** · 2026-08-24 → 2026-11-29 · weekly logs in `logs/STA-101/`
+**Week 1 of 14** · 2026-09-07 → 2026-12-13 · weekly logs in `logs/STA-101/`
 
 Runs concurrently with PSY-101 and feeds it — see the interlock table in the course file. Agents: this is a **separate enrolment**. Do not merge its sections with PSY-101's.
 
@@ -345,15 +353,15 @@ Runs concurrently with PSY-101 and feeds it — see the interlock table in the c
 
 | Wk | Dates | Milestone | Primary source | Output | Closed |
 |---|---|---|---|---|---|
-| 1 | 08-24 → 08-30 | What a number claims: population, sample, estimand | Spiegelhalter 1–2 `[H]` | 600w | ☐ |
-| 2 | 08-31 → 09-06 | **Effect size and interval as the primary result** → feeds PSY-101 wk 3 | Cumming 2014 `[V]` | 600w | ☐ |
-| 3 | 09-07 → 09-13 | **The misinterpretation catalogue** → feeds PSY-101 wk 4 | Greenland et al. 2016 `[V]` | 600w | ☐ |
-| 4 | 09-14 → 09-20 | *p*-values: the six things they are not | Wasserstein & Lazar 2016 `[V]` | 600w | ☐ |
-| 5 | 09-21 → 09-27 | Power; why underpowered significant results exaggerate | Cumming, cont. | 600w | ☐ |
-| 6 | 09-28 → 10-04 | Base rates and positive predictive value | Ioannidis 2005 `[V]` | 600w | ☐ |
-| 7 | 10-05 → 10-11 | **MIDTERM** — oral, cold | — | Tutor verdict | ☐ |
-| 8–13 | 10-12 → 11-22 | Forking paths · confounding · causal inference · measurement · graphs · meta-analysis | see course file | 600w each | ☐ |
-| 14 | 11-23 → 11-29 | **Term paper** — audit one published claim end to end | — | **2,000w** | ☐ |
+| 1 | 09-07 → 09-13 | What a number claims: population, sample, estimand | Spiegelhalter 1–2 `[H]` | 600w | ☐ |
+| 2 | 09-14 → 09-20 | **Effect size and interval as the primary result** → feeds PSY-101 wk 3 | Cumming 2014 `[V]` | 600w | ☐ |
+| 3 | 09-21 → 09-27 | **The misinterpretation catalogue** → feeds PSY-101 wk 4 | Greenland et al. 2016 `[V]` | 600w | ☐ |
+| 4 | 09-28 → 10-04 | *p*-values: the six things they are not | Wasserstein & Lazar 2016 `[V]` | 600w | ☐ |
+| 5 | 10-05 → 10-11 | Power; why underpowered significant results exaggerate | Cumming, cont. | 600w | ☐ |
+| 6 | 10-12 → 10-18 | Base rates and positive predictive value | Ioannidis 2005 `[V]` | 600w | ☐ |
+| 7 | 10-19 → 10-25 | **MIDTERM** — oral, cold | — | Tutor verdict | ☐ |
+| 8–13 | 10-26 → 12-06 | Forking paths · confounding · causal inference · measurement · graphs · meta-analysis | see course file | 600w each | ☐ |
+| 14 | 12-07 → 12-13 | **Term paper** — audit one published claim end to end | — | **2,000w** | ☐ |
 
 **Slipped:** 0 / 3.
 
@@ -789,7 +797,7 @@ Operationally: the Editor is the rehearsal witness for drafts one through three 
 
 # START HERE
 
-Everything that has to happen, in order. Term A opens **Monday 24 August 2026**.
+Everything that has to happen, in order. Term A opens **Monday 7 September 2026** _(postponed from 24 Aug — accounting cross-training until 4 Sept)_.
 
 ---
 
@@ -859,7 +867,7 @@ Upload the four free PDFs: OSC 2015 goes in PSY, the other three in STA. Then up
 
 ---
 
-# Part 2 — Week 1: Mon 24 → Sun 30 August
+# Part 2 — Week 1: Mon 7 → Sun 13 September
 
 | Day | Do | Time |
 |---|---|---|
@@ -887,8 +895,8 @@ Sat   Roommate — fortnightly only
 Sun   Editor grades · Advisor closes the week
 ```
 
-**Week 7** (5–11 Oct) is midterms, both courses, oral and cold.
-**Week 14** (29 Nov) is term papers, 2,000 words each. Then Term A is on the transcript.
+**Week 7** (19–25 Oct) is midterms, both courses, oral and cold.
+**Week 14** (13 Dec) is term papers, 2,000 words each. Then Term A is on the transcript.
 
 ---
 
@@ -908,7 +916,7 @@ Not lack of motivation. These:
 
 # Owed later, easy to forget
 
-**Before Term B (7 Dec)** — the **access check**. Confirm your employer's policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in December costs you a swap to the fallback destination. The same refusal at week 45 costs the entire capstone.
+**Before Term B (4 Jan 2027)** — the **access check**. Confirm your employer's policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in December costs you a swap to the fallback destination. The same refusal at week 45 costs the entire capstone.
 
 **Also before Term B** — start hunting **Meehl, *Clinical Versus Statistical Prediction* (1954)**. Highest-value single item in the major for your destination, and the hardest to obtain. Dawes, Faust & Meehl 1989 in *Science* is the accessible substitute if the monograph can't be found.
 

@@ -1,11 +1,11 @@
 # Week 1 — Term 0, Calibration
-**2026-08-24 → 2026-08-30** · Milestone: the replication crisis — what happened, what fraction, which subfields.
+**2026-09-07 → 2026-09-13** · Milestone: the replication crisis — what happened, what fraction, which subfields.
 
 ---
 
 ## Part A — Intake (Advisor)
 
-Four questions. Answer before Monday. They are written so they can be answered *wrongly* — a question that only admits a comfortable answer measures nothing. Don't look anything up; a researched answer is a ruined measurement.
+Four questions. Answer before Monday 7 September. They are written so they can be answered *wrongly* — a question that only admits a comfortable answer measures nothing. Don't look anything up; a researched answer is a ruined measurement.
 
 ### Q1 — Reading stamina and retention
 > What is the last non-fiction book you finished, and what do you still remember from it?
@@ -68,7 +68,7 @@ Setup step 2 is complete. The week-1 reading is released.
 ### Q2 — Statistical baseline
 > A study reports *d* = 0.3, *p* = .04, *n* = 60. React.
 
-**Answer:** `DECLINED 2026-08-20` → deferred to observed measurement, Tutor session Thu 08-27.
+**Answer:** `DECLINED 2026-08-20` → deferred to observed measurement, Tutor session Thu 09-10.
 
 *A declined self-report is not a baseline and won't be guessed at. Week 3 is planned protectively (assume no effect-size fluency) because the costs are asymmetric — over-teaching it wastes a week, under-teaching it corrupts source triage for the remaining 49. The Tutor measures it directly instead, which is the better instrument: the magnitude probe in Part E can't be answered fluently without the concept and can't be bluffed.*
 
@@ -144,7 +144,7 @@ One primary, one supporting. The Librarian's rule is a hard cap: three good sour
 
 **The number to sit with:** 97% of the original studies reported statistically significant results. 36% of the replications did. Before Thursday, form a view on what that gap is made of — how much is false positives, how much is real effects that are smaller than reported, how much is replications done badly. You will be wrong about the proportions. Being wrong on the record is the point.
 
-## Part E — Tutor session, Thu 2026-08-27
+## Part E — Tutor session, Thu 2026-09-10
 
 Opens cold, no source open, on: *what was the argument?* Then boundaries — the probe you should expect first is **"which subfields, and how do you know it wasn't just the hard-to-replicate ones that got picked?"**
 

@@ -8,14 +8,14 @@ Per-course state lives in `enrolled/<CODE>.md` — that's where the five agent s
 
 ## Student
 
-**Ulrich** · Program start **2026-08-24** · Award target: **Certificate** (6 courses), then reassess
+**Ulrich** · Program start **2026-09-07** _(postponed 2026-08-21, see below)_ · Award target: **Certificate** (6 courses), then reassess
 **Capacity:** 9–12 h/week at a bad week (intake Q3, 2026-08-20) → 2 concurrent courses, ~5 h each
 
 ### Baseline
 
 **Status:** complete on the three answerable questions — Q1, Q3, Q4 answered 2026-08-21; Q2 declined and re-instrumented as a performance measure at the week-7 midterm.
 
-**Priors Sheet: SEALED 2026-08-21**, before any source was opened — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.
+**Priors Sheet: SEALED 2026-08-21**, before any source was opened. **The seal is conditional on the postponement.** It was written 17 days before week 1 now, not 3. It stays valid only if no Term A source is opened before 2026-09-07 — OSC 2015, Ritchie, Spiegelhalter and Greenland are all already in NotebookLM and all four are off-limits until then. If any is read in the gap, log the date here; the week-52 comparison is still interpretable, but only if the contamination is on the record — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.
 
 | | Question | Answer | Effect |
 |---|---|---|---|
@@ -32,14 +32,22 @@ Enrolling STA-101 makes the question moot. The machinery is now taught properly 
 
 ## Calendar 2026–27
 
+**Postponed 2026-08-21.** Start moved from 24 Aug to 7 Sept: the student is in full-time accounting cross-training until Fri 4 Sept. Ten hours a week on top of that is the plan that reaches three slipped weeks by October and triggers a mandatory scope cut in the first term.
+
+**This is a scheduling decision, not a slip.** The no-extension rule governs falling behind *inside* a term — pushing a deadline you already own. This is a start date set before week 1 against a known external constraint. The distinction matters, and it does not license moving anything once week 1 opens. Slipped-week counter stays at 0/3 per course.
+
+**Two weeks became five, and the calendar is better for it.** A straight two-week shift would have opened Term B on 21 Dec — Christmas week, in a resort and casino, at peak season. The break absorbs it instead.
+
 | | Weeks | Dates | Enrolled |
 |---|---|---|---|
-| **Term A** | 1–14 | 2026-08-24 → 2026-11-29 | **PSY-101** + **STA-101** |
-| break | 15 | 11-30 → 12-06 | — |
-| **Term B** | 16–29 | 12-07 → 2027-03-14 | PSY-201, PSY-202 |
-| break | 30 | 03-15 → 03-21 | — |
-| **Term C** | 31–44 | 03-22 → 2027-06-27 | PSY-301, PSY-302 |
-| **Capstone** | 45–52 | 06-28 → 2027-08-22 | PSY-401 |
+| **Term A** | 1–14 | 2026-09-07 → 2026-12-13 | **PSY-101** + **STA-101** |
+| break | 15–17 | 12-14 → 2027-01-03 | — · three weeks, holidays + peak season |
+| **Term B** | 1–14 | 2027-01-04 → 2027-04-11 | PSY-201, PSY-202 |
+| break | — | 04-12 → 04-18 | — |
+| **Term C** | 1–14 | 2027-04-19 → 2027-07-25 | PSY-301, PSY-302 |
+| **Capstone** | 1–8 | 2027-07-26 → 2027-09-19 | PSY-401 |
+
+Award target unchanged: Certificate, 6 courses. Ends 2027-09-19 instead of 2027-08-22.
 
 **Term A is full.** STA-101 filled slot 2 on 2026-08-20. Terms B and C are psychology-only as scheduled; a second STA course or a third subject would have to displace one, and the Advisor's two-concurrent cap is not negotiable.
 
@@ -91,4 +99,4 @@ A course is `complete` when its term paper passes and its weekly pass rate is re
 
 **Detail horizon:** Term A set. Terms B and C exist as course definitions with sequences; the Advisor does not schedule their weeks until the preceding term closes, informed by the gap and verdict logs.
 
-**Access check owed:** Term B. Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.
+**Access check owed:** Term B (now opens 2027-01-04). Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.
