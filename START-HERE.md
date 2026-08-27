@@ -28,7 +28,7 @@ Q1 sets how much of the teaching load the writing has to carry versus the readin
 - "What would change my mind" must name an **observation**, not a feeling. *"If I saw contradictory evidence"* fails. *"If a preregistered multi-lab replication with n > 2000 found d < 0.1"* passes.
 - Don't look anything up.
 
-The calendar shows it due Sunday 30 August. That's the **seal** date, not the write date. Write it before Monday; seal it Sunday and never revise it — not in month six when it's embarrassing.
+**Already done — written and sealed 2026-08-21**, before any source was opened. The seal is now conditional on the postponement: it stays valid only if no Term A source is opened before 7 September. All four week-1 and week-3 sources are already sitting in NotebookLM, so this is a live temptation, not a theoretical one. If you do read one in the gap, log the date in `REGISTRAR.md` — a contaminated measurement on the record is still usable; a silent one is not.
 
 It will fail rubric criteria A2 and A4. It cites nothing and gives no magnitudes, because in week 1 you can't yet do either. **That failure is the instrument reading, not a setback.** No rewrite is owed.
 
