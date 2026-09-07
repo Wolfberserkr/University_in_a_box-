@@ -4,6 +4,8 @@ A one-person university: a course catalog, credit accounting, concurrent enrolme
 
 **Start here:** [`DEGREE.md`](DEGREE.md) — how it works and what it honestly isn't · [`CATALOG.md`](CATALOG.md) — courses, and the open slot · [`REGISTRAR.md`](REGISTRAR.md) — current enrolment
 
+**Or read it as a site.** [`docs/`](docs/) is a built page that answers two questions: *what do I do right now*, from today's date, and *is this year actually happening* — a dashboard carrying the weekly pass rate, the slipped-week counter against the scope-cut trigger, source-ledger health by tag, open gaps, and credits against the Certificate. It also carries the whole institution: every catalog course, the source stack, the locked standard, and per-week briefs for the five agents. Enable GitHub Pages on `/docs`, or just open `docs/index.html` off disk — it works either way, with no build step to read it.
+
 ---
 
 ## Faculty and institution
@@ -41,7 +43,19 @@ catalog/             course definitions — inert, reusable
   PSY-sources.md     the source stack, [V]/[R]/[H] tagged
 enrolled/            live per-course state, five agent sections each
 logs/<CODE>/         weekly outputs and Editor verdicts
+site/                source for the published site — React, built with Vite
+docs/                the built site. Do not edit by hand; `cd site && npm run build`
+tools/               build-agent-pack.py · build-site-data.py
 ```
+
+**The site is generated, never transcribed.** `tools/build-site-data.py` reads the
+Markdown above and writes one JSON file the pages render, so a week board changed in
+`enrolled/` shows up on the next build and there is no second, disagreeing record.
+Progress you tick on the site comes back the other way as a Markdown patch — for
+every change, the line as the site last read it and the line it should become — which
+you paste into these files at the Sunday close. The site never writes to the repo
+itself, and it does not publish the Priors Sheet, the intake answers, or anything in
+`logs/`.
 
 ## Cadence, per course
 
