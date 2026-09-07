@@ -24,6 +24,7 @@ NOT read into the site. logs/ is reported as a count and a status, never a body.
 
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -799,6 +800,31 @@ def build_weeks(registrar, enrolled, courses):
 
 # --------------------------------------------------------------------------
 
+def source_stamp():
+    """When the curriculum last changed - not when this script last ran.
+
+    A wall-clock timestamp here rehashes the bundle on every build, so a rebuild
+    with no content change shows up as a diff. Ask git when the source files were
+    last committed instead, so the output is a function of its inputs. Falls back
+    to file mtimes outside a git checkout.
+    """
+    paths = ["REGISTRAR.md", "DEGREE.md", "CATALOG.md", "ASSESSMENT.md",
+             "START-HERE.md", "README.md", "catalog", "enrolled", ".claude/agents"]
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(ROOT), "log", "-1", "--format=%cI", "--"] + paths,
+            capture_output=True, text=True, timeout=10, check=True).stdout.strip()
+        if out:
+            return datetime.fromisoformat(out).astimezone(timezone.utc) \
+                           .strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        pass
+    newest = max(f.stat().st_mtime
+                 for p in paths
+                 for f in ([ROOT / p] if (ROOT / p).is_file() else (ROOT / p).glob("*.md")))
+    return datetime.fromtimestamp(newest, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def main():
     registrar = parse_registrar()
 
@@ -823,7 +849,7 @@ def main():
                   for p in (ROOT / "logs").rglob("week-*.md"))
 
     data = {
-        "generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated": source_stamp(),
         "registrar": registrar,
         "courses": [courses[c] for c in sorted(courses)],
         "enrolled": enrolled,
