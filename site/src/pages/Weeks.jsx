@@ -64,7 +64,7 @@ export default function Weeks({ focus }) {
       </div>
 
       {weeks.map((w) => (
-        <WeekPanel key={`${w.n}-${bulk.nonce}-${focus || 0}`} week={w} open={openFor(w.n)} />
+        <WeekPanel key={w.n} week={w} open={openFor(w.n)} bulk={bulk} />
       ))}
 
       <div className="grid grid-2" style={{ marginTop: '1.4rem' }}>

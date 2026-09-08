@@ -58,19 +58,21 @@ export function locate(weeks, iso, terms = []) {
      closed weeks, an acquisition list from September, and a masthead naming the
      wrong term for thirty-eight of the fifty-two weeks. */
   const dated = terms.filter((t) => t.start && t.end);
-  const block = dated.find((t) => iso >= t.start && iso <= t.end)
-    || (dated.length && iso > dated[dated.length - 1].end ? null : null);
+  const block = dated.find((t) => iso >= t.start && iso <= t.end) || null;
   const nextBlock = dated.find((t) => t.start > iso) || null;
+  // past every block in the registrar's calendar: the programme is over, which
+  // is a different thing from "between blocks" and must not read as Term A
+  const afterAll = dated.length > 0 && iso > dated[dated.length - 1].end;
 
   if (iso < first.start) {
-    return { phase: 'pre', week: null, daysUntil: daysBetween(iso, first.start), next: first, block, nextBlock };
+    return { phase: 'pre', week: null, daysUntil: daysBetween(iso, first.start), next: first, block, nextBlock, afterAll };
   }
   if (iso > last.end) {
-    return { phase: 'post', week: null, daysSince: daysBetween(last.end, iso), block, nextBlock };
+    return { phase: 'post', week: null, daysSince: daysBetween(last.end, iso), block, nextBlock, afterAll };
   }
   const week = weeks.find((w) => iso >= w.start && iso <= w.end) || first;
   const dayIndex = daysBetween(week.start, iso); // 0 = Monday
-  return { phase: 'in', week, dayIndex, weekday: DAY_NAMES[toDate(iso).getDay()], block, nextBlock };
+  return { phase: 'in', week, dayIndex, weekday: DAY_NAMES[toDate(iso).getDay()], block, nextBlock, afterAll };
 }
 
 /* Weeks whose Sunday is already past, relative to `iso`. These are the weeks

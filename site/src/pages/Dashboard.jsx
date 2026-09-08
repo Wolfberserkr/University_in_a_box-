@@ -456,7 +456,7 @@ function HoursChart({ data, codes, courses, today }) {
 
       {hovered && (
         <div className="chart-tip" style={{
-          left: `${((pad.l + (shown.indexOf(hovered) + 0.5) * bw) / W) * 100}%`,
+          '--tip-x': `${((pad.l + (shown.indexOf(hovered) + 0.5) * bw) / W) * 100}%`,
         }}>
           <strong>Week {hovered.n}</strong> <span className="dim">{fmtRange(hovered.w.start, hovered.w.end)}</span>
           {codes.map((code) => (

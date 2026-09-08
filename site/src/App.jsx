@@ -131,7 +131,10 @@ export default function App() {
   const term = data.termA.term;
   // Name the block today is in, not the one the site was built around.
   const at = locate(data.termA.weeks, today, data.registrar.terms);
-  const blockLabel = at.block ? at.block.label : at.nextBlock ? `before ${at.nextBlock.label}` : term.label;
+  const blockLabel = at.block ? at.block.label
+    : at.afterAll ? 'programme complete'
+    : at.nextBlock ? `before ${at.nextBlock.label}`
+    : term.label;
 
   return (
     <StoreContext.Provider value={ctx}>

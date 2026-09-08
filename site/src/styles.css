@@ -512,7 +512,11 @@ label { font-family: var(--sans); font-size: .8rem; color: var(--ink-2); }
 .chart g.is-hover .hit { fill: var(--ink); opacity: .045; }
 
 .chart-tip {
-  position: absolute; top: 0; transform: translateX(-50%);
+  /* clamped so the first and last week keep it inside the card, and pushed
+     below the plot so it never covers the axis it is explaining */
+  position: absolute; top: 100%; margin-top: .3rem;
+  transform: translateX(-50%);
+  left: clamp(5rem, var(--tip-x, 50%), calc(100% - 5rem));
   background: var(--surface); border: 1px solid var(--rule-ui);
   border-radius: var(--radius); box-shadow: var(--shadow-pop);
   padding: .45rem .6rem; font-size: .76rem; line-height: 1.45;

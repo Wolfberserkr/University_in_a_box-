@@ -98,7 +98,9 @@ def split_cells(row):
         row = row[1:]
     if row.endswith("|") and not row.endswith("\\|"):
         row = row[:-1]
-    return [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", row)]
+    # unescape whatever cell() escaped: `\|` and `\\`, in one pass so the
+    # order cannot lose a literal backslash
+    return [re.sub(r"\\(.)", r"\1", c.strip()) for c in re.split(r"(?<!\\)\|", row)]
 
 
 def is_divider(row):

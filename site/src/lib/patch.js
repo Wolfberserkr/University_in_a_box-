@@ -257,6 +257,7 @@ export function buildPatch(data, state, today) {
 
   /* --- REGISTRAR.md ------------------------------------------------------ */
   const regEdits = [];
+  const regNotes = [];
   const perCourse = codes.map((code) => courseMetrics(data, state, code, today));
   const totalSlipped = perCourse.reduce((s, c) => s + c.slipped, 0);
 
@@ -321,11 +322,18 @@ export function buildPatch(data, state, today) {
     }
     if (newlyComplete.includes(m)) {
       // REGISTRAR.md: complete when its term paper passes AND its weekly pass
-      // rate is recorded. Writing the result without the paper cell states half
-      // of a definition the same file spells out three lines below.
-      next = setCell(next, 7, '**pass**');
-      next = setCell(next, 8, '**complete**');
-      reasons.push('14 weeks closed and the week-14 paper at 5/5');
+      // rate is recorded. Both cells or neither - and if the row has no such
+      // columns, setCell returns it unchanged, so the course must also drop out
+      // of the credits count rather than being counted for a Result never
+      // written.
+      const marked = setCell(setCell(next, 7, '**pass**'), 8, '**complete**');
+      if (marked === next) {
+        regNotes.push(`${row.code}: the transcript row has no Paper/Result column, so completion could not be written and the credits line was left alone. Fix the row in REGISTRAR.md, then close again.`);
+        newlyComplete.splice(newlyComplete.indexOf(m), 1);
+      } else {
+        next = marked;
+        reasons.push('14 weeks closed and the week-14 paper at 5/5');
+      }
     }
 
     if (next === row.raw) return;
@@ -370,7 +378,6 @@ export function buildPatch(data, state, today) {
     });
   }
 
-  const regNotes = [];
   /* One note per rule, naming every course it fires for. The same 40 words
      twice, differing only in a course code, is the duplication the callout
      stack exists to prevent - and this is the page where it is loudest. */

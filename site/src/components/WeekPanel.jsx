@@ -7,13 +7,21 @@ import { buildPatch } from '../lib/patch.js';
 import { Chip, Copy, courseKind } from './ui.jsx';
 import { MdInline } from '../lib/markdown.jsx';
 
-const WeekPanel = React.memo(function WeekPanel({ week, open = false }) {
+const WeekPanel = React.memo(function WeekPanel({ week, open = false, bulk = null }) {
   const { data, state, today } = useStore();
   const codes = Object.keys(data.enrolled);
   const statuses = codes.map((c) => weekStatus(data, state, c, week, today));
 
+  /* Expand all / Collapse all used to remount every panel through its React
+     key, which threw away a half-typed gap. The <details> is opened in place
+     instead, so a draft survives the press. */
+  const ref = React.useRef(null);
+  React.useEffect(() => {
+    if (bulk && bulk.mode !== null && ref.current) ref.current.open = bulk.mode;
+  }, [bulk && bulk.nonce, bulk && bulk.mode]);
+
   return (
-    <details className="week" open={open} id={`week-${week.n}`}>
+    <details className="week" ref={ref} open={open} id={`week-${week.n}`}>
       <summary>
         <h3 className="week-n">Week {week.n}</h3>
         <span className="week-dates">{fmtRange(week.start, week.end)}</span>
