@@ -21,6 +21,7 @@ export const emptyState = () => ({
   tagNotes: {},   // { [ledgerRowId]: 'checked against ...' }
   gaps: [],       // Tutor §C
   cross: [],      // Roommate §E
+  closes: [],     // [{ at, edits, files }] - what the last Sunday close wrote back
   updated: null,
 });
 
@@ -104,6 +105,15 @@ export function migrate(raw) {
   return next;
 }
 
+/* crypto.randomUUID is not available on every file:// origin in every browser,
+   and this id only has to be unique within one browser's own state. */
+function uid() {
+  try {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+  } catch { /* fall through */ }
+  return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 /* ---------------------------------------------------------------- reducer */
 
 export function reducer(state, action) {
@@ -161,7 +171,7 @@ export function reducer(state, action) {
       return stamp({ ...state, tags, tagNotes });
     }
     case 'gap:add':
-      return stamp({ ...state, gaps: [...state.gaps, { id: crypto.randomUUID(), status: 'open', ...action.gap }] });
+      return stamp({ ...state, gaps: [...state.gaps, { id: uid(), status: 'open', ...action.gap }] });
     case 'gap:update':
       return stamp({
         ...state,
@@ -170,7 +180,21 @@ export function reducer(state, action) {
     case 'gap:remove':
       return stamp({ ...state, gaps: state.gaps.filter((g) => g.id !== action.id) });
     case 'cross:add':
-      return stamp({ ...state, cross: [...state.cross, { id: crypto.randomUUID(), ...action.entry }] });
+      return stamp({ ...state, cross: [...state.cross, { id: uid(), ...action.entry }] });
+    case 'cross:update':
+      return stamp({
+        ...state,
+        cross: state.cross.map((c) => (c.id === action.id ? { ...c, ...action.patch } : c)),
+      });
+    /* The Sunday close is the one moment this buffer touches the record. It is
+       recorded here so the site can say when it last happened and what it wrote,
+       which is the difference between a patch you trust and a patch you re-read. */
+    case 'close:record':
+      return stamp({
+        ...state,
+        closes: [{ at: new Date().toISOString(), on: action.on, edits: action.edits, files: action.files },
+                 ...(state.closes || [])].slice(0, 8),
+      });
     case 'cross:remove':
       return stamp({ ...state, cross: state.cross.filter((c) => c.id !== action.id) });
     case 'state:import':

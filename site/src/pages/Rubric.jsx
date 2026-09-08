@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../lib/store.js';
 import { Card, Callout, Chip } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Rubric() {
   const { data } = useStore();
@@ -30,11 +30,11 @@ export default function Rubric() {
             <tbody>
               {a.scaling.map((r, i) => (
                 <tr key={i}>
-                  <td className="nowrap"><Markdown md={r.level} className="" /></td>
-                  <td><Markdown md={r.weekly} className="" /></td>
-                  <td><Markdown md={r.midterm} className="" /></td>
-                  <td><Markdown md={r.paper} className="" /></td>
-                  <td className="nowrap"><Markdown md={r.extra} className="" /></td>
+                  <td className="nowrap"><MdInline md={r.level} /></td>
+                  <td><MdInline md={r.weekly} /></td>
+                  <td><MdInline md={r.midterm} /></td>
+                  <td><MdInline md={r.paper} /></td>
+                  <td className="nowrap"><MdInline md={r.extra} /></td>
                 </tr>
               ))}
             </tbody>
@@ -51,8 +51,8 @@ export default function Rubric() {
               {a.partA.map((c) => (
                 <tr key={c.id}>
                   <td className="nowrap"><strong>{c.id}</strong></td>
-                  <td><Markdown md={c.criterion} className="" /></td>
-                  <td><Markdown md={c.failsIf} className="" /></td>
+                  <td><MdInline md={c.criterion} /></td>
+                  <td><MdInline md={c.failsIf} /></td>
                 </tr>
               ))}
             </tbody>
@@ -69,8 +69,8 @@ export default function Rubric() {
               {a.partB.map((c) => (
                 <tr key={c.id}>
                   <td className="nowrap"><strong>{c.id}</strong></td>
-                  <td><Markdown md={c.criterion} className="" /></td>
-                  <td><Markdown md={c.failsIf} className="" /></td>
+                  <td><MdInline md={c.criterion} /></td>
+                  <td><MdInline md={c.failsIf} /></td>
                 </tr>
               ))}
             </tbody>
@@ -86,7 +86,7 @@ export default function Rubric() {
       <Card title="Part D — programme level, at each award boundary">
         <Markdown md={a.partDNote} />
         <ol className="prose">
-          {a.partD.map((q) => <li key={q.n}><Markdown md={q.q} className="" /></li>)}
+          {a.partD.map((q) => <li key={q.n}><MdInline md={q.q} /></li>)}
         </ol>
       </Card>
     </>

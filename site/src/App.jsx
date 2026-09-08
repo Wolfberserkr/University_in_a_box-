@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import data from './data/curriculum.json';
 import { StoreContext, reducer, load, save, storageAvailable } from './lib/store.js';
 import { todayISO, fmtLong } from './lib/calendar.js';
@@ -38,18 +38,55 @@ function useHashRoute() {
   return route;
 }
 
+/* A page meant to be opened every morning has to survive being left open
+   overnight: today is derived from the clock at render, and nothing re-renders
+   on its own. So schedule one timer at the next local midnight, bump a counter,
+   and let the week roll over live. */
+function useMidnight() {
+  const [, tick] = useReducer((n) => n + 1, 0);
+  useEffect(() => {
+    let timer;
+    const arm = () => {
+      const now = new Date();
+      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 30);
+      timer = setTimeout(() => { tick(); arm(); }, Math.max(1000, next - now));
+    };
+    arm();
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { clearTimeout(timer); document.removeEventListener('visibilitychange', onVisible); };
+  }, []);
+}
+
 export default function App() {
   const route = useHashRoute();
   const [state, dispatch] = useReducer(reducer, undefined, load);
   const [previewDate, setPreviewDate] = useState(null);
   const [canStore] = useState(storageAvailable);
+  const [notice, setNotice] = useState(null);
+  useMidnight();
 
-  useEffect(() => { if (canStore) save(state); }, [state, canStore]);
+  /* week:set fires per keystroke in the hours and note fields; writing the whole
+     term to localStorage on each one is wasted work. Coalesce. */
+  useEffect(() => {
+    if (!canStore) return undefined;
+    const t = setTimeout(() => save(state), 300);
+    return () => clearTimeout(t);
+  }, [state, canStore]);
+
+  const announce = useCallback((text, tone = 'ok') => {
+    setNotice({ text, tone, id: Date.now() });
+  }, []);
+  useEffect(() => {
+    if (!notice) return undefined;
+    const t = setTimeout(() => setNotice(null), 5200);
+    return () => clearTimeout(t);
+  }, [notice]);
 
   const today = previewDate || todayISO();
   const ctx = useMemo(
-    () => ({ data, state, dispatch, today, realToday: todayISO(), previewDate, setPreviewDate, canStore }),
-    [state, today, previewDate, canStore]
+    () => ({ data, state, dispatch, today, realToday: todayISO(), previewDate, setPreviewDate, canStore, announce }),
+    [state, today, previewDate, canStore, announce]
   );
 
   const [head, param] = route.split('/');
@@ -71,24 +108,27 @@ export default function App() {
 
   return (
     <StoreContext.Provider value={ctx}>
+      <a className="skip" href="#main">Skip to content</a>
       <header className="masthead">
         <div className="masthead-inner">
           <h1><a href="#/">University in a Box</a><span className="sep">·</span>
             <span style={{ fontWeight: 400 }}>{term.label} {data.registrar.programStart.slice(0, 4)}</span></h1>
           <p className="mast-meta">
-            {data.registrar.student} · {term.enrolled.join(' + ')} · {fmtLong(today)}
-            {previewDate && ' — previewed'}
+            <span className="mast-who">{data.registrar.student} · {term.enrolled.join(' + ')} · </span>
+            {fmtLong(today)}{previewDate && ' — previewed'}
           </p>
         </div>
-        <nav className="tabs" aria-label="Sections">
-          {TABS.map(([slug, label]) => (
-            <a key={slug} href={`#/${slug}`}
-               aria-current={head === slug ? 'page' : undefined}>{label}</a>
-          ))}
-        </nav>
+        <div className="tabs-wrap">
+          <nav className="tabs" aria-label="Sections">
+            {TABS.map(([slug, label]) => (
+              <a key={slug} href={`#/${slug}`}
+                 aria-current={head === slug ? 'page' : undefined}>{label}</a>
+            ))}
+          </nav>
+        </div>
       </header>
 
-      <main>
+      <main id="main" key={route} className="page-enter">
         {!canStore && (
           <Callout kind="warn" icon="!" title="This browser is not storing anything">
             <p>Private window, or site data is blocked. The page still reads correctly and
@@ -105,6 +145,13 @@ export default function App() {
         )}
         {page}
       </main>
+
+      {/* One polite live region for the whole site: what changed, in words, for
+          a screen reader and for anyone who clicked something two views away
+          from the number it moved. */}
+      <div className="status-wrap" role="status" aria-live="polite">
+        {notice && <p className={`status-toast tone-${notice.tone}`} key={notice.id}>{notice.text}</p>}
+      </div>
 
       <footer>
         <p>The repository is the record, not this page:

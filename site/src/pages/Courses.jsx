@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../lib/store.js';
-import { Card, Chip, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import { Card, Chip } from '../components/ui.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Courses() {
   const { data } = useStore();
@@ -33,8 +33,8 @@ export default function Courses() {
                     <td>{c.title}</td>
                     <td className="nowrap">{c.level}</td>
                     <td className="nowrap">{c.credits}</td>
-                    <td><Markdown md={c.prerequisite} className="" /></td>
-                    <td><Markdown md={c.unblocks} className="" /></td>
+                    <td><MdInline md={c.prerequisite} /></td>
+                    <td><MdInline md={c.unblocks} /></td>
                     <td className="nowrap">{c.enrolled && <Chip kind="ok">enrolled</Chip>}</td>
                   </tr>
                 ))}
@@ -54,8 +54,8 @@ export default function Courses() {
                 {data.catalog.plan.map((p) => (
                   <tr key={p.term}>
                     <td className="nowrap">{p.term}</td>
-                    <td><Markdown md={p.slot1} className="" /></td>
-                    <td><Markdown md={p.slot2} className="" /></td>
+                    <td><MdInline md={p.slot1} /></td>
+                    <td><MdInline md={p.slot2} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -71,9 +71,9 @@ export default function Courses() {
               <tbody>
                 {data.catalog.future.map((f, i) => (
                   <tr key={i}>
-                    <td><Markdown md={f.subject} className="" /></td>
-                    <td><Markdown md={f.opensWith} className="" /></td>
-                    <td><Markdown md={f.why} className="" /></td>
+                    <td><MdInline md={f.subject} /></td>
+                    <td><MdInline md={f.opensWith} /></td>
+                    <td><MdInline md={f.why} /></td>
                   </tr>
                 ))}
               </tbody>

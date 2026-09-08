@@ -132,6 +132,48 @@ def first_table(md):
     return t[0]["rows"] if t else []
 
 
+def first_table_header(md):
+    """The header line of the first pipe table, verbatim.
+
+    The write-back appends rows under this line, so it has to be the file's
+    own text rather than a copy typed into the site.
+    """
+    for line, in_fence in strip_fences(md.splitlines()):
+        if not in_fence and line.strip().startswith("|"):
+            return line.rstrip()
+    return ""
+
+
+def placeholder_row(md):
+    """An empty `| — | | | |` row, if the table has one and nothing else.
+
+    Appending under it would leave a dash row above real data, so the patch
+    replaces it with the first real row instead.
+    """
+    rows = []
+    started = False
+    for line, in_fence in strip_fences(md.splitlines()):
+        if in_fence:
+            continue
+        if line.strip().startswith("|"):
+            rows.append(line.rstrip())
+            started = True
+        elif started:
+            break
+    body = rows[2:] if len(rows) > 2 else []
+    if len(body) == 1 and not plain(body[0]).replace("|", "").replace("—", "").strip():
+        return body[0]
+    return ""
+
+
+def raw_line(md, prefix):
+    """The whole line that starts with `prefix`, so an edit replaces a line."""
+    for line in md.splitlines():
+        if line.startswith(prefix):
+            return line.rstrip()
+    return ""
+
+
 def drop_tables(md):
     """The prose of a section, with its pipe tables removed."""
     keep = []
@@ -186,7 +228,6 @@ def bare_urls(md):
 
 def parse_registrar():
     md = read("REGISTRAR.md")
-    secs = section_map(md)
 
     student = find_section(md, "Student")
     m = re.search(r"\*\*(.+?)\*\* · Program start \*\*([\d-]+)\*\*", student)
@@ -194,6 +235,9 @@ def parse_registrar():
     start = m.group(2) if m else ""
     award = re.search(r"Award target: \*\*(.+?)\*\*", student)
     capacity = re.search(r"\*\*Capacity:\*\* (.+)", student)
+    # "9-12 h/week at a bad week" - the feasibility argument the whole calendar
+    # rests on, and the reference band the hours chart is drawn against
+    band = re.search(r"(\d+)\s*[–-]\s*(\d+)\s*h/week", capacity.group(1) if capacity else "")
 
     intake = []
     for t in parse_tables(find_section(md, "Student")):
@@ -211,18 +255,33 @@ def parse_registrar():
 
     cal = find_section(md, "Calendar")
     terms = []
+    prev = None  # last resolved date, so a bare MM-DD can take a year from it
     for r in first_table(cal):
         label = plain(r.get("", ""))
         if not label:
             continue
         dates = r.get("Dates", "")
-        dm = re.findall(r"(\d{4}-\d{2}-\d{2})", dates)
+        resolved = []
+        # The calendar writes the break rows as `12-14 → 2027-01-03` and
+        # `04-12 → 04-18`: a bare MM-DD means the year the sequence is in.
+        for m in re.finditer(r"\b(\d{4})-(\d{2})-(\d{2})\b|\b(\d{2})-(\d{2})\b", dates):
+            if m.group(1):
+                iso = "%s-%s-%s" % (m.group(1), m.group(2), m.group(3))
+            elif prev:
+                y = int(prev[:4])
+                iso = "%d-%s-%s" % (y, m.group(4), m.group(5))
+                if iso < prev:                       # wrapped into the next year
+                    iso = "%d-%s-%s" % (y + 1, m.group(4), m.group(5))
+            else:
+                continue
+            resolved.append(iso)
+            prev = iso
         terms.append({
             "label": label,
             "weeks": r.get("Weeks", ""),
             "dates": dates,
-            "start": dm[0] if dm else "",
-            "end": dm[1] if len(dm) > 1 else (dm[0] if dm else ""),
+            "start": resolved[0] if resolved else "",
+            "end": resolved[-1] if resolved else "",
             "enrolled": [c for c in re.findall(r"[A-Z]{3}-\d{3}", r.get("Enrolled", ""))],
             "isTerm": label.lower().startswith(("term", "capstone")),
         })
@@ -256,6 +315,7 @@ def parse_registrar():
             "passRate": r.get("Weekly pass rate", ""),
             "paper": r.get("Paper", ""),
             "result": plain(r.get("Result", "")),
+            "raw": r.get("_raw", ""),
         })
 
     tr = find_section(md, "Transcript")
@@ -265,19 +325,26 @@ def parse_registrar():
 
     rules = find_section(md, "Standing rules")
     slipped = re.search(r"\*\*Slipped weeks:\*\*\s*(\d+)", rules)
-    slip_trigger = re.search(r"(\w+) slips in one course triggers", rules)
+
+    # "Agents stood up ...: Advisor ✓ · Librarian ✓ ... · Tutor — due before ..."
+    agent_names = ["Advisor", "Librarian", "Tutor", "Editor", "Roommate"]
+    stood_up = [a for a in agent_names
+                if re.search(r"%s[^·\n]{0,40}✓" % a, rules)]
+    access = raw_line(rules, "**Access check owed")
+    access_term = re.search(r"owed:\*\*\s*([^.(]+)", access)
+    access_date = re.search(r"(\d{4}-\d{2}-\d{2})", access)
 
     return {
         "student": name,
         "programStart": start,
         "award": award.group(1) if award else "",
         "capacity": capacity.group(1).strip() if capacity else "",
+        "capacityBand": ({"low": int(band.group(1)), "high": int(band.group(2)),
+                          "unit": "h/week"} if band else None),
         "intake": intake,
-        "intakeNote": drop_tables(find_section(md, "Student")),
         "terms": terms,
         "calendarNote": drop_tables(cal),
         "enrolment": enrolment,
-        "enrolmentNote": drop_tables(find_section(md, "Enrolment")),
         "transcript": transcript,
         "transcriptNote": drop_tables(tr),
         "credits": {
@@ -286,12 +353,20 @@ def parse_registrar():
             "coursesComplete": int(courses_done.group(1)) if courses_done else 0,
             "coursesPlanned": int(courses_done.group(2)) if courses_done else 0,
             "certificateNeeds": int(cert.group(1)) if cert else 6,
+            "perCourse": next((int(t["credits"]) for t in transcript
+                               if t["credits"].isdigit()), 3),
+            "raw": raw_line(tr, "**Credits earned:**"),
         },
         "slippedRecorded": int(slipped.group(1)) if slipped else 0,
-        "slipTrigger": 3,
+        "slippedRaw": raw_line(rules, "**Slipped weeks:**"),
         "rulesMd": rules,
-        "accessCheck": next((l for l in rules.splitlines()
-                             if l.startswith("**Access check owed")), ""),
+        "agents": {"stoodUp": stood_up, "total": len(agent_names), "names": agent_names},
+        "accessCheck": {
+            "raw": access,
+            "term": plain(access_term.group(1)).strip() if access_term else "",
+            "date": access_date.group(1) if access_date else "",
+            "why": plain(access.split(". ", 1)[1]) if ". " in access else "",
+        },
     }
 
 
@@ -328,7 +403,9 @@ def parse_enrolled(code):
             "dates": r.get("Dates", ""),
             "milestone": r.get("Milestone", ""),
             "source": r.get("Primary source", ""),
-            "sourceTag": tag_of(r.get("Primary source", "")),
+            # every tag in the cell, in order - a row can cite two sources with
+            # two different tags, and the first is not the row's tag
+            "sourceTags": re.findall(r"\[([VRH])\]", r.get("Primary source", "")),
             "output": r.get("Output", ""),
             "midterm": "MIDTERM" in r.get("Milestone", "").upper(),
             "paper": "term paper" in plain(r.get("Milestone", "")).casefold()
@@ -356,20 +433,55 @@ def parse_enrolled(code):
 
     slipped = re.search(r"\*\*Slipped:\*\*\s*(\d+)\s*/\s*(\d+)", board_md)
 
+    def week_of(cell):
+        m = re.search(r"\d+", plain(cell))
+        return int(m.group(0)) if m else None
+
+    # §C / §D / §E as the file already holds them. The site reconciles what it
+    # is about to write back against these, so a row already applied is never
+    # offered a second time.
+    gaps = [{"week": week_of(r.get("Wk", "")),
+             "concept": plain(r.get("Concept", "")),
+             "gap": plain(r.get("Gap (specific)", "")),
+             "status": plain(r.get("Status", "")),
+             "closedBy": plain(r.get("Closed by", "")),
+             "raw": r.get("_raw", "")}
+            for r in first_table(gaps_md) if plain(r.get("Concept", ""))]
+    verdicts = [{"week": week_of(r.get("Wk", "")),
+                 "artifact": plain(r.get("Artifact", "")),
+                 "rubric": plain(r.get("Rubric", "")),
+                 "verdict": plain(r.get("Verdict", "")),
+                 "rewrite": plain(r.get("Rewrite", "")),
+                 "raw": r.get("_raw", "")}
+                for r in first_table(verdict_md) if plain(r.get("Artifact", ""))]
+    cross = [{"week": week_of(r.get("Wk", "")),
+              "domain": plain(r.get("Domain", "")),
+              "collidedWith": plain(r.get("Collided with", "")),
+              "transfer": plain(r.get("Transfer that survived", "")),
+              "raw": r.get("_raw", "")}
+             for r in first_table(cross_md) if plain(r.get("Domain", ""))]
+
     return {
         "code": code,
         "board": rows,
         "boardNote": drop_tables(board_md),
         "slipped": int(slipped.group(1)) if slipped else 0,
         "slipLimit": int(slipped.group(2)) if slipped else 3,
+        "slippedRaw": raw_line(board_md, "**Slipped:**"),
         "ledger": ledger,
         "ledgerNote": drop_tables(ledger_md),
-        "gaps": [r for r in first_table(gaps_md) if plain(r.get("Concept", ""))],
+        "gaps": gaps,
         "gapsNote": drop_tables(gaps_md),
-        "verdicts": [r for r in first_table(verdict_md) if plain(r.get("Artifact", ""))],
+        "gapsHeader": first_table_header(gaps_md),
+        "gapsPlaceholder": placeholder_row(gaps_md),
+        "verdicts": verdicts,
         "verdictsNote": drop_tables(verdict_md),
-        "crossDomain": [r for r in first_table(cross_md) if plain(r.get("Domain", ""))],
+        "verdictsHeader": first_table_header(verdict_md),
+        "verdictsPlaceholder": placeholder_row(verdict_md),
+        "crossDomain": cross,
         "crossNote": drop_tables(cross_md),
+        "crossHeader": first_table_header(cross_md),
+        "crossPlaceholder": placeholder_row(cross_md),
     }
 
 
@@ -399,7 +511,7 @@ def parse_course(path):
             "label": plain(r.get("Wk", "")),
             "milestone": r.get("Milestone", ""),
             "source": r.get("Primary source", ""),
-            "sourceTag": tag_of(r.get("Primary source", "")),
+            "sourceTags": re.findall(r"\[([VRH])\]", r.get("Primary source", "")),
             "unblocks": r.get("Unblocks", ""),
         })
 
@@ -516,10 +628,8 @@ def parse_degree():
     for m in re.finditer(r"^\d+\.\s+\*\*(.+?)\*\*\s*(.*)$", gaps_md, re.M):
         gaps.append({"title": m.group(1).rstrip(". "), "body": m.group(2).strip()})
     return {
-        "missing": find_section(md, "What was missing"),
         "creditMd": drop_tables(find_section(md, "Credit accounting")),
         "overhead": overhead,
-        "calendarMd": find_section(md, "Calendar"),
         "levels": levels,
         "levelsNote": drop_tables(find_section(md, "Levels")),
         "awards": awards,
@@ -592,6 +702,13 @@ def parse_start_here():
             "note": " · ".join(bits[1:]),
             "md": body,
             "done": "**Already done" in body,
+            # the sentence the file uses to say so, so the site quotes the repo
+            # rather than inventing its own evidence line
+            "doneNote": next((plain(l.split(".")[0]) for l in body.splitlines()
+                              if "**Already done" in l), ""),
+            # how many things the step's own table asks for (step 3 lists four
+            # free sources); the site counts [H] rows against it
+            "tableRows": len(first_table(body)),
         })
 
     wk1_md = next((b for t, b in split_sections(md, 1) if t.startswith("Part 2")), "")
@@ -673,16 +790,12 @@ def parse_source_stack():
             queue = [q.strip() for q in line.split("·") if q.strip()]
             break
 
-    verified = links_in(find_section(md, "verified this session"))
-
     return {
         "tagKey": tagKey,
-        "tagKeyNote": drop_tables(find_section(md, "Tag key")),
         "groups": groups,
         "roommateQueue": queue,
         "roommateNote": queue_md.split("\n\n")[0].strip() if queue_md else "",
         "acquisition": find_section(md, "Acquisition order"),
-        "verifiedLinks": verified,
     }
 
 
@@ -760,7 +873,7 @@ def build_weeks(registrar, enrolled, courses):
                     rows[w] = dict(rows[w],
                                    milestone=row["milestone"],
                                    source=row["source"],
-                                   sourceTag=row["sourceTag"],
+                                   sourceTags=row["sourceTags"],
                                    unblocks=row.get("unblocks", ""),
                                    fromCourseFile=True)
                 elif w in rows:
@@ -781,7 +894,7 @@ def build_weeks(registrar, enrolled, courses):
                 "code": code,
                 "milestone": row["milestone"],
                 "source": row["source"],
-                "sourceTag": row["sourceTag"],
+                "sourceTags": row["sourceTags"],
                 "output": row["output"],
                 "unblocks": row.get("unblocks", ""),
                 "fromCourseFile": row.get("fromCourseFile", False),

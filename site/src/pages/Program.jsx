@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../lib/store.js';
 import { courseMetrics, creditMetrics } from '../lib/metrics.js';
 import { Card, Tile, Callout, Chip, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Program() {
   const { data, state, today } = useStore();
@@ -23,8 +23,14 @@ export default function Program() {
       <div className="tiles">
         <Tile label="Credits" value={credits.earnedRecorded} of={credits.totalPlanned}
               meter={credits.totalPlanned ? credits.earnedRecorded / credits.totalPlanned : 0}
-              note="3 per course, recorded on completion" />
+              sub={credits.projected !== credits.earnedRecorded
+                ? `${credits.projected} projected once this term is written back`
+                : undefined}
+              note={`${credits.perCourse} per course, recorded in REGISTRAR.md on completion`} />
         <Tile label="Courses complete" value={credits.coursesComplete} of={credits.coursesPlanned}
+              sub={credits.coursesProjected !== credits.coursesComplete
+                ? `${credits.coursesProjected} projected`
+                : undefined}
               note={`Certificate needs ${credits.certificateNeeds} — one course of slack`} />
         <Tile label="Award target" value={r.award.split('(')[0].trim()}
               note={r.award.includes('(') ? r.award.slice(r.award.indexOf('(')) : ''} />
@@ -73,8 +79,8 @@ export default function Program() {
             <thead><tr><th>Block</th><th>Weeks</th><th>Dates</th><th>Enrolled</th></tr></thead>
             <tbody>
               {r.terms.map((t, i) => (
-                <tr key={i} style={t.start && t.start <= today && (!t.end || t.end >= today)
-                  ? { background: 'var(--accent-soft)' } : undefined}>
+                <tr key={i} className={t.start && t.start <= today && (!t.end || t.end >= today)
+                  ? 'is-now' : undefined}>
                   <td className="nowrap">{t.label}</td>
                   <td className="nowrap">{t.weeks}</td>
                   <td className="nowrap">{t.dates}</td>
@@ -86,8 +92,24 @@ export default function Program() {
             </tbody>
           </table>
         </div>
+        <p className="small">
+          The <em>Weeks</em> column carries two conventions at once, faithfully: the terms are
+          numbered 1–14 from their own first week, while the break rows are numbered on the
+          year's continuous count (weeks 15–17). <code>DEGREE.md</code> numbers Term B as weeks
+          16–29; <code>REGISTRAR.md</code> numbers it 1–14. The site prints what each file says
+          rather than quietly picking one.
+        </p>
         <Markdown md={r.calendarNote} className="small" />
       </Card>
+
+      {r.accessCheck && r.accessCheck.raw && (
+        <Callout kind="warn" icon="◷"
+                 title={`Access check owed before ${r.accessCheck.term}${r.accessCheck.date ? ` — ${r.accessCheck.date}` : ''}`}>
+          <p>{r.accessCheck.why} It is parsed out of the standing rules and repeated here because
+            it is the one owed item whose deadline is nine months away and whose cost, if it is
+            missed, is the capstone.</p>
+        </Callout>
+      )}
 
       <Card title="Credit accounting">
         <Markdown md={d.creditMd} />
@@ -97,8 +119,8 @@ export default function Program() {
             <tbody>
               {d.overhead.map((o, i) => (
                 <tr key={i}>
-                  <td><Markdown md={o.hour} className="" /></td>
-                  <td className="nowrap"><Markdown md={o.paid} className="" /></td>
+                  <td><MdInline md={o.hour} /></td>
+                  <td className="nowrap"><MdInline md={o.paid} /></td>
                 </tr>
               ))}
             </tbody>
@@ -114,9 +136,9 @@ export default function Program() {
               <tbody>
                 {d.levels.map((l, i) => (
                   <tr key={i}>
-                    <td className="nowrap"><Markdown md={l.level} className="" /></td>
-                    <td><Markdown md={l.relationship} className="" /></td>
-                    <td><Markdown md={l.assessment} className="" /></td>
+                    <td className="nowrap"><MdInline md={l.level} /></td>
+                    <td><MdInline md={l.relationship} /></td>
+                    <td><MdInline md={l.assessment} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -132,10 +154,10 @@ export default function Program() {
               <tbody>
                 {d.awards.map((a, i) => (
                   <tr key={i}>
-                    <td className="nowrap"><Markdown md={a.award} className="" /></td>
+                    <td className="nowrap"><MdInline md={a.award} /></td>
                     <td className="nowrap">{a.courses}</td>
                     <td className="nowrap">{a.time}</td>
-                    <td><Markdown md={a.requires} className="" /></td>
+                    <td><MdInline md={a.requires} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -153,13 +175,13 @@ export default function Program() {
               {r.intake.map((q) => (
                 <tr key={q.id}>
                   <td className="nowrap"><strong>{q.id}</strong></td>
-                  <td><Markdown md={q.question} className="" /></td>
+                  <td><MdInline md={q.question} /></td>
                   <td className="nowrap">
                     {q.declined ? <Chip kind="warn">declined</Chip>
                       : q.answered ? <Chip kind="ok">answered</Chip>
                       : <Chip>open</Chip>}
                   </td>
-                  <td><Markdown md={q.effect} className="" /></td>
+                  <td><MdInline md={q.effect} /></td>
                 </tr>
               ))}
             </tbody>
@@ -185,7 +207,7 @@ export default function Program() {
         <ol className="prose">
           {d.gaps.map((g, i) => (
             <li key={i} style={{ marginBottom: '.55rem' }}>
-              <strong>{g.title}.</strong> <Markdown md={g.body} className="" />
+              <strong>{g.title}.</strong> <MdInline md={g.body} />
             </li>
           ))}
         </ol>

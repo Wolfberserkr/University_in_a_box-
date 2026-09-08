@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { locate, fmtRange, daysBetween, fmt } from '../lib/calendar.js';
 import {
   courseMetrics, ledgerMetrics, gapMetrics, setupMetrics, creditMetrics,
-  termProgress, weekStatus, acquireQueue, STATUS_LABEL, TAG_LABEL, effectiveTag,
+  termProgress, acquireQueue, passRateBand, TAG_LABEL,
 } from '../lib/metrics.js';
-import { Card, Tile, Callout, Tag, Chip, StackedBar, courseKind } from '../components/ui.jsx';
+import {
+  Card, Tile, Callout, CalloutStack, Tag, Chip, StackedBar, Copy, courseKind,
+} from '../components/ui.jsx';
+import WeekStrip from '../components/WeekStrip.jsx';
+import { MdInline } from '../lib/markdown.jsx';
+import { agentBrief } from '../lib/briefs.js';
 
-const MARK = { pass: '✓', rewrite: '↻', closed: '·', slipped: '!', current: '', future: '' };
 const TAG_ORDER = ['H', 'V', 'R'];
 
 function pct(x) { return x === null ? '—' : `${Math.round(x * 100)}%`; }
@@ -15,28 +19,40 @@ function pct(x) { return x === null ? '—' : `${Math.round(x * 100)}%`; }
 export default function Dashboard() {
   const { data, state, today } = useStore();
   const weeks = data.termA.weeks;
-  const codes = Object.keys(data.enrolled);
+  const codes = useMemo(() => Object.keys(data.enrolled), [data]);
   const here = locate(weeks, today);
 
-  const courses = codes.map((c) => courseMetrics(data, state, c, today));
-  const ledgers = codes.map((c) => ledgerMetrics(data, state, c));
+  const courses = useMemo(() => codes.map((c) => courseMetrics(data, state, c, today)),
+    [data, state, today, codes]);
+  const ledgers = useMemo(() => codes.map((c) => ledgerMetrics(data, state, c)),
+    [data, state, codes]);
   const gaps = gapMetrics(state);
-  const setup = setupMetrics(data, state);
+  const setup = useMemo(() => setupMetrics(data, state), [data, state]);
   const credits = creditMetrics(data, state, courses);
   const progress = termProgress(courses);
 
   const totalH = ledgers.reduce((s, l) => s + l.counts.H, 0);
   const totalRows = ledgers.reduce((s, l) => s + l.total, 0);
+  const maxLedger = Math.max(...ledgers.map((l) => l.total), 1);
   const totalSlipped = courses.reduce((s, c) => s + c.slipped, 0);
   const rewrites = courses.flatMap((c) => c.rewritesOwed.map((n) => ({ code: c.code, n })));
   const queue = acquireQueue(data, state, here.week ? here.week.n : 1);
   const scopeCuts = courses.filter((c) => c.scopeCut);
   const soft = courses.filter((c) => c.editorSoft);
-
-  const attempted = courses.reduce((s, c) => s + c.attempted, 0);
-  const full = courses.reduce((s, c) => s + c.full, 0);
-  const overallRate = attempted ? full / attempted : null;
+  const rate = passRateBand(courses);
   const hours = courses.reduce((s, c) => s + c.hours, 0);
+
+  const access = data.registrar.accessCheck;
+  const accessDue = access && access.date && access.date > today
+    && here.phase === 'in' && here.week.n >= 10;
+
+  /* The first morning. Six tiles reading zero and twenty-eight dashed squares
+     is not a briefing, it is an empty database. Until something is closed, the
+     page opens with the one thing that is true on day one: here is the week,
+     here is what each course wants, and here is the step that cannot be
+     recovered if it is done in the wrong order. */
+  const firstMorning = here.phase === 'in' && progress.closed === 0
+    && courses.every((c) => c.attempted === 0);
 
   return (
     <>
@@ -61,109 +77,97 @@ export default function Dashboard() {
 
       {/* ---------- things that need a decision, most severe first ---------- */}
 
-      {scopeCuts.map((c) => (
-        <Callout key={c.code} kind="bad" icon="!" title={`${c.code}: ${c.slipped} slipped weeks — scope cut triggered`}>
-          <p>REGISTRAR.md standing rules: three slips in one course triggers a scope cut in
-            that course, and the Advisor executes it without renegotiating. <strong>The calendar
-            does not move.</strong> Open the Advisor before you write anything else.</p>
-        </Callout>
-      ))}
+      <CalloutStack>
+        {scopeCuts.length > 0 && (
+          <Callout key="cut" kind="bad" icon="!"
+                   title={`Scope cut triggered — ${scopeCuts.map((c) => c.code).join(' and ')}`}>
+            <p>{scopeCuts.map((c) => `${c.code} ${c.slipped}/${c.slipLimit}`).join(' · ')}.
+              REGISTRAR.md standing rules: three slips in one course triggers a scope cut in
+              that course, and the Advisor executes it without renegotiating. <strong>The calendar
+              does not move.</strong> Open the Advisor before you write anything else.</p>
+          </Callout>
+        )}
 
-      {soft.map((c) => (
-        <Callout key={c.code} kind="warn" icon="?" title={`${c.code} is passing at ${pct(c.passRateExBaseline)} — check the Editor`}>
-          <p>A pass rate near 100% by week 6 means the Editor has drifted toward the standard
-            you argued for in the moment, which is the specific thing it is bad at. That is why{' '}
-            <code>ASSESSMENT.md</code> is locked and dated before week 1. The Advisor should say so.</p>
-        </Callout>
-      ))}
+        {soft.length > 0 && (
+          <Callout key="soft" kind="warn" icon="?"
+                   title={`Check the Editor — ${soft.map((c) => `${c.code} at ${pct(c.passRateExBaseline)}`).join(', ')}`}>
+            <p>A pass rate near 100% by week 6 means the Editor has drifted toward the standard
+              you argued for in the moment, which is the specific thing it is bad at. That is why{' '}
+              <code>ASSESSMENT.md</code> is locked and dated before week 1. The Advisor should say so.</p>
+          </Callout>
+        )}
 
-      {totalSlipped > 0 && !scopeCuts.length && (
-        <Callout kind="warn" icon="!" title={`${totalSlipped} slipped week${totalSlipped === 1 ? '' : 's'}`}>
-          <p>{courses.filter((c) => c.slipped).map((c) =>
-            `${c.code}: week${c.slippedWeeks.length === 1 ? '' : 's'} ${c.slippedWeeks.join(', ')} (${c.slipped}/${c.slipLimit})`).join(' · ')}.
-            A week with no output is a slipped week — the output is not a record of the learning, it is the learning.</p>
-        </Callout>
+        {totalSlipped > 0 && scopeCuts.length === 0 && (
+          <Callout key="slip" kind="warn" icon="!"
+                   title={`${totalSlipped} slipped week${totalSlipped === 1 ? '' : 's'}`}>
+            <p>{courses.filter((c) => c.slipped).map((c) =>
+              `${c.code}: week${c.slippedWeeks.length === 1 ? '' : 's'} ${c.slippedWeeks.join(', ')} (${c.slipped}/${c.slipLimit})`).join(' · ')}.
+              A week with no output is a slipped week — the output is not a record of the learning, it is the learning.</p>
+          </Callout>
+        )}
+
+        {rewrites.length > 0 && (
+          <Callout key="rw" kind="warn" icon="↻"
+                   title={`${rewrites.length} rewrite${rewrites.length === 1 ? '' : 's'} owed`}>
+            <p>{rewrites.map((r) => `${r.code} week ${r.n}`).join(' · ')}. 5/5 or the week is a
+              rewrite — there is no partial credit and no strong 4.</p>
+          </Callout>
+        )}
+
+        {here.phase === 'pre' && setup.done < setup.total && (
+          <Callout key="setup" kind="info" icon="→"
+                   title={`${setup.total - setup.done} setup step${setup.total - setup.done === 1 ? '' : 's'} left before Monday`}>
+            <p>Step 2, the Priors Sheet, is the one with an order dependency you cannot undo:
+              the moment you open a Term A source, that measurement is gone for good.{' '}
+              <a href="#/now">Open the checklist →</a></p>
+          </Callout>
+        )}
+
+        {accessDue && (
+          <Callout key="access" kind="info" icon="◷"
+                   title={`Access check owed in ${daysBetween(today, access.date)} days — before ${access.term}`}>
+            <p>{access.why} <a href="#/program">Standing rules →</a></p>
+          </Callout>
+        )}
+      </CalloutStack>
+
+      {/* ------------------------- the first morning ------------------------ */}
+
+      {firstMorning ? (
+        <FirstMorning here={here} setup={setup} />
+      ) : (
+        <div className="tiles">
+          <Tile label="Course-weeks closed" value={progress.closed} of={progress.total}
+                meter={progress.fraction}
+                note={`${weeks.length} weeks × ${codes.length} courses`} />
+          <Tile label="Pass rate" value={pct(rate.rate)} state={rate.state}
+                note={rate.attempted
+                  ? `${rate.full} of ${rate.attempted} graded weeks at 5/5 · a diagnostic, not a grade`
+                  : 'no week graded yet'} />
+          <Tile label="Slipped weeks" value={totalSlipped}
+                state={totalSlipped === 0 ? undefined : scopeCuts.length ? 'bad' : 'warn'}
+                note={totalSlipped === 0
+                  ? 'nothing late · three in one course cuts scope'
+                  : courses.map((c) => `${c.code} ${c.slipped}/${c.slipLimit}`).join(' · ')} />
+          <Tile label="Sources in hand" value={totalH} of={totalRows}
+                meter={totalRows ? totalH / totalRows : 0}
+                note="[H] — in NotebookLM, the citation authority" />
+          <Tile label="Open gaps" value={gaps.open}
+                state={gaps.open > 4 ? 'warn' : undefined}
+                note={gaps.closed ? `${gaps.closed} closed cold` : 'logged by the Tutor'} />
+          <Tile label="Credits" value={credits.earnedRecorded} of={credits.totalPlanned}
+                meter={credits.totalPlanned ? credits.earnedRecorded / credits.totalPlanned : 0}
+                sub={credits.projected !== credits.earnedRecorded
+                  ? `${credits.projected} projected from this browser`
+                  : undefined}
+                note={`recorded in REGISTRAR.md · Certificate needs ${credits.certificateNeeds} courses`} />
+        </div>
       )}
-
-      {rewrites.length > 0 && (
-        <Callout kind="warn" icon="↻" title={`${rewrites.length} rewrite${rewrites.length === 1 ? '' : 's'} owed`}>
-          <p>{rewrites.map((r) => `${r.code} week ${r.n}`).join(' · ')}. 5/5 or the week is a
-            rewrite — there is no partial credit and no strong 4.</p>
-        </Callout>
-      )}
-
-      {here.phase === 'pre' && setup.done < setup.total && (
-        <Callout kind="info" icon="→" title={`${setup.total - setup.done} setup step${setup.total - setup.done === 1 ? '' : 's'} left before Monday`}>
-          <p>Step 2, the Priors Sheet, is the one with an order dependency you cannot undo:
-            the moment you open a Term A source, that measurement is gone for good.{' '}
-            <a href="#/now">Open the checklist →</a></p>
-        </Callout>
-      )}
-
-      {/* --------------------------------- tiles --------------------------- */}
-
-      <div className="tiles">
-        <Tile label="Weeks closed" value={progress.closed} of={progress.total}
-              meter={progress.fraction}
-              note={`both courses · ${Math.round(progress.fraction * 100)}% of Term A`} />
-        <Tile label="Pass rate" value={pct(overallRate)}
-              state={overallRate === null ? undefined : overallRate >= 0.9 && attempted >= 5 ? 'warn' : 'ok'}
-              note={attempted ? `${full} of ${attempted} weeks at 5/5` : 'no week graded yet'} />
-        <Tile label="Slipped weeks" value={totalSlipped}
-              state={totalSlipped === 0 ? 'ok' : scopeCuts.length ? 'bad' : 'warn'}
-              note={totalSlipped === 0
-                ? 'nothing late · three in one course cuts scope'
-                : courses.map((c) => `${c.code} ${c.slipped}/${c.slipLimit}`).join(' · ')} />
-        <Tile label="Sources in hand" value={totalH} of={totalRows}
-              meter={totalRows ? totalH / totalRows : 0}
-              note="[H] — in NotebookLM, the citation authority" />
-        <Tile label="Open gaps" value={gaps.open}
-              state={gaps.open > 4 ? 'warn' : undefined}
-              note={gaps.closed ? `${gaps.closed} closed cold` : 'logged by the Tutor'} />
-        <Tile label="Credits" value={credits.earnedRecorded} of={credits.totalPlanned}
-              meter={credits.totalPlanned ? credits.earnedRecorded / credits.totalPlanned : 0}
-              note={`Certificate needs ${credits.certificateNeeds} courses`} />
-      </div>
 
       {/* ---------------------------- the week strip ----------------------- */}
 
       <Card title="Term A, week by week">
-        <div className="strip-wrap">
-        <div className="strip-head">
-          <span />
-          <div className="strip-scale" aria-hidden="true">
-            {weeks.map((w) => <span key={w.n}>{w.n}</span>)}
-          </div>
-        </div>
-        <div className="strip">
-          {codes.map((code) => (
-            <div className="strip-row" key={code}>
-              <span className="strip-label">{code}</span>
-              <div className="strip-cells">
-                {weeks.map((w) => {
-                  const s = weekStatus(state, code, w, today);
-                  return (
-                    <a key={w.n} className={`cell s-${s}`} href={`#/weeks/${w.n}`}
-                       title={`${code} week ${w.n} — ${STATUS_LABEL[s]}`}
-                       aria-label={`${code} week ${w.n}, ${STATUS_LABEL[s]}`}>
-                      <span className="mark" aria-hidden="true">{MARK[s] || w.n}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-        </div>
-        <p className="legend">
-          <span><i className="swatch" style={{ background: 'var(--ok)', borderColor: 'var(--ok)' }} />✓ closed 5/5</span>
-          <span><i className="swatch" style={{ background: 'var(--warn)', borderColor: 'var(--warn)' }} />↻ rewrite owed</span>
-          <span><i className="swatch" style={{ background: 'var(--bad)', borderColor: 'var(--bad)' }} />! slipped</span>
-          <span><i className="swatch" style={{ borderColor: 'var(--accent)', borderWidth: 2 }} />this week</span>
-          <span><i className="swatch" style={{ borderStyle: 'dashed' }} />ahead</span>
-        </p>
-        <p className="small">Week 7 is the midterm, oral and cold. Week 14 is the term paper,
-          2,000 words each. Tap any week to open its board.</p>
+        <WeekStrip />
       </Card>
 
       <div className="grid grid-2">
@@ -171,12 +175,14 @@ export default function Dashboard() {
         <Card title="Source ledger health">
           {ledgers.map((l) => (
             <StackedBar key={l.code} label={l.code} counts={l.counts}
-                        order={TAG_ORDER} total={l.total} labels={TAG_LABEL} />
+                        order={TAG_ORDER} total={l.total} scaleTo={maxLedger}
+                        labels={TAG_LABEL} />
           ))}
           <p className="legend">
-            <span><i className="swatch" style={{ background: 'var(--ramp-h)' }} />[H] in hand</span>
-            <span><i className="swatch" style={{ background: 'var(--ramp-v)' }} />[V] verified</span>
-            <span><i className="swatch" style={{ background: 'var(--ramp-r)' }} />[R] recalled</span>
+            <span><i className="swatch swatch-H" />[H] in hand</span>
+            <span><i className="swatch swatch-V" />[V] verified</span>
+            <span><i className="swatch swatch-R" />[R] recalled</span>
+            <span className="dim">tracks are to scale against the longer ledger</span>
           </p>
           <p className="small">A tag is a claim about what you have actually done with a source.
             The Librarian is the weakest of the five agents and this ratio is the reason — nothing
@@ -218,10 +224,10 @@ export default function Dashboard() {
             <Card key={c.code} title={`${c.code} — ${course.title}`}>
               <div className="tiles" style={{ marginBottom: '.6rem' }}>
                 <Tile label="Closed" value={c.closed} of={c.total} meter={c.closed / c.total} />
-                <Tile label="At 5/5" value={c.full} of={c.attempted || 0}
-                      note={c.attempted ? pct(c.passRate) : 'not graded yet'} />
+                <Tile label="At 5/5" value={c.exBaselineFull} of={c.exBaselineAttempted || 0}
+                      note={c.exBaselineAttempted ? `${pct(c.passRateExBaseline)} of graded weeks` : 'not graded yet'} />
                 <Tile label="Slipped" value={c.slipped} of={c.slipLimit}
-                      state={c.slipped === 0 ? 'ok' : c.scopeCut ? 'bad' : 'warn'} />
+                      state={c.slipped === 0 ? undefined : c.scopeCut ? 'bad' : 'warn'} />
               </div>
               <p className="small">
                 Level {course.level} · {course.credits} credits · {course.load}
@@ -244,7 +250,7 @@ export default function Dashboard() {
                 const started = t.start && t.start <= today;
                 const done = t.end && t.end < today;
                 return (
-                  <tr key={i}>
+                  <tr key={i} className={started && !done ? 'is-now' : undefined}>
                     <td className="nowrap">{t.label}</td>
                     <td className="nowrap">{t.weeks}</td>
                     <td className="nowrap">{t.dates}</td>
@@ -266,67 +272,212 @@ export default function Dashboard() {
       </Card>
 
       {hours > 0 && (
-        <Card title="Hours logged">
-          <HoursChart data={data} state={state} codes={codes} courses={courses} />
+        <Card title="Hours logged against capacity">
+          <HoursChart data={data} state={state} codes={codes} courses={courses} today={today} />
         </Card>
       )}
     </>
   );
 }
 
-/* Grouped columns, one axis, two series, direct-labelled totals. Only rendered
-   once hours actually exist - an empty chart is worse than no chart. */
-function HoursChart({ data, codes, courses }) {
+/* ------------------------------------------------------------------------- */
+
+/* Day one, or any morning before anything has been graded. One card, both
+   milestones, one primary move — and the Advisor brief already bound to the
+   course, which is the thing you actually have to do first on a Monday. */
+function FirstMorning({ here, setup }) {
+  const { data, state } = useStore();
+  const week = here.week;
+  const advisor = data.agents.find((a) => a.name === 'advisor');
+  const [copyFor, setCopyFor] = useState(week.entries[0] ? week.entries[0].code : null);
+  const owed = setup.steps.filter((s) => !s.done);
+
+  return (
+    <Card title={`Week ${week.n} · ${here.weekday} · nothing closed yet`} className="first-morning">
+      <p className="fm-lede">
+        Two courses, one milestone each. Nothing is late and nothing is graded, so there is
+        no number on this page worth reading yet — there is only the week.
+      </p>
+      <ol className="fm-list">
+        {week.entries.map((entry) => (
+          <li key={entry.code} className={courseKind(entry.code)}>
+            <p className="fm-code">{entry.code}</p>
+            <p className="fm-ms"><MdInline md={entry.milestone} /></p>
+            <p className="fm-meta">
+              Source: <MdInline md={entry.source} /> · Output: <MdInline md={entry.output} />
+            </p>
+          </li>
+        ))}
+      </ol>
+      <div className="btn-row">
+        <Copy className="btn btn-primary"
+              text={agentBrief({ data, state, agent: advisor, code: copyFor, weekNo: week.n })}
+              label={`Copy the Advisor brief for ${copyFor}`} />
+        {week.entries.length > 1 && (
+          <span className="fm-switch">
+            {week.entries.map((e) => (
+              <button key={e.code} type="button" className="btn btn-sm"
+                      aria-pressed={copyFor === e.code}
+                      onClick={() => setCopyFor(e.code)}>{e.code}</button>
+            ))}
+          </span>
+        )}
+        <a className="btn right" href="#/now">Today, hour by hour →</a>
+      </div>
+      {owed.length > 0 && (
+        <p className="small fm-owed">
+          Still open from the setup list: {owed.map((s) => s.title).join(' · ')}.{' '}
+          {owed.some((s) => /priors/i.test(s.title))
+            ? <strong>The Priors Sheet is the one that cannot be recovered — write it before you open a source.</strong>
+            : <a href="#/now">Open the checklist →</a>}
+        </p>
+      )}
+    </Card>
+  );
+}
+
+/* ------------------------------------------------------------------------- */
+
+/* Hours per week, stacked by course, against the capacity band DEGREE.md spends
+   four hundred words establishing. The band is the point of the chart: the
+   question is not "how many hours" but "did this week fit". Axis steps are
+   whole hours by construction; the window stops two weeks past the present so
+   the plot is not two thirds reserved for weeks that have not happened. */
+function HoursChart({ data, codes, courses, today }) {
+  const [hover, setHover] = useState(null);
+  const [table, setTable] = useState(false);
   const weeks = data.termA.weeks;
+  const band = data.registrar.capacityBand;
+
   const byWeek = weeks.map((w) => {
     const vals = {};
     codes.forEach((code) => {
       const rec = courses.find((c) => c.code === code).records.find((r) => r.w.n === w.n);
       vals[code] = parseFloat(rec.r.hours) || 0;
     });
-    return { n: w.n, vals, total: Object.values(vals).reduce((a, b) => a + b, 0) };
+    return { n: w.n, w, vals, total: Object.values(vals).reduce((a, b) => a + b, 0) };
   });
-  const max = Math.max(12, ...byWeek.map((b) => b.total));
-  const W = 700; const H = 150; const pad = { l: 26, r: 6, t: 8, b: 18 };
-  const bw = (W - pad.l - pad.r) / weeks.length;
+
+  const lastLogged = byWeek.filter((b) => b.total > 0).map((b) => b.n).pop() || 1;
+  const elapsed = weeks.filter((w) => w.end < today).length;
+  const shown = byWeek.slice(0, Math.min(weeks.length, Math.max(lastLogged, elapsed) + 2));
+
+  const STEP = 4;
+  const raw = Math.max(band ? band.high : 12, ...shown.map((b) => b.total));
+  const max = Math.ceil(raw / STEP) * STEP;
+  const ticks = [];
+  for (let v = 0; v <= max; v += STEP) ticks.push(v);
+
+  const W = 700; const H = 168; const pad = { l: 30, r: 62, t: 10, b: 26 };
+  const bw = (W - pad.l - pad.r) / shown.length;
   const y = (v) => pad.t + (1 - v / max) * (H - pad.t - pad.b);
   const colour = { 'PSY-101': 'var(--series-psy)', 'STA-101': 'var(--series-sta)' };
+  const hovered = hover === null ? null : shown.find((b) => b.n === hover);
+
+  /* A stacked segment is rounded where the data ends and square where it meets
+     the segment below, so the join has no pinch and the baseline stays flat. */
+  const seg = (x, top, h, w, roundTop) => {
+    const r = roundTop ? Math.min(3, h / 2, w / 2) : 0;
+    if (!r) return `M${x} ${top}h${w}v${h}h${-w}z`;
+    return `M${x} ${top + r}a${r} ${r} 0 0 1 ${r} ${-r}h${w - 2 * r}a${r} ${r} 0 0 1 ${r} ${r}v${h - r}h${-w}z`;
+  };
 
   return (
     <div className="chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
-           aria-label={`Hours logged per week. ${byWeek.filter((b) => b.total).map((b) => `week ${b.n}: ${b.total} hours`).join('; ')}`}>
-        {[0, max / 2, max].map((v) => (
+           onMouseLeave={() => setHover(null)}
+           aria-label={`Hours logged per week against a capacity of ${band ? `${band.low} to ${band.high} hours` : 'the stated weekly hours'}. ${shown.filter((b) => b.total).map((b) => `week ${b.n}: ${b.total} hours`).join('; ')}`}>
+        {band && (
+          <g>
+            <rect className="band" x={pad.l} width={W - pad.l - pad.r}
+                  y={y(band.high)} height={Math.max(0, y(band.low) - y(band.high))} />
+            <text className="axis band-label" x={W - pad.r + 6} y={(y(band.low) + y(band.high)) / 2 + 3}>
+              {band.low}–{band.high} h capacity
+            </text>
+          </g>
+        )}
+        {ticks.map((v) => (
           <g key={v}>
             <line className="grid-line" x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} />
-            <text className="axis" x={0} y={y(v) + 3}>{Math.round(v)}</text>
+            <text className="axis" textAnchor="end" x={pad.l - 6} y={y(v) + 3}>{v}</text>
           </g>
         ))}
-        {byWeek.map((b) => {
+        <text className="axis axis-unit" textAnchor="end" x={pad.l - 6} y={pad.t - 2}>h</text>
+
+        {shown.map((b, i) => {
           let stackY = y(0);
+          const x0 = pad.l + i * bw;
+          const nonZero = codes.filter((c) => b.vals[c] > 0);
           return (
-            <g key={b.n}>
-              {codes.map((code) => {
+            <g key={b.n} className={hover === b.n ? 'is-hover' : ''}>
+              {nonZero.map((code, j) => {
                 const v = b.vals[code];
-                if (!v) return null;
                 const h = (v / max) * (H - pad.t - pad.b);
                 stackY -= h;
                 return (
-                  <rect key={code} x={pad.l + b.n * bw - bw + bw * 0.18} width={bw * 0.64}
-                        y={stackY} height={Math.max(0, h - 2)} rx="2" fill={colour[code]} />
+                  <path key={code} d={seg(x0 + bw * 0.2, stackY, Math.max(1, h - 2), bw * 0.6,
+                                          j === nonZero.length - 1)}
+                        fill={colour[code]} />
                 );
               })}
-              <text className="axis" textAnchor="middle" x={pad.l + b.n * bw - bw / 2} y={H - 5}>{b.n}</text>
+              <text className="axis" textAnchor="middle" x={x0 + bw / 2} y={H - 6}>{b.n}</text>
+              <rect className="hit" x={x0} y={pad.t} width={bw} height={H - pad.t - pad.b}
+                    onMouseEnter={() => setHover(b.n)} />
             </g>
           );
         })}
       </svg>
+
+      {hovered && (
+        <div className="chart-tip" style={{
+          left: `${((pad.l + (shown.indexOf(hovered) + 0.5) * bw) / W) * 100}%`,
+        }}>
+          <strong>Week {hovered.n}</strong> <span className="dim">{fmtRange(hovered.w.start, hovered.w.end)}</span>
+          {codes.map((code) => (
+            <span key={code} className="tip-row">
+              <i className="swatch" style={{ background: colour[code], borderColor: colour[code] }} />
+              {code} <b>{hovered.vals[code] || 0} h</b>
+            </span>
+          ))}
+          <span className="tip-row tip-total">
+            total <b>{hovered.total} h</b>
+            {band && (hovered.total > band.high ? ' · over capacity'
+              : hovered.total < band.low && hovered.total > 0 ? ' · under the band'
+              : hovered.total > 0 ? ' · inside the band' : '')}
+          </span>
+        </div>
+      )}
+
       <p className="legend">
         {codes.map((code) => (
           <span key={code}><i className="swatch" style={{ background: colour[code], borderColor: colour[code] }} />{code}</span>
         ))}
-        <span className="dim">against a stated capacity of {data.registrar.capacity.split('(')[0].trim()}</span>
+        <span><i className="swatch sw-band" />{band ? `${band.low}–${band.high} h/week` : 'capacity'} at a bad week</span>
+        <button type="button" className="btn btn-sm btn-quiet right" aria-expanded={table}
+                onClick={() => setTable((v) => !v)}>{table ? 'Hide the numbers' : 'Show the numbers'}</button>
       </p>
+
+      {table && (
+        <div className="table-scroll">
+          <table>
+            <thead><tr><th>Wk</th>{codes.map((c) => <th key={c}>{c}</th>)}<th>Total</th><th>vs capacity</th></tr></thead>
+            <tbody>
+              {shown.map((b) => (
+                <tr key={b.n}>
+                  <td className="nowrap">{b.n}</td>
+                  {codes.map((c) => <td key={c} className="nowrap">{b.vals[c] || 0}</td>)}
+                  <td className="nowrap"><strong>{b.total}</strong></td>
+                  <td className="nowrap dim">{!b.total ? '—'
+                    : !band ? ''
+                    : b.total > band.high ? `+${(b.total - band.high).toFixed(1).replace(/\.0$/, '')} over`
+                    : b.total < band.low ? `${(band.low - b.total).toFixed(1).replace(/\.0$/, '')} under`
+                    : 'inside'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

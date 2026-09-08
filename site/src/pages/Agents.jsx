@@ -3,7 +3,7 @@ import { useStore } from '../lib/store.js';
 import { locate } from '../lib/calendar.js';
 import { agentBrief } from '../lib/briefs.js';
 import { Card, Callout, Copy, Chip, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Agents() {
   const { data, state, today } = useStore();
@@ -35,8 +35,8 @@ export default function Agents() {
                 <tr key={a.name}>
                   <td className="nowrap"><strong>{a.letter}</strong></td>
                   <td className="nowrap">{a.title}</td>
-                  <td><Markdown md={a.owns} className="" /></td>
-                  <td><Markdown md={a.refuses} className="" /></td>
+                  <td><MdInline md={a.owns} /></td>
+                  <td><MdInline md={a.refuses} /></td>
                 </tr>
               ))}
             </tbody>
@@ -51,16 +51,16 @@ export default function Agents() {
           open gaps and the last verdict.</p>
         {codes.map((code) => (
           <div key={code} style={{ margin: '.9rem 0' }}>
-            <p className="card-title"><Chip kind={courseKind(code)}>{code}</Chip></p>
+            <h4 className="card-title"><Chip kind={courseKind(code)}>{code}</Chip></h4>
             {data.agents.map((agent) => {
               const text = agentBrief({ data, state, agent, code, weekNo });
               return (
-                <details key={agent.name}>
-                  <summary className="small" style={{ cursor: 'pointer', padding: '.25rem 0' }}>
-                    {agent.letter} · {agent.title}
-                  </summary>
-                  <div className="btn-row"><Copy text={text} label="Copy brief" /></div>
-                  <pre><code>{text}</code></pre>
+                <details key={agent.name} className="disclose">
+                  <summary className="small">{agent.letter} · {agent.title}</summary>
+                  <div className="disclose-body">
+                    <div className="btn-row"><Copy text={text} label="Copy brief" /></div>
+                    <pre><code>{text}</code></pre>
+                  </div>
                 </details>
               );
             })}
@@ -74,14 +74,14 @@ export default function Agents() {
             <div className="agent-letter" aria-hidden="true">{a.letter}</div>
             <div style={{ minWidth: 0 }}>
               <p className="small" style={{ marginTop: 0 }}>{a.description}</p>
-              <p className="small">Owns <Markdown md={a.owns} className="" /> ·
+              <p className="small">Owns <MdInline md={a.owns} /> ·
                 Tools: {a.tools.join(', ') || '—'} · <code>{a.path}</code></p>
               <div className="btn-row">
                 <Copy text={a.prompt} label="Copy the full system prompt" />
               </div>
-              <details>
-                <summary className="small" style={{ cursor: 'pointer' }}>Read the system prompt</summary>
-                <Markdown md={a.prompt} />
+              <details className="disclose">
+                <summary className="small">Read the system prompt</summary>
+                <div className="disclose-body"><Markdown md={a.prompt} /></div>
               </details>
             </div>
           </div>

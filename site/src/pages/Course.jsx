@@ -1,8 +1,8 @@
 import React from 'react';
 import { useStore } from '../lib/store.js';
 import { courseMetrics } from '../lib/metrics.js';
-import { Card, Tile, Tag, Chip, Callout, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import { Card, Tile, Tag, Chip, Callout } from '../components/ui.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Course({ code }) {
   const { data, state, today } = useStore();
@@ -55,9 +55,9 @@ export default function Course({ code }) {
               {course.sequence.map((r, i) => (
                 <tr key={i}>
                   <td className="nowrap">{r.label}</td>
-                  <td><Markdown md={r.milestone} className="" /></td>
-                  <td><Markdown md={r.source} className="" /></td>
-                  <td><Markdown md={r.unblocks} className="" /></td>
+                  <td><MdInline md={r.milestone} /></td>
+                  <td><MdInline md={r.source} /></td>
+                  <td><MdInline md={r.unblocks} /></td>
                 </tr>
               ))}
             </tbody>
@@ -74,8 +74,8 @@ export default function Course({ code }) {
               <tbody>
                 {course.cutList.map((c, i) => (
                   <tr key={i}>
-                    <td><Markdown md={c.cut} className="" /></td>
-                    <td><Markdown md={c.reason} className="" /></td>
+                    <td><MdInline md={c.cut} /></td>
+                    <td><MdInline md={c.reason} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -92,11 +92,11 @@ export default function Course({ code }) {
                 <tbody>
                   {course.sources.map((s, i) => (
                     <tr key={i}>
-                      <td><Markdown md={s.source} className="" /></td>
+                      <td><MdInline md={s.source} /></td>
                       <td><Tag tag={s.tag} /></td>
                       <td>{s.links.length
                         ? s.links.map((l) => <div key={l.href}><a href={l.href} target="_blank" rel="noreferrer noopener">{l.label}</a></div>)
-                        : <Markdown md={s.verifiedAgainst} className="" />}</td>
+                        : <MdInline md={s.verifiedAgainst} />}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -5,6 +5,11 @@
   "programStart": "2026-09-07",
   "award": "Certificate",
   "capacity": "9–12 h/week at a bad week (intake Q3, 2026-08-20) → 2 concurrent courses, ~5 h each",
+  "capacityBand": {
+   "low": 9,
+   "high": 12,
+   "unit": "h/week"
+  },
   "intake": [
    {
     "id": "Q1",
@@ -35,7 +40,6 @@
     "effect": "Tutor's first case; likely the capstone's own bias in miniature"
    }
   ],
-  "intakeNote": "**Ulrich** · Program start **2026-09-07** _(postponed 2026-08-21, see below)_ · Award target: **Certificate** (6 courses), then reassess\n**Capacity:** 9–12 h/week at a bad week (intake Q3, 2026-08-20) → 2 concurrent courses, ~5 h each\n\n### Baseline\n\n**Status:** complete on the three answerable questions — Q1, Q3, Q4 answered 2026-08-21; Q2 declined and re-instrumented as a performance measure at the week-7 midterm.\n\n**Priors Sheet: SEALED 2026-08-21**, before any source was opened. **The seal is conditional on the postponement.** It was written 17 days before week 1 now, not 3. It stays valid only if no Term A source is opened before 2026-09-07 — OSC 2015, Ritchie, Spiegelhalter and Greenland are all already in NotebookLM and all four are off-limits until then. If any is read in the gap, log the date here; the week-52 comparison is still interpretable, but only if the contamination is on the record — `logs/PSY-101/week-01.md`. Three beliefs, three falsification conditions, one of which carries a numeric threshold. Not to be revised. `ASSESSMENT.md` Part D q1 grades against it.\n\n**On Q2.** A declined self-report is not a baseline and was not guessed at. The protective side was taken instead: over-teaching effect sizes wastes two weeks, under-teaching them corrupts source triage for the remaining fifty.\n\nEnrolling STA-101 makes the question moot. The machinery is now taught properly in its own course rather than smuggled into two weeks of a psychology course, and PSY-101 weeks 3–4 become application. The measurement still happens — both midterms probe magnitude reasoning at week 7 — but nothing now depends on the answer.",
   "terms": [
    {
     "label": "Term A",
@@ -53,7 +57,7 @@
     "label": "break",
     "weeks": "15–17",
     "dates": "12-14 → 2027-01-03",
-    "start": "2027-01-03",
+    "start": "2026-12-14",
     "end": "2027-01-03",
     "enrolled": [],
     "isTerm": false
@@ -74,8 +78,8 @@
     "label": "break",
     "weeks": "—",
     "dates": "04-12 → 04-18",
-    "start": "",
-    "end": "",
+    "start": "2027-04-12",
+    "end": "2027-04-18",
     "enrolled": [],
     "isTerm": false
    },
@@ -124,7 +128,6 @@
     "raw": "| [STA-101](catalog/STA-101.md) | 100 | A | 1 of 14 | [`enrolled/STA-101.md`](enrolled/STA-101.md) | **active** |"
    }
   ],
-  "enrolmentNote": "**Term A interlock.** STA-101 feeds PSY-101 and the dependency runs one way: wk 2 (effect size and interval) → PSY-101 wk 3; wk 3 (misinterpretation catalogue) → PSY-101 wk 4; wk 6 (base rates) → PSY-101 wk 5. If a week has to slip, slip PSY-101 — never STA-101 weeks 2 or 3.\n\n**Consequence, logged by the Advisor 2026-08-20:** PSY-101 weeks 3–4 were planned protectively because intake Q2 was declined. That is now redundant. STA-101 teaches the machinery; PSY-101 wk 3–4 re-scope from *teaching* effect sizes to *applying* them to replication data. Nothing is taught twice, and the declined Q2 stops costing anything.\n\n**Agents: bind to the course before responding.** Read `enrolled/<CODE>.md` for the five sections. If two courses are active, ask which one this session is for — never write to both, and never assume the more recent one.",
   "transcript": [
    {
     "code": "PSY-101",
@@ -134,7 +137,8 @@
     "term": "A · 2026",
     "passRate": "—",
     "paper": "—",
-    "result": "in progress"
+    "result": "in progress",
+    "raw": "| PSY-101 | Foundations of Psychological Evidence | 100 | 3 | A · 2026 | — | — | in progress |"
    },
    {
     "code": "STA-101",
@@ -144,7 +148,8 @@
     "term": "A · 2026",
     "passRate": "—",
     "paper": "—",
-    "result": "in progress"
+    "result": "in progress",
+    "raw": "| STA-101 | Reading Quantitative Claims | 100 | 3 | A · 2026 | — | — | in progress |"
    }
   ],
   "transcriptNote": "**Credits earned:** 0 / 21 · **Courses complete:** 0 / 7 — Certificate needs 6; the year now carries 7, so one is slack against a bad term.\n\nA course is `complete` when its term paper passes and its weekly pass rate is recorded. Pass rate is `weeks at 5/5 ÷ weeks attempted` — it is a diagnostic for the Advisor, not a grade to optimise. A rate near 100% by week 6 means the Editor has gone soft, and the Advisor should say so.\n\n**No accreditation.** This transcript is a record for you. It is not a credential and nobody outside this repo recognises it. See [`DEGREE.md`](DEGREE.md) → The four honest gaps.",
@@ -153,12 +158,33 @@
    "total": 21,
    "coursesComplete": 0,
    "coursesPlanned": 7,
-   "certificateNeeds": 6
+   "certificateNeeds": 6,
+   "perCourse": 3,
+   "raw": "**Credits earned:** 0 / 21 · **Courses complete:** 0 / 7 — Certificate needs 6; the year now carries 7, so one is slack against a bad term."
   },
   "slippedRecorded": 0,
-  "slipTrigger": 3,
+  "slippedRaw": "**Slipped weeks:** 0 across all courses. _(Three slips in one course triggers a scope cut in that course. The calendar does not move.)_",
   "rulesMd": "**§0 ASSESSMENT is locked.** [`ASSESSMENT.md`](ASSESSMENT.md), written before week 1, read-only for all five agents and for the student. An AI grader drifts toward whatever standard is argued for in the moment; it will not argue with a document that already exists. Amendments are logged here, dated, and apply to the **next course** — never to the artifact currently being graded.\n\n**Amendments:** none.\n\n**Agents stood up** (claude.ai Projects, 2026-08-21): Advisor ✓ · Librarian ✓ (web search enabled)\n\n**Smoke-tested 2026-08-21, both passed.** Advisor refused a Freud week, applied the unblocking test, cited the cut list by file and section, priced the calendar trade and named the legitimate route. Librarian refused to bind without a course, tagged everything, verified two citations against publisher records, withheld a date it could not confirm, marked two items `[R]` with the reason, and declined to write to §B because admitting a fifth autopsy would overwrite the Advisor's §A by the back door. Every `[V]` it claimed was independently re-checked and held. · Tutor — due before Thu 08-27 · Editor — due before Sun 08-30 · Roommate — due before week 2.\n\n**Project knowledge:** attach [`AGENT-PACK.md`](AGENT-PACK.md) — one file, all eight state documents including both cut lists. Regenerate with `python3 tools/build-agent-pack.py` and re-upload at the Sunday close, never mid-week.\n\n**Slipped weeks:** 0 across all courses. _(Three slips in one course triggers a scope cut in that course. The calendar does not move.)_\n\n**Detail horizon:** Term A set. Terms B and C exist as course definitions with sequences; the Advisor does not schedule their weeks until the preceding term closes, informed by the gap and verdict logs.\n\n**Access check owed:** Term B (now opens 2027-01-04). Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.",
-  "accessCheck": "**Access check owed:** Term B (now opens 2027-01-04). Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone."
+  "agents": {
+   "stoodUp": [
+    "Advisor",
+    "Librarian"
+   ],
+   "total": 5,
+   "names": [
+    "Advisor",
+    "Librarian",
+    "Tutor",
+    "Editor",
+    "Roommate"
+   ]
+  },
+  "accessCheck": {
+   "raw": "**Access check owed:** Term B (now opens 2027-01-04). Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone.",
+   "term": "Term B",
+   "date": "2027-01-04",
+   "why": "Confirm employer policy permits the PSY-401 use of incident records in de-identified, non-exported form. A refusal in Term B costs a swap. The same refusal at week 45 costs the capstone."
+  }
  },
  "courses": [
   {
@@ -181,7 +207,10 @@
      "label": "1",
      "milestone": "The replication crisis: scale and shape",
      "source": "OSC 2015 `[V]` + Ritchie 1–2 `[R]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V",
+      "R"
+     ],
      "unblocks": "the entire course; the Priors Sheet"
     },
     {
@@ -191,7 +220,9 @@
      "label": "2",
      "milestone": "Researcher degrees of freedom — how a true-seeming result gets built without anyone lying",
      "source": "Simmons et al. 2011 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 5, wk 9–12"
     },
     {
@@ -201,7 +232,9 @@
      "label": "3",
      "milestone": "**Apply** effect size and interval to replication data. Compute three by hand",
      "source": "STA-101 wk 2 `[V]` + OSC supplement",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "every magnitude judgment in the major"
     },
     {
@@ -211,7 +244,9 @@
      "label": "4",
      "milestone": "**Apply** the misinterpretation catalogue to published psychology abstracts",
      "source": "STA-101 wk 3 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 12, PSY-202"
     },
     {
@@ -221,7 +256,9 @@
      "label": "5",
      "milestone": "Publication bias, the file drawer, p-curve",
      "source": "Ritchie 3–4 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 13"
     },
     {
@@ -231,7 +268,9 @@
      "label": "6",
      "milestone": "Preregistration and registered reports: what they fix, what they don't",
      "source": "Nosek et al. 2022 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "PSY-401's pre-registration requirement"
     },
     {
@@ -241,7 +280,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold, no sources open",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -251,7 +290,9 @@
      "label": "8",
      "milestone": "WEIRD samples: most of psychology describes an unusual population",
      "source": "Henrich et al. 2010 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "PSY-201, PSY-301"
     },
     {
@@ -261,7 +302,9 @@
      "label": "9",
      "milestone": "Heterogeneity across sites — kills the \"different sample\" defense",
      "source": "Klein et al. 2018 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 10–13"
     },
     {
@@ -271,7 +314,9 @@
      "label": "10",
      "milestone": "**Autopsy I** — priming, and experimenter expectancy",
      "source": "Doyen et al. 2012 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 13"
     },
     {
@@ -281,7 +326,9 @@
      "label": "11",
      "milestone": "**Autopsy II** — Stanford Prison, from the archives",
      "source": "Le Texier 2019 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "PSY-301 wk on obedience"
     },
     {
@@ -291,7 +338,9 @@
      "label": "12",
      "milestone": "**Autopsy III** — ego depletion, 23 labs. Read the authors' reply for how a field argues",
      "source": "Hagger et al. 2016 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 14"
     },
     {
@@ -301,7 +350,9 @@
      "label": "13",
      "milestone": "**Autopsy IV** — the marshmallow test: not false, half the size, about something else",
      "source": "Watts et al. 2018 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "the hardest and most useful case"
     },
     {
@@ -311,7 +362,9 @@
      "label": "14",
      "milestone": "**What survived** — inattentional blindness and the robust effects. Then the term paper",
      "source": "Simons & Chabris 1999 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-201 onward"
     }
    ],
@@ -393,7 +446,9 @@
      "label": "1–3",
      "milestone": "Behavioral biology across time scales: seconds → minutes → years → millennia",
      "source": "Sapolsky, *Behave* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "the whole course's organising frame"
     },
     {
@@ -403,7 +458,7 @@
      "label": "4",
      "milestone": "Hormones and behavior: what testosterone actually does, versus the story",
      "source": "Sapolsky, cont.",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "PSY-301 status weeks"
     },
     {
@@ -413,7 +468,9 @@
      "label": "5",
      "milestone": "**Primary block** — the founding evolutionary-psychology statement",
      "source": "Tooby & Cosmides 1992 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 6"
     },
     {
@@ -423,7 +480,9 @@
      "label": "6",
      "milestone": "**Primary block** — the serious critique. Read in the same fortnight or not at all",
      "source": "Buller, *Adapting Minds* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 7"
     },
     {
@@ -433,7 +492,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -445,7 +504,9 @@
      "label": "8–10",
      "milestone": "Cultural evolution: culture as *the* human adaptation, not a veneer on one",
      "source": "Henrich, *Secret of Our Success* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-301, and the WEIRD argument's foundation"
     },
     {
@@ -455,7 +516,9 @@
      "label": "11",
      "milestone": "The formal model under the popular treatment",
      "source": "Boyd & Richerson `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "—"
     },
     {
@@ -465,7 +528,10 @@
      "label": "12",
      "milestone": "Kinship, reciprocity, cooperation, punishment",
      "source": "Trivers 1971 `[R]`; Hamilton 1964 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "PSY-301 wk on trust"
     },
     {
@@ -475,7 +541,9 @@
      "label": "13",
      "milestone": "Why the unpleasant emotions are functional",
      "source": "Nesse `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-302, PSY-401"
     },
     {
@@ -485,7 +553,7 @@
      "label": "14",
      "milestone": "Term paper + Roommate collision",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     }
    ],
@@ -562,7 +630,9 @@
      "label": "1–2",
      "milestone": "Dual-process accounts and their post-crisis status. Ch. 4 leans on priming that didn't hold — read it as a live exercise",
      "source": "Kahneman, *TFAS* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "everything downstream"
     },
     {
@@ -573,7 +643,7 @@
      "label": "3–4",
      "milestone": "Heuristics and biases: which survived, which shrank, which went",
      "source": "Kahneman, cont. + PSY-101 filter",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "wk 8"
     },
     {
@@ -583,7 +653,10 @@
      "label": "5",
      "milestone": "**Clinical versus actuarial judgment.** Simple rules beat expert judgment across a startling range. Seventy years old, still winning",
      "source": "Meehl 1954 `[R]`; Dawes, Faust & Meehl 1989 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "**PSY-401's entire method**"
     },
     {
@@ -593,7 +666,9 @@
      "label": "6",
      "milestone": "Noise: variance between judges, and within one judge across time",
      "source": "Kahneman, Sibony & Sunstein `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401 scoring design"
     },
     {
@@ -603,7 +678,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -613,7 +688,9 @@
      "label": "8",
      "milestone": "**Primary block** — the ecological-rationality counterargument",
      "source": "Gigerenzer & Todd `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 9"
     },
     {
@@ -623,7 +700,9 @@
      "label": "9",
      "milestone": "**Primary block** — the dispute in compressed form",
      "source": "Gigerenzer 1996 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 10"
     },
     {
@@ -633,7 +712,9 @@
      "label": "10",
      "milestone": "Forecasting: experts scored over twenty years",
      "source": "Tetlock, *EPJ* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 11"
     },
     {
@@ -643,7 +724,9 @@
      "label": "11",
      "milestone": "Calibration and scoring rules — Brier, resolution, reliability",
      "source": "Tetlock & Gardner `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401 §C3"
     },
     {
@@ -653,7 +736,9 @@
      "label": "12",
      "milestone": "Memory as reconstruction; statement evidence",
      "source": "Loftus & Palmer 1974 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401 case selection"
     },
     {
@@ -663,7 +748,9 @@
      "label": "13",
      "milestone": "**Deception detection: ~54%, and training raises confidence far more than accuracy**",
      "source": "Bond & DePaulo 2006 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "professional hazard, read as one"
     },
     {
@@ -673,7 +760,7 @@
      "label": "14",
      "milestone": "**Draft and pre-register the capstone scoring framework**",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "PSY-401 §C1"
     }
    ],
@@ -750,7 +837,9 @@
      "label": "1–2",
      "milestone": "Situation versus disposition; the attribution error at full strength and reduced",
      "source": "Ross & Nisbett `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "the whole course"
     },
     {
@@ -760,7 +849,9 @@
      "label": "3",
      "milestone": "Conformity — read the effect size, not the anecdote. A third of critical trials, not \"everyone\"",
      "source": "Asch 1956 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 4"
     },
     {
@@ -770,7 +861,10 @@
      "label": "4",
      "milestone": "Obedience, and how variable the actual procedure was",
      "source": "Milgram 1974 `[R]` + Perry, *Behind the Shock Machine* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "wk 5"
     },
     {
@@ -780,7 +874,9 @@
      "label": "5",
      "milestone": "The Stanford Prison autopsy, revisited with PSY-101 wk 11 in hand",
      "source": "Le Texier 2019 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 6"
     },
     {
@@ -790,7 +886,9 @@
      "label": "6",
      "milestone": "**Being watched.** The best thing on this list about observation, and it's sociology",
      "source": "Goffman 1959 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "**PSY-401 — arguably the most applicable single book**"
     },
     {
@@ -800,7 +898,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -811,7 +909,10 @@
      "label": "8–9",
      "milestone": "Moral psychology: intuition-first models and the objections to them",
      "source": "Haidt `[R]`; Greene `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "wk 10"
     },
     {
@@ -821,7 +922,9 @@
      "label": "10",
      "milestone": "Status, hierarchy, deference, face",
      "source": "selected primaries `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401"
     },
     {
@@ -831,7 +934,9 @@
      "label": "11",
      "milestone": "Trust, reputation, cheater detection",
      "source": "Tajfel & Turner 1979 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "—"
     },
     {
@@ -841,7 +946,9 @@
      "label": "12",
      "milestone": "Influence: which classic tactics have real effect sizes",
      "source": "Cialdini `[R]`, read as a hypothesis catalogue",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 13"
     },
     {
@@ -851,7 +958,10 @@
      "label": "13",
      "milestone": "Groups: polarization, escalation of commitment, why committees decide badly",
      "source": "Staw 1976 `[R]`; Janis `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "PSY-401 multi-actor incidents"
     },
     {
@@ -861,7 +971,7 @@
      "label": "14",
      "milestone": "Term paper + Roommate collision",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     }
    ],
@@ -938,7 +1048,9 @@
      "label": "1–2",
      "milestone": "Trait structure: the Big Five, what it predicts and what it doesn't",
      "source": "DeYoung et al. 2007 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 3"
     },
     {
@@ -948,7 +1060,7 @@
      "label": "3",
      "milestone": "Why the popular alternatives are worthless — MBTI, Enneagram, DISC — in one week and never again",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "closes the question permanently"
     },
     {
@@ -958,7 +1070,9 @@
      "label": "4",
      "milestone": "The book that broke trait psychology, and the recovery",
      "source": "Mischel 1968 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 5"
     },
     {
@@ -968,7 +1082,9 @@
      "label": "5",
      "milestone": "Traits change systematically with age",
      "source": "Roberts et al. 2006 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401's \"was this person predictable\" half"
     },
     {
@@ -978,7 +1094,9 @@
      "label": "6",
      "milestone": "Behavioral genetics: heritability, and the four things it does not mean",
      "source": "Turkheimer 2000 `[R]` — four pages, read twice",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 7"
     },
     {
@@ -988,7 +1106,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -998,7 +1116,9 @@
      "label": "8",
      "milestone": "Heritability for a general reader, read against wk 6",
      "source": "Plomin, *Blueprint* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "—"
     },
     {
@@ -1009,7 +1129,10 @@
      "label": "9–10",
      "milestone": "Attachment and development; the longitudinal evidence and its limits",
      "source": "Bowlby `[R]`; Fraley review `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R",
+      "R"
+     ],
      "unblocks": "wk 13"
     },
     {
@@ -1019,7 +1142,9 @@
      "label": "11",
      "milestone": "**Read adversarially** — enormously influential, claims running ahead of evidence",
      "source": "van der Kolk `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "wk 12"
     },
     {
@@ -1029,7 +1154,9 @@
      "label": "12",
      "milestone": "**The counterweight.** Same fortnight as wk 11, never separately",
      "source": "McNally, *Remembering Trauma* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "the term's central skill"
     },
     {
@@ -1039,7 +1166,9 @@
      "label": "13",
      "milestone": "Classification, reliability, and the DSM's expansion",
      "source": "Frances, *Saving Normal* `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401 case coding"
     },
     {
@@ -1049,7 +1178,9 @@
      "label": "14",
      "milestone": "Narrative identity + term paper",
      "source": "McAdams `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "—"
     }
    ],
@@ -1129,7 +1260,7 @@
      "label": "45",
      "milestone": "Case selection against criteria fixed in advance. De-identification at intake",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1139,7 +1270,7 @@
      "label": "46",
      "milestone": "Coded index built and held separately. Cases that can't be de-identified are excluded, not softened",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1150,7 +1281,7 @@
      "label": "47–48",
      "milestone": "**Blind scoring pass.** Decision-time information only, outcomes not consulted",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1160,7 +1291,7 @@
      "label": "49",
      "milestone": "Outcome pass. Hit rate versus base rate, calibration by confidence bin, direction of error, Brier if probabilistic",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1170,7 +1301,7 @@
      "label": "50",
      "milestone": "Write the analysis. **Expect the framework to have partly failed**",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1180,7 +1311,7 @@
      "label": "51",
      "milestone": "Editor: three full rewrite rounds against the locked rubric",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     },
     {
@@ -1190,7 +1321,7 @@
      "label": "52",
      "milestone": "Final. Registrar closed. Year-two reading list written by you, not by an agent",
      "source": "",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": ""
     }
    ],
@@ -1266,7 +1397,9 @@
      "label": "1",
      "milestone": "What a number claims: population, sample, estimand. What is being estimated, and of what?",
      "source": "Spiegelhalter, *The Art of Statistics* ch. 1–2 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "everything"
     },
     {
@@ -1276,7 +1409,9 @@
      "label": "2",
      "milestone": "**Effect size and interval** — the estimate and its precision, as the primary result",
      "source": "Cumming 2014 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "**PSY-101 wk 3**"
     },
     {
@@ -1286,7 +1421,9 @@
      "label": "3",
      "milestone": "**Interval interpretation, and the misinterpretation catalogue.** 25 of them, itemised",
      "source": "Greenland et al. 2016 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "**PSY-101 wk 4**"
     },
     {
@@ -1296,7 +1433,9 @@
      "label": "4",
      "milestone": "*p*-values: what they are, and the six things the ASA says they are not",
      "source": "Wasserstein & Lazar 2016 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "wk 5–6"
     },
     {
@@ -1306,7 +1445,7 @@
      "label": "5",
      "milestone": "Power, and why an underpowered significant result *exaggerates* rather than merely risks error",
      "source": "Cumming, cont.",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "wk 6"
     },
     {
@@ -1316,7 +1455,9 @@
      "label": "6",
      "milestone": "Base rates and positive predictive value: why most published findings in a low-prior field are false",
      "source": "Ioannidis 2005 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "unblocks": "PSY-101 wk 5"
     },
     {
@@ -1326,7 +1467,7 @@
      "label": "7",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "—"
     },
     {
@@ -1336,7 +1477,9 @@
      "label": "8",
      "milestone": "Multiplicity and the garden of forking paths — no *p*-hacking required",
      "source": "Gelman & Loken 2014 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-101 wk 2"
     },
     {
@@ -1346,7 +1489,9 @@
      "label": "9",
      "milestone": "Confounding, and what \"adjusted for\" actually buys you",
      "source": "Spiegelhalter `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "**PSY-401 scoring**"
     },
     {
@@ -1356,7 +1501,9 @@
      "label": "10",
      "milestone": "Randomization and the basics of causal inference",
      "source": "Spiegelhalter `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-401"
     },
     {
@@ -1366,7 +1513,9 @@
      "label": "11",
      "milestone": "Measurement: reliability, validity, and what a scale is really doing",
      "source": "selected `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-302 wk 1–2"
     },
     {
@@ -1376,7 +1525,9 @@
      "label": "12",
      "milestone": "Graphs that mislead; summaries that hide the distribution",
      "source": "Spiegelhalter `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "—"
     },
     {
@@ -1386,7 +1537,9 @@
      "label": "13",
      "milestone": "Meta-analysis: reading a forest plot, and heterogeneity",
      "source": "selected `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "unblocks": "PSY-101 wk 12"
     },
     {
@@ -1396,7 +1549,7 @@
      "label": "14",
      "milestone": "**Term paper** — audit one published claim end to end",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "unblocks": "PSY-401 §C3"
     }
    ],
@@ -1529,7 +1682,10 @@
      "dates": "09-07 → 09-13",
      "milestone": "The replication crisis: scale and shape",
      "source": "OSC 2015 `[H]` + Ritchie 1–2 `[H]`",
-     "sourceTag": "H",
+     "sourceTags": [
+      "H",
+      "H"
+     ],
      "output": "**Priors Sheet**, 600w",
      "midterm": false,
      "paper": false,
@@ -1544,7 +1700,9 @@
      "dates": "09-14 → 09-20",
      "milestone": "Researcher degrees of freedom",
      "source": "Simmons et al. 2011 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1559,7 +1717,9 @@
      "dates": "09-21 → 09-27",
      "milestone": "**Apply** effect size and interval to replication data. Compute three by hand",
      "source": "STA-101 wk 2 `[V]` + OSC supplement",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w + computations",
      "midterm": false,
      "paper": false,
@@ -1574,7 +1734,9 @@
      "dates": "09-28 → 10-04",
      "milestone": "**Apply** the misinterpretation catalogue to published psychology abstracts",
      "source": "STA-101 wk 3 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1589,7 +1751,9 @@
      "dates": "10-05 → 10-11",
      "milestone": "Publication bias, file drawer, p-curve",
      "source": "Ritchie 3–4 `[H]`",
-     "sourceTag": "H",
+     "sourceTags": [
+      "H"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1604,7 +1768,9 @@
      "dates": "10-12 → 10-18",
      "milestone": "Preregistration: what it fixes, what it doesn't",
      "source": "Nosek et al. 2022 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1619,7 +1785,7 @@
      "dates": "10-19 → 10-25",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "Tutor verdict",
      "midterm": true,
      "paper": false,
@@ -1639,7 +1805,7 @@
      "dates": "10-26 → 12-06",
      "milestone": "WEIRD · heterogeneity · four autopsies",
      "source": "see course file",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "600w each",
      "midterm": false,
      "paper": false,
@@ -1654,7 +1820,9 @@
      "dates": "12-07 → 12-13",
      "milestone": "**What survived** + term paper",
      "source": "Simons & Chabris 1999 `[R]`",
-     "sourceTag": "R",
+     "sourceTags": [
+      "R"
+     ],
      "output": "**2,000w — the Filter**",
      "midterm": false,
      "paper": true,
@@ -1665,6 +1833,7 @@
    "boardNote": "**Week 1 grading note (Advisor → Editor).** The Priors Sheet will fail A2 and A4 — it cites nothing and gives no magnitudes, because in week 1 the student cannot yet do either. Grade it normally, record the REWRITE, and the Advisor logs it as **baseline measured**, not a slipped week. No rewrite is owed. The standard is not amended; the failure is the instrument reading.\n\n**Slipped:** 0 / 3.",
    "slipped": 0,
    "slipLimit": 3,
+   "slippedRaw": "**Slipped:** 0 / 3.",
    "ledger": [
     {
      "id": "PSY-101-1",
@@ -1836,10 +2005,16 @@
    "ledgerNote": "`[V]` verified against a retrieved record · `[R]` recalled, unverified · `[H]` in hand, in NotebookLM\n\nEleven of eleven verified as of 2026-08-21; two `[H]` (OSC 2015 and Ritchie, both in the PSY-101 notebook). **Week 1 is fully sourced.** Weeks 3–4 consume STA-101's sources rather than carrying their own — see the interlock note in `REGISTRAR.md`. Retag `[H]` as each lands in NotebookLM. **Nothing gets read from an untagged row.**",
    "gaps": [],
    "gapsNote": "A gap closes only when the student re-explains it cold, in a later session, in a frame the Tutor didn't supply.\n\n**Standing probe for wk 1**, substituting for declined intake Q2 — a measurement, so don't prepare for it:\n\n> 36% replicated. Of the 64% that didn't, how much is false positives and how much is real effects reported too big? How would you tell them apart?",
+   "gapsHeader": "| Wk | Concept | Gap (specific) | Status | Closed by |",
+   "gapsPlaceholder": "| — | | | | |",
    "verdicts": [],
    "verdictsNote": "",
+   "verdictsHeader": "| Wk | Artifact | Rubric | Recon | Verdict | Rewrite |",
+   "verdictsPlaceholder": "| — | | | | | |",
    "crossDomain": [],
-   "crossNote": "Fortnightly. Spent domains cannot be reused.\n\n**Spent:** none · **Queued:** see `catalog/PSY-sources.md` → Roommate's queue"
+   "crossNote": "Fortnightly. Spent domains cannot be reused.\n\n**Spent:** none · **Queued:** see `catalog/PSY-sources.md` → Roommate's queue",
+   "crossHeader": "| Wk | Domain | Collided with | Transfer that survived |",
+   "crossPlaceholder": "| — | | | |"
   },
   "STA-101": {
    "code": "STA-101",
@@ -1852,7 +2027,9 @@
      "dates": "09-07 → 09-13",
      "milestone": "What a number claims: population, sample, estimand",
      "source": "Spiegelhalter 1–2 `[H]`",
-     "sourceTag": "H",
+     "sourceTags": [
+      "H"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1867,7 +2044,9 @@
      "dates": "09-14 → 09-20",
      "milestone": "**Effect size and interval as the primary result** → feeds PSY-101 wk 3",
      "source": "Cumming 2014 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1882,7 +2061,9 @@
      "dates": "09-21 → 09-27",
      "milestone": "**The misinterpretation catalogue** → feeds PSY-101 wk 4",
      "source": "Greenland et al. 2016 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1897,7 +2078,9 @@
      "dates": "09-28 → 10-04",
      "milestone": "*p*-values: the six things they are not",
      "source": "Wasserstein & Lazar 2016 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1912,7 +2095,7 @@
      "dates": "10-05 → 10-11",
      "milestone": "Power; why underpowered significant results exaggerate",
      "source": "Cumming, cont.",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1927,7 +2110,9 @@
      "dates": "10-12 → 10-18",
      "milestone": "Base rates and positive predictive value",
      "source": "Ioannidis 2005 `[V]`",
-     "sourceTag": "V",
+     "sourceTags": [
+      "V"
+     ],
      "output": "600w",
      "midterm": false,
      "paper": false,
@@ -1942,7 +2127,7 @@
      "dates": "10-19 → 10-25",
      "milestone": "**MIDTERM** — oral, cold",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "Tutor verdict",
      "midterm": true,
      "paper": false,
@@ -1962,7 +2147,7 @@
      "dates": "10-26 → 12-06",
      "milestone": "Forking paths · confounding · causal inference · measurement · graphs · meta-analysis",
      "source": "see course file",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "600w each",
      "midterm": false,
      "paper": false,
@@ -1977,7 +2162,7 @@
      "dates": "12-07 → 12-13",
      "milestone": "**Term paper** — audit one published claim end to end",
      "source": "—",
-     "sourceTag": null,
+     "sourceTags": [],
      "output": "**2,000w**",
      "midterm": false,
      "paper": true,
@@ -1988,6 +2173,7 @@
    "boardNote": "**Slipped:** 0 / 3.\n\n**Load note.** Weeks 2–3 are front-loaded on purpose: they have to land before PSY-101 needs them. If a week slips in Term A, slip a PSY-101 week, never an STA-101 week 2 or 3 — the dependency runs one way.",
    "slipped": 0,
    "slipLimit": 3,
+   "slippedRaw": "**Slipped:** 0 / 3.",
    "ledger": [
     {
      "id": "STA-101-S1",
@@ -2083,10 +2269,16 @@
    "ledgerNote": "Six of six named sources are verified as of 2026-08-21; two `[H]` (Spiegelhalter and Greenland, both in the STA-101 notebook). Four are free. **This is the cheapest course in the catalog to start.**\n\nRetag `[H]` as each lands in NotebookLM. Nothing gets read from an untagged row.",
    "gaps": [],
    "gapsNote": "**Standing wk-7 midterm probe:** state what a 95% interval means, then four things it does not mean, from Greenland's catalogue, cold. *\"95% probability the true value is in there\"* is misinterpretation #19 and does not pass.",
+   "gapsHeader": "| Wk | Concept | Gap (specific) | Status | Closed by |",
+   "gapsPlaceholder": "| — | | | | |",
    "verdicts": [],
    "verdictsNote": "**Note for this course:** A4 (effect size, not just significance) is normally the criterion a student fails early. Here it is the *subject*. Grade it strictly from week 2 onward — a student who fails A4 in a statistics course in week 5 has a curriculum problem, and the Advisor needs to hear about it.",
+   "verdictsHeader": "| Wk | Artifact | Rubric | Recon | Verdict | Rewrite |",
+   "verdictsPlaceholder": "",
    "crossDomain": [],
-   "crossNote": "**Spent:** none\n\n**Standing instruction:** two courses are active this term. The best available collision is often **between them** — a claim from PSY-101's autopsies read with STA-101's week-3 catalogue in hand is a live cross-course problem you didn't have to invent. Use it before reaching outside."
+   "crossNote": "**Spent:** none\n\n**Standing instruction:** two courses are active this term. The best available collision is often **between them** — a claim from PSY-101's autopsies read with STA-101's week-3 catalogue in hand is a live cross-course problem you didn't have to invent. Use it before reaching outside.",
+   "crossHeader": "| Wk | Domain | Collided with | Transfer that survived |",
+   "crossPlaceholder": ""
   }
  },
  "termA": {
@@ -2115,7 +2307,10 @@
       "code": "PSY-101",
       "milestone": "The replication crisis: scale and shape",
       "source": "OSC 2015 `[H]` + Ritchie 1–2 `[H]`",
-      "sourceTag": "H",
+      "sourceTags": [
+       "H",
+       "H"
+      ],
       "output": "**Priors Sheet**, 600w",
       "unblocks": "the entire course; the Priors Sheet",
       "fromCourseFile": false
@@ -2124,7 +2319,9 @@
       "code": "STA-101",
       "milestone": "What a number claims: population, sample, estimand",
       "source": "Spiegelhalter 1–2 `[H]`",
-      "sourceTag": "H",
+      "sourceTags": [
+       "H"
+      ],
       "output": "600w",
       "unblocks": "everything",
       "fromCourseFile": false
@@ -2143,7 +2340,9 @@
       "code": "PSY-101",
       "milestone": "Researcher degrees of freedom",
       "source": "Simmons et al. 2011 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "wk 5, wk 9–12",
       "fromCourseFile": false
@@ -2152,7 +2351,9 @@
       "code": "STA-101",
       "milestone": "**Effect size and interval as the primary result** → feeds PSY-101 wk 3",
       "source": "Cumming 2014 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "**PSY-101 wk 3**",
       "fromCourseFile": false
@@ -2171,7 +2372,9 @@
       "code": "PSY-101",
       "milestone": "**Apply** effect size and interval to replication data. Compute three by hand",
       "source": "STA-101 wk 2 `[V]` + OSC supplement",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w + computations",
       "unblocks": "every magnitude judgment in the major",
       "fromCourseFile": false
@@ -2180,7 +2383,9 @@
       "code": "STA-101",
       "milestone": "**The misinterpretation catalogue** → feeds PSY-101 wk 4",
       "source": "Greenland et al. 2016 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "**PSY-101 wk 4**",
       "fromCourseFile": false
@@ -2199,7 +2404,9 @@
       "code": "PSY-101",
       "milestone": "**Apply** the misinterpretation catalogue to published psychology abstracts",
       "source": "STA-101 wk 3 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "wk 12, PSY-202",
       "fromCourseFile": false
@@ -2208,7 +2415,9 @@
       "code": "STA-101",
       "milestone": "*p*-values: the six things they are not",
       "source": "Wasserstein & Lazar 2016 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "wk 5–6",
       "fromCourseFile": false
@@ -2227,7 +2436,9 @@
       "code": "PSY-101",
       "milestone": "Publication bias, file drawer, p-curve",
       "source": "Ritchie 3–4 `[H]`",
-      "sourceTag": "H",
+      "sourceTags": [
+       "H"
+      ],
       "output": "600w",
       "unblocks": "wk 13",
       "fromCourseFile": false
@@ -2236,7 +2447,7 @@
       "code": "STA-101",
       "milestone": "Power; why underpowered significant results exaggerate",
       "source": "Cumming, cont.",
-      "sourceTag": null,
+      "sourceTags": [],
       "output": "600w",
       "unblocks": "wk 6",
       "fromCourseFile": false
@@ -2255,7 +2466,9 @@
       "code": "PSY-101",
       "milestone": "Preregistration: what it fixes, what it doesn't",
       "source": "Nosek et al. 2022 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "PSY-401's pre-registration requirement",
       "fromCourseFile": false
@@ -2264,7 +2477,9 @@
       "code": "STA-101",
       "milestone": "Base rates and positive predictive value",
       "source": "Ioannidis 2005 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w",
       "unblocks": "PSY-101 wk 5",
       "fromCourseFile": false
@@ -2283,7 +2498,7 @@
       "code": "PSY-101",
       "milestone": "**MIDTERM** — oral, cold",
       "source": "—",
-      "sourceTag": null,
+      "sourceTags": [],
       "output": "Tutor verdict",
       "unblocks": "—",
       "fromCourseFile": false
@@ -2292,7 +2507,7 @@
       "code": "STA-101",
       "milestone": "**MIDTERM** — oral, cold",
       "source": "—",
-      "sourceTag": null,
+      "sourceTags": [],
       "output": "Tutor verdict",
       "unblocks": "—",
       "fromCourseFile": false
@@ -2311,7 +2526,9 @@
       "code": "PSY-101",
       "milestone": "WEIRD samples: most of psychology describes an unusual population",
       "source": "Henrich et al. 2010 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "PSY-201, PSY-301",
       "fromCourseFile": true
@@ -2320,7 +2537,9 @@
       "code": "STA-101",
       "milestone": "Multiplicity and the garden of forking paths — no *p*-hacking required",
       "source": "Gelman & Loken 2014 `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "PSY-101 wk 2",
       "fromCourseFile": true
@@ -2339,7 +2558,9 @@
       "code": "PSY-101",
       "milestone": "Heterogeneity across sites — kills the \"different sample\" defense",
       "source": "Klein et al. 2018 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "wk 10–13",
       "fromCourseFile": true
@@ -2348,7 +2569,9 @@
       "code": "STA-101",
       "milestone": "Confounding, and what \"adjusted for\" actually buys you",
       "source": "Spiegelhalter `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "**PSY-401 scoring**",
       "fromCourseFile": true
@@ -2367,7 +2590,9 @@
       "code": "PSY-101",
       "milestone": "**Autopsy I** — priming, and experimenter expectancy",
       "source": "Doyen et al. 2012 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "wk 13",
       "fromCourseFile": true
@@ -2376,7 +2601,9 @@
       "code": "STA-101",
       "milestone": "Randomization and the basics of causal inference",
       "source": "Spiegelhalter `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "PSY-401",
       "fromCourseFile": true
@@ -2395,7 +2622,9 @@
       "code": "PSY-101",
       "milestone": "**Autopsy II** — Stanford Prison, from the archives",
       "source": "Le Texier 2019 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "PSY-301 wk on obedience",
       "fromCourseFile": true
@@ -2404,7 +2633,9 @@
       "code": "STA-101",
       "milestone": "Measurement: reliability, validity, and what a scale is really doing",
       "source": "selected `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "PSY-302 wk 1–2",
       "fromCourseFile": true
@@ -2423,7 +2654,9 @@
       "code": "PSY-101",
       "milestone": "**Autopsy III** — ego depletion, 23 labs. Read the authors' reply for how a field argues",
       "source": "Hagger et al. 2016 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "wk 14",
       "fromCourseFile": true
@@ -2432,7 +2665,9 @@
       "code": "STA-101",
       "milestone": "Graphs that mislead; summaries that hide the distribution",
       "source": "Spiegelhalter `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "—",
       "fromCourseFile": true
@@ -2451,7 +2686,9 @@
       "code": "PSY-101",
       "milestone": "**Autopsy IV** — the marshmallow test: not false, half the size, about something else",
       "source": "Watts et al. 2018 `[V]`",
-      "sourceTag": "V",
+      "sourceTags": [
+       "V"
+      ],
       "output": "600w each",
       "unblocks": "the hardest and most useful case",
       "fromCourseFile": true
@@ -2460,7 +2697,9 @@
       "code": "STA-101",
       "milestone": "Meta-analysis: reading a forest plot, and heterogeneity",
       "source": "selected `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "600w each",
       "unblocks": "PSY-101 wk 12",
       "fromCourseFile": true
@@ -2479,7 +2718,9 @@
       "code": "PSY-101",
       "milestone": "**What survived** + term paper",
       "source": "Simons & Chabris 1999 `[R]`",
-      "sourceTag": "R",
+      "sourceTags": [
+       "R"
+      ],
       "output": "**2,000w — the Filter**",
       "unblocks": "PSY-201 onward",
       "fromCourseFile": false
@@ -2488,7 +2729,7 @@
       "code": "STA-101",
       "milestone": "**Term paper** — audit one published claim end to end",
       "source": "—",
-      "sourceTag": null,
+      "sourceTags": [],
       "output": "**2,000w**",
       "unblocks": "PSY-401 §C3",
       "fromCourseFile": false
@@ -2570,7 +2811,6 @@
   "adding": "Use [`catalog/_TEMPLATE.md`](catalog/_TEMPLATE.md). A course enters the catalog only when all six fields are filled — most importantly:\n\n- **Sources obtainable.** If the reading is behind a paywall you can't clear, the course is cut at the catalog stage, not faked at week 6.\n- **Unblocks.** Name the later course or artifact this makes possible. A course that unblocks nothing is a hobby, and the Advisor will refuse it."
  },
  "degree": {
-  "missing": "The ALTER framework describes five **roles**. It does not describe an **institution**. That distinction is the whole of your question.\n\nA university gives a student two separable things:\n\n1. **Faculty** — an advisor, a librarian, a tutor, an editor, and a corridor full of people studying something else. That is exactly ALTER, and the framework as you wrote it is a good decomposition of it.\n2. **An institution** — a course catalog, prerequisites, levels, credit accounting, concurrent enrolment, terms that start and end, assessment separated from teaching, and a transcript.\n\nThe first build gave you all of (1) and none of (2). Five excellent staff members and no registrar, no catalog, no levels, no second subject. Which is why it came out as a thesis: with only one course defined, the faculty had only one thing to do.\n\nThis file is the institution. ALTER stays exactly as written — it is now the engine that runs **each course**, rather than the whole school.\n\n---",
   "creditMd": "The standard: one US semester credit ≈ 45 hours of total student work. A 3-credit course ≈ 135 hours. A bachelor's degree = 120 credits ≈ **5,400 hours**.\n\nYour capacity, from intake Q3: **9–12 hours/week at a bad week**. Call it 10 × 48 working weeks = **480 hours/year**. A full-time student does roughly 1,800. So at face value a degree takes you eleven years, and anyone who tells you otherwise is selling something.\n\nBut face value is wrong, because a large fraction of those 135 hours is institutional overhead you don't carry:\n\nThe irreducible core of a social-science course is roughly 800–1,200 pages read, 5,000 words written, and defended. Done seriously, that is **~70 hours**, not 135.\n\n**So: 70 hours per course, 6 courses per year.** Two concurrent, three terms. That is a quarter-time student who has cut all the padding — which is a real and defensible thing to be, and it is not the same as claiming a degree in a year.",
   "overhead": [
    {
@@ -2606,7 +2846,6 @@
     "paid": "**Yes**"
    }
   ],
-  "calendarMd": "| | Weeks | Load |\n|---|---|---|\n| **Term A** | 1–14 | 2 courses concurrent, ~5 h/week each · 2026-09-07 → 12-13 |\n| break | 15–17 | nothing. Actually nothing — three weeks over the holidays and the resort's peak season |\n| **Term B** | 16–29 | 2 courses |\n| break | 30 | — |\n| **Term C** | 31–44 | 2 courses |\n| **Capstone / examination period** | 45–52 | 1 course, intensive, alone |\n\nTwo concurrent is the cap and it is not a suggestion. Three concurrent at 10 hours a week produces three shallow courses, and shallow is the one failure this whole structure exists to prevent.\n\n---",
   "levels": [
    {
     "level": "**100**",
@@ -2785,7 +3024,9 @@
     "time": "10 min",
     "note": "10 min",
     "md": "Open `logs/PSY-101/week-01.md` and fill in Q1 and Q4. Don't look anything up — a researched answer measures nothing.\n\n> **Q1.** What is the last non-fiction book you finished, and what do you still remember from it?\n>\n> **Q4.** Name a time you predicted someone's behavior correctly, and a time you didn't. Which do you remember better, and why?\n\nQ1 sets how much of the teaching load the writing has to carry versus the reading. Q4 is the capstone's problem in miniature — if the *correct* prediction is the vivid one, that's the exact bias the audit exists to measure, and you've handed the Tutor its first case.",
-    "done": false
+    "done": false,
+    "doneNote": "",
+    "tableRows": 0
    },
    {
     "n": 2,
@@ -2793,7 +3034,9 @@
     "time": "45 min",
     "note": "45 min · **BEFORE YOU OPEN A SINGLE SOURCE**",
     "md": "600 words. Three findings about human behavior you currently believe, what you think the evidence is for each, and what would change your mind.\n\n**This is the one step with an order dependency you cannot undo.** The moment you read the OSC 2015 paper, your priors are contaminated and this measurement is gone for good. Write it this weekend, or Monday morning before anything else.\n\n- Pick findings you'd actually **act on**. Something you've used at work beats something you read in a magazine.\n- \"What would change my mind\" must name an **observation**, not a feeling. *\"If I saw contradictory evidence\"* fails. *\"If a preregistered multi-lab replication with n > 2000 found d < 0.1\"* passes.\n- Don't look anything up.\n\n**Already done — written and sealed 2026-08-21**, before any source was opened. The seal is now conditional on the postponement: it stays valid only if no Term A source is opened before 7 September. All four week-1 and week-3 sources are already sitting in NotebookLM, so this is a live temptation, not a theoretical one. If you do read one in the gap, log the date in `REGISTRAR.md` — a contaminated measurement on the record is still usable; a silent one is not.\n\nIt will fail rubric criteria A2 and A4. It cites nothing and gives no magnitudes, because in week 1 you can't yet do either. **That failure is the instrument reading, not a setback.** No rewrite is owed.",
-    "done": true
+    "done": true,
+    "doneNote": "Already done — written and sealed 2026-08-21, before any source was opened",
+    "tableRows": 0
    },
    {
     "n": 3,
@@ -2801,7 +3044,9 @@
     "time": "30 min",
     "note": "30 min",
     "md": "**Free, verified, get all four now:**\n\n| | Source | Find it at |\n|---|---|---|\n| 1 | Open Science Collaboration 2015, *Science* 349(6251) aac4716 | PubMed 26315443 |\n| 2 | Cumming 2014, *Psych Sci* 25(1) 7–29 | doi:10.1177/0956797613504966 |\n| 3 | Greenland et al. 2016, *Eur J Epidemiol* 31(4) 337–350 | PubMed 27209009 |\n| 4 | Wasserstein & Lazar 2016, *Am Stat* 70(2) 129–133 | doi:10.1080/00031305.2016.1154108 |\n\n**Verify before buying — these are `[R]`, recalled, not verified:**\n\n- Ritchie, *Science Fictions* (2020)\n- Spiegelhalter, *The Art of Statistics* (2019)\n\nI can produce a fluent, correctly formatted citation for a book that doesn't exist under that title. Check both are real before spending money. That check is not paranoia, it's the specific failure mode of using a language model as a librarian.\n\n**Buy nothing else yet.** Not Sapolsky, not Kahneman, not Meehl. A folder of sixty unread PDFs by month nine is the exact way this year dies, and it starts with a productive-feeling afternoon in week 1.",
-    "done": false
+    "done": false,
+    "doneNote": "",
+    "tableRows": 4
    },
    {
     "n": 4,
@@ -2809,7 +3054,9 @@
     "time": "15 min",
     "note": "15 min",
     "md": "**Recommended: run it in Claude Code, in this repo.** The agents are already live in `.claude/agents/` — invoke by name. They read `REGISTRAR.md` and `enrolled/<CODE>.md` directly off disk, which means the shared state file stays in sync with zero effort from you.\n\n**Alternative: five claude.ai Projects.** One per agent. Copy everything *below* the `---` frontmatter block of each `.claude/agents/*.md` file into the Project's custom instructions. Add **`AGENT-PACK.md`** to each Project's knowledge — one file containing all eight state documents, including both cut lists. Attaching the state files individually is a mistake: it is easy to omit the catalog files, and without the cut lists an agent cannot refuse anything, which is the whole of what makes it an agent.\n\nBe aware of what this costs: **you re-upload the state files to five Projects every time they change**, which is roughly five times a week. That friction is small on day one and is a plausible reason the program is dead by October. If you use Projects anyway, do the re-upload as part of the Sunday close and nowhere else.\n\n**Either way: the Librarian needs web search enabled.** Without it, it cannot verify a single citation and every source it hands you is `[R]`. Turn it on and confirm it's on.",
-    "done": false
+    "done": false,
+    "doneNote": "",
+    "tableRows": 0
    },
    {
     "n": 5,
@@ -2817,7 +3064,9 @@
     "time": "10 min",
     "note": "10 min",
     "md": "One for **PSY-101**, one for **STA-101**. Separate, not combined — NotebookLM grounds its answers in what you upload, so mixing the two stacks dilutes both.\n\nUpload the four free PDFs: OSC 2015 goes in PSY, the other three in STA. Then update the tag in `enrolled/<CODE>.md` §B from `[V]` to `[H]` — in hand. `[H]` is the strongest tag and it means the notebook, not the Librarian, is now the citation authority for that source.\n\n---",
-    "done": false
+    "done": false,
+    "doneNote": "",
+    "tableRows": 0
    }
   ],
   "setupIntro": "About 90 minutes total, spread across four days. Do them in this order; step 2 is order-dependent and can't be recovered if you get it wrong.",
@@ -2941,7 +3190,6 @@
     "trust": "Strongest. Supersedes `[V]`. Update the tag yourself as items arrive."
    }
   ],
-  "tagKeyNote": "**9 items below are `[V]`. Everything else is `[R]`.** That ratio is the honest state of an LLM used as a librarian, and it is why this agent must run with search enabled. A model produces fluent, correctly formatted citations for work that does not exist — the failure isn't rare, it's the default mode when recall is thin.\n\nThe `[V]` items cluster in Term 0 deliberately. Term 0 is the term where a fabricated citation would do the most damage, because it's the term that teaches you to detect fabrication.\n\n**Order of operations:** verify → acquire → upload to NotebookLM → retag `[H]` → then read. Never read from an untagged item.",
   "groups": [
    {
     "title": "TERM 0 — Calibration (Weeks 1–4)",
@@ -3462,45 +3710,7 @@
    "shipping-container standardization"
   ],
   "roommateNote": "Held for the Roommate's cross-domain collisions. One per fortnight, max, and each domain is spent after use (Registrar §5). Listed so the Roommate doesn't default to jazz every time.",
-  "acquisition": "Don't buy sixty things. Buy in this order and let the Registrar catch up.\n\n**Now (Term 0, all `[V]`):** items 1, 2, 5 as PDFs — all findable open-access. Then Ritchie, *Science Fictions* (#12).\n**Before week 5:** Sapolsky #15, Henrich #16.\n**Before week 15:** Kahneman #25, *Noise* #26, Meehl #29.\n**Before week 25:** Ross & Nisbett #37, Goffman #46.\n**Before week 35:** #57 and #58 together, never separately.\n\nEverything else waits until the week that needs it. A folder of sixty unread PDFs by month nine is the specific way this year fails, and it starts with buying the whole list in week 1.\n\n---",
-  "verifiedLinks": [
-   {
-    "label": "Open Science Collaboration 2015 — PubMed",
-    "href": "https://pubmed.ncbi.nlm.nih.gov/26315443/"
-   },
-   {
-    "label": "Simmons, Nelson & Simonsohn 2011 — Psychological Science",
-    "href": "https://journals.sagepub.com/doi/10.1177/0956797611417632"
-   },
-   {
-    "label": "Nosek et al. 2022 — Annual Review of Psychology",
-    "href": "https://www.annualreviews.org/content/journals/10.1146/annurev-psych-020821-114157"
-   },
-   {
-    "label": "Klein et al. 2018, Many Labs 2 — Semantic Scholar",
-    "href": "https://www.semanticscholar.org/paper/Many-Labs-2:-Investigating-Variation-in-Across-and-Klein-Vianello/c09441deaa6a6ced4bf2fd021b7aa9cc2122af3e"
-   },
-   {
-    "label": "Henrich, Heine & Norenzayan 2010 — PubMed",
-    "href": "https://pubmed.ncbi.nlm.nih.gov/20550733/"
-   },
-   {
-    "label": "Doyen et al. 2012 — PLoS ONE",
-    "href": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0029081"
-   },
-   {
-    "label": "Le Texier 2019 — PubMed",
-    "href": "https://pubmed.ncbi.nlm.nih.gov/31380664/"
-   },
-   {
-    "label": "Hagger et al. 2016 — Perspectives on Psychological Science",
-    "href": "https://journals.sagepub.com/doi/10.1177/1745691616652873"
-   },
-   {
-    "label": "Watts, Duncan & Quan 2018 — Psychological Science",
-    "href": "https://journals.sagepub.com/doi/abs/10.1177/0956797618761661"
-   }
-  ]
+  "acquisition": "Don't buy sixty things. Buy in this order and let the Registrar catch up.\n\n**Now (Term 0, all `[V]`):** items 1, 2, 5 as PDFs — all findable open-access. Then Ritchie, *Science Fictions* (#12).\n**Before week 5:** Sapolsky #15, Henrich #16.\n**Before week 15:** Kahneman #25, *Noise* #26, Meehl #29.\n**Before week 25:** Ross & Nisbett #37, Goffman #46.\n**Before week 35:** #57 and #58 together, never separately.\n\nEverything else waits until the week that needs it. A folder of sixty unread PDFs by month nine is the specific way this year fails, and it starts with buying the whole list in week 1.\n\n---"
  },
  "major": {
   "title": "PSY — Program Statement",

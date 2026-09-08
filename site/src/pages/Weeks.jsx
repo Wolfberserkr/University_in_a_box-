@@ -1,28 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { locate } from '../lib/calendar.js';
 import { courseMetrics, gapMetrics } from '../lib/metrics.js';
 import { Card, Callout, Chip, courseKind } from '../components/ui.jsx';
 import WeekPanel from '../components/WeekPanel.jsx';
+import WeekStrip from '../components/WeekStrip.jsx';
 import Markdown from '../lib/markdown.jsx';
 
 export default function Weeks({ focus }) {
-  const { data, state, dispatch, today } = useStore();
+  const { data, state, dispatch, today, announce } = useStore();
   const weeks = data.termA.weeks;
   const here = locate(weeks, today);
-  const codes = Object.keys(data.enrolled);
-  const [expandAll, setExpandAll] = useState(null);
+  const codes = useMemo(() => Object.keys(data.enrolled), [data]);
+  /* `expandAll` used to be a plain boolean, so pressing "Expand all" twice with
+     a manual collapse in between did nothing: the value had not changed, so
+     React never touched the `open` prop. The nonce makes every press a new
+     instruction. */
+  const [bulk, setBulk] = useState({ mode: null, nonce: 0 });
   const gaps = gapMetrics(state);
 
+  // a jump to one week is an instruction about that week, so it clears a
+  // standing "expand all"
+  useEffect(() => { setBulk({ mode: null, nonce: 0 }); }, [focus]);
+
   useEffect(() => {
-    if (focus) {
-      const el = document.getElementById(`week-${focus}`);
-      if (el) { el.open = true; el.scrollIntoView({ block: 'start' }); }
-    }
+    if (!focus) return;
+    const el = document.getElementById(`week-${focus}`);
+    if (el) el.scrollIntoView({ block: 'start' });
   }, [focus]);
 
   const openFor = (n) =>
-    expandAll !== null ? expandAll : (focus ? n === focus : here.phase === 'in' && here.week.n === n);
+    bulk.mode !== null ? bulk.mode : (focus ? n === focus : here.phase === 'in' && here.week.n === n);
 
   return (
     <>
@@ -35,30 +43,38 @@ export default function Weeks({ focus }) {
           a week whose Sunday has passed and is still open counts as slipped.</p>
       </div>
 
+      <Card title="The term at a glance">
+        <WeekStrip />
+      </Card>
+
       <Callout kind="info" icon="→" title="Term A interlocks one way">
         <p>STA-101 wk 2 → PSY-101 wk 3 · STA-101 wk 3 → PSY-101 wk 4 · STA-101 wk 6 → PSY-101 wk 5.
           If something has to slip, slip PSY-101 — never STA-101 weeks 2 or 3.</p>
       </Callout>
 
       <div className="btn-row">
-        <button type="button" className="btn btn-quiet" onClick={() => setExpandAll(true)}>Expand all</button>
-        <button type="button" className="btn btn-quiet" onClick={() => setExpandAll(false)}>Collapse all</button>
+        <button type="button" className="btn btn-quiet"
+                onClick={() => setBulk((b) => ({ mode: true, nonce: b.nonce + 1 }))}>Expand all</button>
+        <button type="button" className="btn btn-quiet"
+                onClick={() => setBulk((b) => ({ mode: false, nonce: b.nonce + 1 }))}>Collapse all</button>
         {here.phase === 'in' && (
           <a className="btn btn-quiet" href={`#/weeks/${here.week.n}`}>Jump to this week</a>
         )}
       </div>
 
-      {weeks.map((w) => <WeekPanel key={w.n} week={w} open={openFor(w.n)} />)}
+      {weeks.map((w) => (
+        <WeekPanel key={`${w.n}-${bulk.nonce}-${focus || 0}`} week={w} open={openFor(w.n)} />
+      ))}
 
       <div className="grid grid-2" style={{ marginTop: '1.4rem' }}>
         <Card title={`§C Gap log — ${gaps.open} open, ${gaps.closed} closed`}>
           {state.gaps.length === 0 ? (
-            <p className="small">Nothing logged. A gap closes only when you re-explain it cold, in
-              a later session, in a frame the Tutor did not supply.</p>
+            <p className="small">Nothing logged in this browser. A gap closes only when you
+              re-explain it cold, in a later session, in a frame the Tutor did not supply.</p>
           ) : (
             <div className="table-scroll">
               <table>
-                <thead><tr><th>Wk</th><th>Course</th><th>Concept</th><th>Gap</th><th>Status</th><th /></tr></thead>
+                <thead><tr><th>Wk</th><th>Course</th><th>Concept</th><th>Gap</th><th>Status</th><th><span className="sr-only">Remove</span></th></tr></thead>
                 <tbody>
                   {state.gaps.map((g) => (
                     <tr key={g.id}>
@@ -69,14 +85,16 @@ export default function Weeks({ focus }) {
                       <td>
                         <button type="button" className="btn btn-sm"
                                 aria-pressed={g.status === 'closed'}
-                                onClick={() => dispatch({
-                                  type: 'gap:update', id: g.id,
-                                  patch: { status: g.status === 'closed' ? 'open' : 'closed' },
-                                })}>
+                                onClick={() => {
+                                  const next = g.status === 'closed' ? 'open' : 'closed';
+                                  dispatch({ type: 'gap:update', id: g.id, patch: { status: next } });
+                                  announce(`${g.concept} marked ${next}.`);
+                                }}>
                           {g.status === 'closed' ? 'closed' : 'open'}
                         </button>
                       </td>
                       <td><button type="button" className="btn btn-sm btn-quiet"
+                                  aria-label={`Remove the gap “${g.concept}”`}
                                   onClick={() => dispatch({ type: 'gap:remove', id: g.id })}>×</button></td>
                     </tr>
                   ))}
@@ -84,6 +102,9 @@ export default function Weeks({ focus }) {
               </table>
             </div>
           )}
+          <FiledRows label="Already in the file"
+                     rows={codes.flatMap((code) => (data.enrolled[code].gaps || [])
+                       .map((g) => ({ code, text: `wk ${g.week ?? '—'} · ${g.concept} — ${g.status}` })))} />
           {codes.map((code) => (
             <Markdown key={code} md={data.enrolled[code].gapsNote} className="small" />
           ))}
@@ -91,24 +112,75 @@ export default function Weeks({ focus }) {
 
         <Card title="§D Verdict log">
           <VerdictTable />
+          <FiledRows label="Already in the file"
+                     rows={codes.flatMap((code) => (data.enrolled[code].verdicts || [])
+                       .map((v) => ({ code, text: `wk ${v.week ?? '—'} · ${v.rubric} · ${v.verdict}` })))} />
           {codes.map((code) => (
             <Markdown key={code} md={data.enrolled[code].verdictsNote} className="small" />
           ))}
         </Card>
       </div>
+
+      <Card title={`§E Cross-domain ledger — ${state.cross.length} logged here`}>
+        <p className="small">The Roommate is fortnightly and a domain is spent once used. Log a
+          collision on any even week above; this is what the Sunday close appends to §E.</p>
+        {state.cross.length === 0 ? (
+          <p className="small">Nothing logged in this browser yet.</p>
+        ) : (
+          <div className="table-scroll">
+            <table>
+              <thead><tr><th>Wk</th><th>Course</th><th>Domain</th><th>Collided with</th><th>Transfer that survived</th><th><span className="sr-only">Remove</span></th></tr></thead>
+              <tbody>
+                {state.cross.map((c) => (
+                  <tr key={c.id}>
+                    <td className="nowrap">{c.week}</td>
+                    <td><Chip kind={courseKind(c.course)}>{c.course}</Chip></td>
+                    <td>{c.domain}</td>
+                    <td>{c.collidedWith}</td>
+                    <td>{c.transfer}</td>
+                    <td><button type="button" className="btn btn-sm btn-quiet"
+                                aria-label={`Remove the ${c.domain} collision`}
+                                onClick={() => dispatch({ type: 'cross:remove', id: c.id })}>×</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <FiledRows label="Already in the file"
+                   rows={codes.flatMap((code) => (data.enrolled[code].crossDomain || [])
+                     .map((c) => ({ code, text: `wk ${c.week ?? '—'} · ${c.domain} × ${c.collidedWith}` })))} />
+        {codes.map((code) => (
+          <Markdown key={code} md={data.enrolled[code].crossNote} className="small" />
+        ))}
+      </Card>
     </>
+  );
+}
+
+/* What the repository already holds for a section, so it is visible that the
+   patch is not about to offer it again. */
+function FiledRows({ label, rows }) {
+  if (!rows.length) return null;
+  return (
+    <p className="small filed-rows">
+      <strong>{label}:</strong>{' '}
+      {rows.map((r, i) => (
+        <React.Fragment key={i}>{i > 0 && ' · '}{r.code} {r.text}</React.Fragment>
+      ))}
+    </p>
   );
 }
 
 function VerdictTable() {
   const { data, state, today } = useStore();
-  const codes = Object.keys(data.enrolled);
-  const rows = codes.flatMap((code) => {
+  const codes = useMemo(() => Object.keys(data.enrolled), [data]);
+  const rows = useMemo(() => codes.flatMap((code) => {
     const m = courseMetrics(data, state, code, today);
     return m.records
       .filter(({ r }) => r.closed || Object.keys(r.rubric).length)
       .map(({ w, r }) => ({ code, n: w.n, r }));
-  }).sort((a, b) => a.n - b.n);
+  }).sort((a, b) => a.n - b.n), [data, state, today, codes]);
 
   if (!rows.length) {
     return <p className="small">Nothing graded yet. Each criterion is pass/fail and it is 5/5 or

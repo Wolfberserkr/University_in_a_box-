@@ -2,8 +2,8 @@ import React from 'react';
 import { useStore } from '../lib/store.js';
 import { locate, fmtRange, fmtLong, daysBetween, DAY_NAMES, toDate } from '../lib/calendar.js';
 import { setupMetrics } from '../lib/metrics.js';
-import { Card, Callout, Tag, Chip, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import { Card, Callout } from '../components/ui.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 import WeekPanel from '../components/WeekPanel.jsx';
 
 export default function Now() {
@@ -34,7 +34,7 @@ export default function Now() {
       ) : here.phase === 'in' ? (
         <Card title={`Week ${here.week.n} · ${fmtRange(here.week.start, here.week.end)} · ${dayName}`}>
           <h3 style={{ marginTop: 0 }}>
-            {week1Today ? <Markdown md={week1Today.do} className="" />
+            {week1Today ? <MdInline md={week1Today.do} />
               : rhythmToday ? rhythmToday.do
               : 'Nothing scheduled today.'}
           </h3>
@@ -63,27 +63,35 @@ export default function Now() {
       <Card title={`Before Monday — ${setup.done} of ${setup.total} done`}>
         <Markdown md={sh.setupIntro} />
         <ol className="checklist">
-          {sh.setup.map((step) => {
-            const done = !!state.setup[step.n] || step.done;
-            return (
-              <li key={step.n} className={done ? 'done' : ''}>
-                <div className="check-row">
-                  <input type="checkbox" id={`setup-${step.n}`} checked={done}
-                         onChange={() => dispatch({ type: 'setup:toggle', n: step.n })} />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <label htmlFor={`setup-${step.n}`}>
-                      <span className="check-title">{step.n}. {step.title}</span>
-                      {step.note && <span className="check-meta"> · {step.note}</span>}
-                    </label>
-                    <details>
-                      <summary className="check-meta" style={{ cursor: 'pointer' }}>What this involves</summary>
-                      <Markdown md={step.md} />
-                    </details>
-                  </div>
+          {setup.steps.map((step) => (
+            <li key={step.n} className={step.done ? 'done' : ''}>
+              <div className="check-row">
+                <input type="checkbox" id={`setup-${step.n}`} checked={step.done}
+                       onChange={() => dispatch({ type: 'setup:toggle', n: step.n })} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <label htmlFor={`setup-${step.n}`}>
+                    <span className="check-title">{step.n}. {step.title}</span>
+                    {step.note && <span className="check-meta"> · {step.note}</span>}
+                  </label>
+                  {/* What the repository already knows about this step. The
+                      box is for the part the repository cannot answer, not for
+                      the part it can. */}
+                  {(step.evidence || step.of) && (
+                    <p className="check-evidence">
+                      {step.of && <span className={`check-count${step.done ? ' is-done' : ''}`}>{step.of}</span>}
+                      <span className="check-meta">{step.evidence}</span>
+                      {step.evidenceFrom && <span className="check-src">{step.evidenceFrom}</span>}
+                      {step.ticked && !step.done && <span className="check-meta"> · ticked here</span>}
+                    </p>
+                  )}
+                  <details className="disclose">
+                    <summary className="check-meta">What this involves</summary>
+                    <div className="disclose-body"><Markdown md={step.md} /></div>
+                  </details>
                 </div>
-              </li>
-            );
-          })}
+              </div>
+            </li>
+          ))}
         </ol>
       </Card>
 
@@ -117,7 +125,7 @@ export default function Now() {
                 {data.startHere.week1.map((r) => (
                   <tr key={r.day}>
                     <td className="nowrap"><strong>{r.day}</strong></td>
-                    <td><Markdown md={r.do} className="" /></td>
+                    <td><MdInline md={r.do} /></td>
                     <td className="nowrap dim">{r.time}</td>
                   </tr>
                 ))}
@@ -153,7 +161,7 @@ export default function Now() {
         <ol className="prose">
           {data.startHere.enders.map((e) => (
             <li key={e.n} style={{ marginBottom: '.6rem' }}>
-              <strong>{e.title}.</strong> <Markdown md={e.body} className="" />
+              <strong>{e.title}.</strong> <MdInline md={e.body} />
             </li>
           ))}
         </ol>

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useStore } from '../lib/store.js';
 import { effectiveTag, ledgerMetrics, TAG_LABEL } from '../lib/metrics.js';
 import { Card, Tag, Chip, Callout, StackedBar, courseKind } from '../components/ui.jsx';
-import Markdown from '../lib/markdown.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 const TAG_ORDER = ['H', 'V', 'R'];
 
@@ -12,42 +12,75 @@ const TAG_ORDER = ['H', 'V', 'R'];
    lands in NotebookLM, and [H] can be dropped back. */
 const LEGAL = { R: ['V'], V: ['R', 'H'], H: ['V'] };
 
+/* Promoting to [V] asks for the record it was checked against. That used to be
+   a `window.prompt` - a native modal in a site that has designed every other
+   surface, and unavailable in a sandboxed frame. It is an inline row now. */
 function TagPicker({ row }) {
-  const { state, dispatch } = useStore();
+  const { state, dispatch, announce } = useStore();
   const current = effectiveTag(state, row);
   const allowed = LEGAL[current] || [];
+  const [asking, setAsking] = useState(false);
+  const [note, setNote] = useState('');
+  const inputId = `verify-${row.id}`;
+
+  const start = () => {
+    setNote(state.tagNotes[row.id] || row.verifiedAgainst.replace(/[*`]/g, '') || '');
+    setAsking(true);
+  };
+
   return (
-    <span className="tag-picker">
-      {['R', 'V', 'H'].map((t) => (
-        <button key={t} type="button"
-                aria-pressed={current === t}
-                disabled={current !== t && !allowed.includes(t)}
-                title={current === t ? `Currently [${t}] — ${TAG_LABEL[t]}`
-                  : allowed.includes(t) ? `Move to [${t}]`
-                  : `[${current}] cannot become [${t}] directly`}
-                onClick={() => {
-                  if (current === t) return;
-                  if (t === 'V') {
-                    const note = window.prompt(
-                      'Verified against which record? Name it — a PubMed ID, a DOI, a publisher page.\n\nA [V] with nothing behind it is an [R] in disguise, and rubric criterion A2 grades against the tag.',
-                      state.tagNotes[row.id] || row.verifiedAgainst.replace(/[*`]/g, '') || ''
-                    );
-                    if (!note || !note.trim()) return;
-                    dispatch({ type: 'tag:set', id: row.id, tag: 'V', note: note.trim() });
-                    return;
-                  }
-                  dispatch({ type: 'tag:set', id: row.id, tag: t });
-                }}>
-          {t}
-        </button>
-      ))}
-    </span>
+    <>
+      <span className="tag-picker" role="group" aria-label={`Tag for ${row.n || row.id}`}>
+        {['R', 'V', 'H'].map((t) => (
+          <button key={t} type="button"
+                  aria-pressed={current === t}
+                  disabled={current !== t && !allowed.includes(t)}
+                  aria-label={current === t ? `Currently [${t}], ${TAG_LABEL[t]}`
+                    : allowed.includes(t) ? `Move to [${t}], ${TAG_LABEL[t]}`
+                    : `[${current}] cannot become [${t}] directly`}
+                  title={current === t ? `Currently [${t}] — ${TAG_LABEL[t]}`
+                    : allowed.includes(t) ? `Move to [${t}]`
+                    : `[${current}] cannot become [${t}] directly`}
+                  onClick={() => {
+                    if (current === t) return;
+                    if (t === 'V') { start(); return; }
+                    setAsking(false);
+                    dispatch({ type: 'tag:set', id: row.id, tag: t });
+                    announce(`Row ${row.n || ''} moved to [${t}] — ${TAG_LABEL[t]}.`);
+                  }}>
+            {t}
+          </button>
+        ))}
+      </span>
+      {asking && (
+        <div className="verify-row">
+          <label htmlFor={inputId}>Verified against which record?</label>
+          <input type="text" id={inputId} value={note} autoFocus
+                 placeholder="PubMed ID, DOI, publisher page"
+                 onChange={(e) => setNote(e.target.value)}
+                 onKeyDown={(e) => { if (e.key === 'Escape') setAsking(false); }} />
+          <p className="small">A <span className="tag tag-v">[V]</span> with nothing behind it is
+            an <span className="tag tag-r">[R]</span> in disguise, and rubric criterion A2 grades
+            against the tag.</p>
+          <div className="btn-row">
+            <button type="button" className="btn btn-sm btn-primary" disabled={!note.trim()}
+                    onClick={() => {
+                      dispatch({ type: 'tag:set', id: row.id, tag: 'V', note: note.trim() });
+                      setAsking(false);
+                      announce(`Row ${row.n || ''} moved to [V], checked against ${note.trim()}.`);
+                    }}>Record it</button>
+            <button type="button" className="btn btn-sm btn-quiet"
+                    onClick={() => setAsking(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
 export default function Sources() {
   const { data, state } = useStore();
-  const codes = Object.keys(data.enrolled);
+  const codes = useMemo(() => Object.keys(data.enrolled), [data]);
   const ledgers = codes.map((c) => ledgerMetrics(data, state, c));
   const [q, setQ] = useState('');
   const [tagFilter, setTagFilter] = useState('');
@@ -65,6 +98,7 @@ export default function Sources() {
   }, [data, state, q, tagFilter, courseFilter, codes]);
 
   const stack = data.sourceStack;
+  const maxLedger = Math.max(...ledgers.map((l) => l.total), 1);
 
   return (
     <>
@@ -86,8 +120,14 @@ export default function Sources() {
       <Card title="Ledger health">
         {ledgers.map((l) => (
           <StackedBar key={l.code} label={l.code} counts={l.counts} order={TAG_ORDER}
-                      total={l.total} labels={TAG_LABEL} />
+                      total={l.total} scaleTo={maxLedger} labels={TAG_LABEL} />
         ))}
+        <p className="legend">
+          <span><i className="swatch swatch-H" />[H] in hand</span>
+          <span><i className="swatch swatch-V" />[V] verified</span>
+          <span><i className="swatch swatch-R" />[R] recalled</span>
+          <span className="dim">tracks are to scale against the longer ledger</span>
+        </p>
         <div className="table-scroll">
           <table>
             <thead><tr><th>Tag</th><th>Means</th><th>Trust</th></tr></thead>
@@ -95,8 +135,8 @@ export default function Sources() {
               {stack.tagKey.map((k) => (
                 <tr key={k.tag}>
                   <td><Tag tag={k.tag} /></td>
-                  <td><Markdown md={k.means} className="" /></td>
-                  <td><Markdown md={k.trust} className="" /></td>
+                  <td><MdInline md={k.means} /></td>
+                  <td><MdInline md={k.trust} /></td>
                 </tr>
               ))}
             </tbody>
@@ -132,7 +172,7 @@ export default function Sources() {
                   <td className="nowrap">{r.week}</td>
                   <td><Chip kind={courseKind(r.code)}>{r.code}</Chip></td>
                   <td>
-                    <Markdown md={r.source} className="" />
+                    <MdInline md={r.source} />
                     {state.tagNotes[r.id] && (
                       <div className="small">you checked: {state.tagNotes[r.id]}</div>
                     )}
@@ -146,9 +186,9 @@ export default function Sources() {
                       ? r.links.map((l) => (
                           <div key={l.href}><a href={l.href} target="_blank" rel="noreferrer noopener">{l.label}</a></div>
                         ))
-                      : <Markdown md={r.verifiedAgainst} className="" />}
+                      : <MdInline md={r.verifiedAgainst} />}
                   </td>
-                  <td><Markdown md={r.status} className="" /></td>
+                  <td><MdInline md={r.status} /></td>
                 </tr>
               ))}
             </tbody>
@@ -175,7 +215,7 @@ export default function Sources() {
                     <tr key={it.n}>
                       <td className="nowrap">{it.n}</td>
                       <td><Tag tag={it.tag} /></td>
-                      <td><Markdown md={it.text} className="" />
+                      <td><MdInline md={it.text} />
                         {it.shelf && <div className="small">{it.shelf}</div>}</td>
                       <td>{it.links.map((l) => (
                         <div key={l.href}><a href={l.href} target="_blank" rel="noreferrer noopener">{l.label}</a></div>

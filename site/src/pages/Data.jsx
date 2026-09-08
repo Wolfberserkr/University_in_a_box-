@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useStore, KEY } from '../lib/store.js';
 import { buildPatch, patchText } from '../lib/patch.js';
+import { fmtLong, toDate, DAY_NAMES } from '../lib/calendar.js';
 import { Card, Callout, Copy } from '../components/ui.jsx';
 
 export default function Data() {
-  const { data, state, dispatch, today, canStore } = useStore();
+  const { data, state, dispatch, today, canStore, announce } = useStore();
   const [io, setIo] = useState(null);          // 'export' | 'import' | null
   const [text, setText] = useState('');
   const [status, setStatus] = useState('');
@@ -12,12 +13,21 @@ export default function Data() {
   const blocks = useMemo(() => buildPatch(data, state, today), [data, state, today]);
   const patch = useMemo(() => patchText(blocks, today), [blocks, today]);
   const edits = blocks.reduce((s, b) => s + b.edits.length, 0);
+  const rows = blocks.reduce((s, b) => s + b.edits.reduce((t, e) => t + (e.rows ? e.rows.length : 0) + (e.find ? 1 : 0), 0), 0);
+  const notes = blocks.reduce((s, b) => s + b.notes.length, 0);
+  const isSunday = DAY_NAMES[toDate(today).getDay()] === 'Sun';
+  const last = (state.closes || [])[0];
 
   const download = (name, body) => {
     const url = URL.createObjectURL(new Blob([body], { type: 'text/plain' }));
     const a = document.createElement('a');
-    a.href = url; a.download = name; a.click();
-    URL.revokeObjectURL(url);
+    a.href = url;
+    a.download = name;
+    a.rel = 'noopener';
+    document.body.append(a);
+    a.click();
+    // the click is queued; revoking in the same tick cancels the download
+    requestAnimationFrame(() => { a.remove(); URL.revokeObjectURL(url); });
   };
 
   return (
@@ -37,44 +47,120 @@ export default function Data() {
 
       {/* -------------------------- the write-back ------------------------- */}
 
-      <Card title={`Sunday close — ${edits} edit${edits === 1 ? '' : 's'} to write back`}>
+      <Card title="The Sunday close"
+            actions={last && (
+              <span className="small">Last close {fmtLong(last.on).replace(/,.*/, '')} · {last.edits} edit{last.edits === 1 ? '' : 's'}</span>
+            )}>
+        <div className="close-head">
+          <p className="close-count">
+            <strong>{edits}</strong> edit{edits === 1 ? '' : 's'}
+            <span className="dim"> · {rows} line{rows === 1 ? '' : 's'} · {blocks.length} file{blocks.length === 1 ? '' : 's'}</span>
+          </p>
+          <p className="small">
+            {isSunday
+              ? 'It is Sunday. The Editor grades, the Advisor closes the week, and this is what goes back into the files.'
+              : `Not Sunday — ${fmtLong(today)}. The close runs on Sunday; this is what it would write today.`}
+          </p>
+        </div>
+
         <p className="small">
           A static page cannot commit, and a browser holding a repository write token is worse
           than a copy-paste step. So this is the patch: for every change, the line as the site
           last read it out of the file, and the line it should become. Paste it into the files,
           or hand the whole block to Claude Code in this repository and let it apply them.
         </p>
+
         {edits === 0 ? (
-          <p className="small">Nothing to write back yet — no week closed, no tag moved, no gap
-            logged since the site last read the repository.</p>
+          <p className="small">Nothing to write back. Every week you have closed, every tag you
+            have moved and every gap you have logged is already in the repository as the site
+            last read it.</p>
         ) : (
           <>
             <div className="btn-row">
-              <Copy text={patch} label="Copy the patch" />
+              <Copy className="btn btn-primary" text={patch} label="Copy the whole patch" />
               <button type="button" className="btn"
                       onClick={() => download(`uib-close-${today}.md`, patch)}>Download .md</button>
+              <button type="button" className="btn btn-quiet right"
+                      onClick={() => {
+                        dispatch({ type: 'close:record', on: today, edits, files: blocks.map((b) => b.path) });
+                        announce(`Close recorded: ${edits} edit${edits === 1 ? '' : 's'} across ${blocks.length} file${blocks.length === 1 ? '' : 's'}. Re-run the build so the site reads the new files.`);
+                      }}>I have applied this</button>
             </div>
+
+            {notes > 0 && blocks.flatMap((b) => b.notes.map((n, i) => (
+              <Callout key={`${b.path}-${i}`} kind="warn" icon="!" title={`${b.path} — read this before pasting`}>
+                <p>{n}</p>
+              </Callout>
+            )))}
+
             {blocks.map((b) => (
-              <div key={b.path}>
-                <h4>{b.path}</h4>
-                <ul className="prose">
-                  {b.edits.map((e, i) => <li key={i}><code>{e.section}</code> — {e.why}</li>)}
-                </ul>
-                {b.notes.map((n, i) => (
-                  <Callout key={i} kind="warn" icon="!"><p>{n}</p></Callout>
+              <section className="close-file" key={b.path}>
+                <div className="close-file-head">
+                  <h4><code>{b.path}</code></h4>
+                  <span className="small dim">{b.edits.length} edit{b.edits.length === 1 ? '' : 's'}</span>
+                  <Copy className="btn btn-sm right" text={patchText(blocks, today, b.path)}
+                        label={`Copy just ${b.path.split('/').pop()}`} />
+                </div>
+                {b.edits.map((e, i) => (
+                  <div className="diff" key={i}>
+                    <p className="diff-why"><span className="diff-section">{e.section}</span> {e.why}</p>
+                    {e.find && (
+                      <>
+                        <p className="diff-line del"><span aria-hidden="true">−</span>{e.find}</p>
+                        <p className="diff-line add"><span aria-hidden="true">+</span>{e.replace}</p>
+                      </>
+                    )}
+                    {e.rows && e.rows.length > 0 && (
+                      <>
+                        <p className="diff-line ctx"><span aria-hidden="true"> </span>{e.appendTo}</p>
+                        {e.rows.map((r, j) => (
+                          <p className="diff-line add" key={j}><span aria-hidden="true">+</span>{r}</p>
+                        ))}
+                      </>
+                    )}
+                  </div>
                 ))}
-              </div>
+              </section>
             ))}
-            <pre><code>{patch}</code></pre>
+
+            <details className="disclose">
+              <summary className="small">The patch as plain text</summary>
+              <div className="disclose-body"><pre><code>{patch}</code></pre></div>
+            </details>
           </>
         )}
       </Card>
 
       <Callout kind="info" icon="→" title="After you apply it">
         <p>Re-run <code>python3 tools/build-site-data.py</code> and rebuild, so the site reads the
-          new file rather than remembering the old one. Until you do, the patch keeps offering the
-          same edits — which is the correct behaviour, not a bug: an unapplied close is an open week.</p>
+          new files. Until you do, a checkbox or a tag the patch has already moved keeps being
+          offered — those edits are idempotent and re-applying one changes nothing. The appended
+          rows in §C, §D and §E are not offered twice: the patch compares what this browser holds
+          against what the parser read out of the files, so a verdict already written back is
+          simply absent from the next close.</p>
       </Callout>
+
+      {(state.closes || []).length > 0 && (
+        <Card title="Closes recorded in this browser">
+          <div className="table-scroll">
+            <table>
+              <thead><tr><th>Closed on</th><th>Edits</th><th>Files</th><th>Recorded</th></tr></thead>
+              <tbody>
+                {state.closes.map((c, i) => (
+                  <tr key={i}>
+                    <td className="nowrap">{c.on}</td>
+                    <td className="nowrap">{c.edits}</td>
+                    <td>{(c.files || []).join(' · ')}</td>
+                    <td className="nowrap dim">{String(c.at).slice(0, 16).replace('T', ' ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="small">A memory aid, not a receipt: this page cannot see the repository,
+            so it records that you said you applied a patch, not that the files changed.</p>
+        </Card>
+      )}
 
       {/* ---------------------------- export / import ---------------------- */}
 
@@ -96,6 +182,7 @@ export default function Data() {
             if (window.confirm('Erase every tick, closed week, rubric mark, gap and tag change in this browser?\n\nThe repository is untouched. Export first if you have not.')) {
               dispatch({ type: 'state:reset' });
               setStatus('Reset. The repository is untouched.');
+              announce('Progress reset in this browser. The repository is untouched.', 'warn');
               setIo(null);
             }
           }}>Reset everything</button>
@@ -116,6 +203,7 @@ export default function Data() {
                     const parsed = JSON.parse(text);
                     dispatch({ type: 'state:import', state: parsed });
                     setStatus('Loaded.');
+                    announce('Progress imported.');
                     setIo(null);
                   } catch {
                     setStatus('That is not valid JSON. Nothing was changed.');
@@ -134,7 +222,7 @@ export default function Data() {
 
       <Card title="Where everything comes from">
         <p className="small">
-          The site holds no curriculum of its own. <code>tools/build-site-data.py</code> reads
+          The site holds no curriculum of its own. <code>tools/build-site-data.py</code> reads{' '}
           <code>REGISTRAR.md</code>, <code>DEGREE.md</code>, <code>CATALOG.md</code>,{' '}
           <code>ASSESSMENT.md</code>, <code>START-HERE.md</code>, <code>catalog/*.md</code>,{' '}
           <code>enrolled/*.md</code> and <code>.claude/agents/*.md</code>, and writes one JSON

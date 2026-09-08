@@ -73,7 +73,24 @@ function Table({ lines }) {
   );
 }
 
-export default function Markdown({ md, className = 'prose' }) {
+/* Inline mode. Every call site that puts repo prose inside a <p>, <span>, <td>
+ * or <li> wants phrasing content, not a block: a <div> there is closed early by
+ * the parser and the surrounding line breaks apart. This collapses the source to
+ * one run of text and renders it with no wrapper at all. */
+export function MdInline({ md }) {
+  if (!md) return null;
+  const text = String(md)
+    .split('\n')
+    .map((l) => l.replace(/^\s*(?:[-*]|\d+\.)\s+/, '').replace(/^#{1,6}\s+/, '').trim())
+    .filter(Boolean)
+    .join(' ');
+  return <Inline text={text} />;
+}
+
+/* Block mode. `baseLevel` clamps repo headings under the heading the page has
+ * already spent - prose inside a card starts at h4, so a `#` in the file can
+ * never outrank the card title. */
+export default function Markdown({ md, className = 'prose', baseLevel = 4 }) {
   if (!md) return null;
   const lines = md.split('\n');
   const out = [];
@@ -98,7 +115,7 @@ export default function Markdown({ md, className = 'prose' }) {
 
     const h = /^(#{1,6})\s+(.*)$/.exec(line);
     if (h) {
-      const Tag = `h${Math.min(6, h[1].length + 1)}`;
+      const Tag = `h${Math.min(6, baseLevel + h[1].length - 1)}`;
       push(<Tag><Inline text={h[2]} /></Tag>);
       i++;
       continue;
@@ -116,7 +133,7 @@ export default function Markdown({ md, className = 'prose' }) {
     if (line.startsWith('>')) {
       const buf = [];
       while (i < lines.length && lines[i].startsWith('>')) buf.push(lines[i++].replace(/^>\s?/, ''));
-      push(<blockquote><Markdown md={buf.join('\n')} className="" /></blockquote>);
+      push(<blockquote><Markdown md={buf.join('\n')} className="" baseLevel={baseLevel} /></blockquote>);
       continue;
     }
 
