@@ -70,13 +70,22 @@ function fileBlock(path, edits, notes = []) {
 
 /* An append that has to land under `header`. If the table still holds only its
  * `| — | | |` placeholder, the first row replaces that instead of sitting under
- * it, so the file never ends up with a dash row above real data. */
+ * a dash row.
+ *
+ * The find for that replacement is the table's header, divider and placeholder
+ * together, never the placeholder alone: §C's `| — | | | | |` is a substring of
+ * §D's `| — | | | | | |`, so a find-and-replace on the short line edits whichever
+ * table comes first in the file. `placeholder` arrives from the parser as those
+ * three lines verbatim.
+ */
 function appendEdit({ section, header, placeholder, rows, why }) {
   if (!rows.length) return null;
   if (placeholder) {
+    const keep = placeholder.split('\n').slice(0, -1);   // header + divider
     return {
-      kind: 'append', section, why,
-      find: placeholder, replace: rows[0],
+      kind: 'replace', section, why,
+      find: placeholder,
+      replace: [...keep, rows[0]].join('\n'),
       appendTo: header, rows: rows.slice(1),
     };
   }
@@ -355,8 +364,11 @@ export function patchText(blocks, today, only = null) {
     b.edits.forEach((e) => {
       out.push(`### ${e.section} — ${e.why}`, '');
       if (e.find) {
-        out.push(`- ${e.find}`);
-        out.push(`+ ${e.replace}`);
+        // a find may span several lines (a table header, its divider and the
+        // placeholder row) - prefix every one of them, so the block stays
+        // copy-pasteable as a unit
+        String(e.find).split('\n').forEach((l) => out.push(`- ${l}`));
+        String(e.replace).split('\n').forEach((l) => out.push(`+ ${l}`));
       }
       if (e.rows && e.rows.length) {
         out.push(`Append under:  ${e.appendTo}`);

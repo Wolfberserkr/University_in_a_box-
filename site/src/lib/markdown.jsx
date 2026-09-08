@@ -89,10 +89,22 @@ export function MdInline({ md }) {
 
 /* Block mode. `baseLevel` clamps repo headings under the heading the page has
  * already spent - prose inside a card starts at h4, so a `#` in the file can
- * never outrank the card title. */
+ * never outrank the card title.
+ *
+ * The levels a fragment actually uses are compacted to consecutive ones before
+ * clamping. A section whose only heading is `###` would otherwise render as h6
+ * directly under the card's h3, and a screen reader reads that as two missing
+ * levels rather than as the one subheading it is. */
 export default function Markdown({ md, className = 'prose', baseLevel = 4 }) {
   if (!md) return null;
   const lines = md.split('\n');
+  const used = [...new Set(
+    lines.filter((l) => !l.startsWith('```'))
+      .map((l) => /^(#{1,6})\s+\S/.exec(l))
+      .filter(Boolean)
+      .map((m) => m[1].length)
+  )].sort((a, b) => a - b);
+  const levelFor = (hashes) => Math.min(6, baseLevel + Math.max(0, used.indexOf(hashes)));
   const out = [];
   let i = 0;
   let k = 0;
@@ -115,7 +127,7 @@ export default function Markdown({ md, className = 'prose', baseLevel = 4 }) {
 
     const h = /^(#{1,6})\s+(.*)$/.exec(line);
     if (h) {
-      const Tag = `h${Math.min(6, baseLevel + h[1].length - 1)}`;
+      const Tag = `h${levelFor(h[1].length)}`;
       push(<Tag><Inline text={h[2]} /></Tag>);
       i++;
       continue;

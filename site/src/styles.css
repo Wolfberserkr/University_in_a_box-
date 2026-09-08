@@ -242,6 +242,10 @@ footer p { margin: .35rem 0; max-width: var(--measure); }
   text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600;
 }
 .grid { display: grid; gap: 1rem; }
+/* A grid or flex item defaults to min-width:auto, which is the content's width -
+   so a card holding a wide table refuses to shrink and pushes the page sideways
+   instead of letting .table-scroll scroll. Every layout child may shrink. */
+.grid > *, .card, main > section { min-width: 0; }
 @media (min-width: 46rem) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 62rem) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
 
@@ -293,7 +297,7 @@ footer p { margin: .35rem 0; max-width: var(--measure); }
 
 /* ----------------------------------------------------------------- tables */
 
-.table-scroll { overflow-x: auto; margin: .8rem 0; }
+.table-scroll { overflow-x: auto; overscroll-behavior-x: contain; max-width: 100%; margin: .8rem 0; }
 table { border-collapse: collapse; width: 100%; font-size: .88rem; font-family: var(--sans); }
 th, td { text-align: left; padding: .45rem .6rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
@@ -382,7 +386,10 @@ label { font-family: var(--sans); font-size: .8rem; color: var(--ink-2); }
 /* --------------------------------------------------------------- week strip */
 
 .strip-block { margin: .2rem 0 0; }
-.strip-wrap { overflow-x: auto; padding-bottom: .2rem; }
+/* min-width/max-width so the scroller can actually be narrower than the 26rem
+   grid inside it - without them it sizes to its content and the page scrolls
+   sideways instead of the strip. */
+.strip-wrap { overflow-x: auto; padding-bottom: .2rem; min-width: 0; max-width: 100%; }
 @media (max-width: 46rem) {
   .strip-wrap {
     -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 1.6rem), transparent 100%);

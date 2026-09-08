@@ -2006,15 +2006,15 @@
    "gaps": [],
    "gapsNote": "A gap closes only when the student re-explains it cold, in a later session, in a frame the Tutor didn't supply.\n\n**Standing probe for wk 1**, substituting for declined intake Q2 — a measurement, so don't prepare for it:\n\n> 36% replicated. Of the 64% that didn't, how much is false positives and how much is real effects reported too big? How would you tell them apart?",
    "gapsHeader": "| Wk | Concept | Gap (specific) | Status | Closed by |",
-   "gapsPlaceholder": "| — | | | | |",
+   "gapsPlaceholder": "| Wk | Concept | Gap (specific) | Status | Closed by |\n|---|---|---|---|---|\n| — | | | | |",
    "verdicts": [],
    "verdictsNote": "",
    "verdictsHeader": "| Wk | Artifact | Rubric | Recon | Verdict | Rewrite |",
-   "verdictsPlaceholder": "| — | | | | | |",
+   "verdictsPlaceholder": "| Wk | Artifact | Rubric | Recon | Verdict | Rewrite |\n|---|---|---|---|---|---|\n| — | | | | | |",
    "crossDomain": [],
    "crossNote": "Fortnightly. Spent domains cannot be reused.\n\n**Spent:** none · **Queued:** see `catalog/PSY-sources.md` → Roommate's queue",
    "crossHeader": "| Wk | Domain | Collided with | Transfer that survived |",
-   "crossPlaceholder": "| — | | | |"
+   "crossPlaceholder": "| Wk | Domain | Collided with | Transfer that survived |\n|---|---|---|---|\n| — | | | |"
   },
   "STA-101": {
    "code": "STA-101",
@@ -2270,7 +2270,7 @@
    "gaps": [],
    "gapsNote": "**Standing wk-7 midterm probe:** state what a 95% interval means, then four things it does not mean, from Greenland's catalogue, cold. *\"95% probability the true value is in there\"* is misinterpretation #19 and does not pass.",
    "gapsHeader": "| Wk | Concept | Gap (specific) | Status | Closed by |",
-   "gapsPlaceholder": "| — | | | | |",
+   "gapsPlaceholder": "| Wk | Concept | Gap (specific) | Status | Closed by |\n|---|---|---|---|---|\n| — | | | | |",
    "verdicts": [],
    "verdictsNote": "**Note for this course:** A4 (effect size, not just significance) is normally the criterion a student fails early. Here it is the *subject*. Grade it strictly from week 2 onward — a student who fails A4 in a statistics course in week 5 has a curriculum problem, and the Advisor needs to hear about it.",
    "verdictsHeader": "| Wk | Artifact | Rubric | Recon | Verdict | Rewrite |",

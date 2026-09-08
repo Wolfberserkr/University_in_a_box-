@@ -85,12 +85,20 @@ def find_section(md, needle, level=2):
 
 
 def split_cells(row):
+    """Cells of a pipe-table row, honouring the `\\|` escape.
+
+    The site writes rows back into these tables and escapes any pipe inside a
+    cell, so the parser has to read its own output correctly: splitting on every
+    `|` turns one escaped cell into two and shifts the whole row, which then
+    fails to match the state that produced it and gets offered for writing again
+    on every close, forever.
+    """
     row = row.strip()
     if row.startswith("|"):
         row = row[1:]
-    if row.endswith("|"):
+    if row.endswith("|") and not row.endswith("\\|"):
         row = row[:-1]
-    return [c.strip() for c in row.split("|")]
+    return [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", row)]
 
 
 def is_divider(row):
@@ -162,7 +170,11 @@ def placeholder_row(md):
             break
     body = rows[2:] if len(rows) > 2 else []
     if len(body) == 1 and not plain(body[0]).replace("|", "").replace("—", "").strip():
-        return body[0]
+        # Header + divider + the placeholder, verbatim and in order. The three
+        # together are unique in the file; the placeholder alone is not - §C's
+        # `| — | | | | |` is a substring of §D's `| — | | | | | |`, so a
+        # find-and-replace on the short one silently edits the wrong table.
+        return "\n".join(rows[:2] + body)
     return ""
 
 
