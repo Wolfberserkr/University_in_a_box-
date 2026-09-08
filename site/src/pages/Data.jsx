@@ -93,7 +93,7 @@ export default function Data() {
                 <span className="verify-mark" aria-hidden="true">✓</span>
                 {audit.edits} edit{audit.edits === 1 ? '' : 's'} across {audit.files} file{audit.files === 1 ? '' : 's'}
                 {audit.rows > 0 && <>, {audit.rows} appended row{audit.rows === 1 ? '' : 's'}</>}
-                {' '}— applied to the files as the site read them, every one matched exactly once and nothing was left over.
+                {' '}— applied to the files as the site read them on {data.generated.slice(0, 10)}, every one matched exactly once and nothing was left over.
               </p>
             ) : (
               <Callout kind="bad" icon="!" title="This patch contradicts itself — do not paste it">

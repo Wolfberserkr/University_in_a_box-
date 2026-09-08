@@ -28,7 +28,7 @@ const BOX = '☐';
 
 /* One table cell, safe to paste into a Markdown row. */
 export function cell(s) {
-  const t = String(s ?? '')
+  const t = String(s ?? '').normalize('NFC')
     .replace(/\\/g, '\\\\')   // escape the escape first, or `a\|b` round-trips as `a\\|b`
     .replace(/\|/g, '\\|')
     .replace(/\s*\n+\s*/g, ' ')
@@ -37,7 +37,7 @@ export function cell(s) {
 }
 
 /* Loose match for "is this the same row" - case and spacing are not identity. */
-const key = (s) => String(s ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
+const key = (s) => String(s ?? '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim();
 
 function replaceLast(row, value) {
   // the board's final column is the Closed checkbox
@@ -462,7 +462,12 @@ export function auditPatch(blocks, targets = {}) {
           problems.push(`${b.path}: "${e.why}" targets a line that appears ${before} times — a find-and-replace would edit the wrong one.`);
           return;
         }
-        working = working.replace(e.find, e.replace);
+        // A function replacement, never a string: `replace` expands $&, $` and
+        // $1 inside a string replacement even when the pattern is a plain
+        // string, and this text comes from the ledger and the gap log. A source
+        // titled "cost $& up" would make the audit model a different file from
+        // the one a paste produces - a green line over a patch it never checked.
+        working = working.replace(e.find, () => e.replace);
       }
 
       if (e.rows && e.rows.length) {
@@ -478,7 +483,7 @@ export function auditPatch(blocks, targets = {}) {
             problems.push(`${b.path}: "${e.why}" appends the same row twice — ${row.slice(0, 70)}…`);
           }
         });
-        working = working.replace(header, `${header}\n${e.rows.join('\n')}`);
+        working = working.replace(header, () => `${header}\n${e.rows.join('\n')}`);
       }
     });
 
