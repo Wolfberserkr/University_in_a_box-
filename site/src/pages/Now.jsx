@@ -67,11 +67,13 @@ export default function Now() {
             <li key={step.n} className={step.done ? 'done' : ''}>
               <div className="check-row">
                 <input type="checkbox" id={`setup-${step.n}`} checked={step.done}
-                       onChange={() => dispatch({ type: 'setup:toggle', n: step.n })} />
+                       onChange={() => dispatch({ type: 'setup:toggle', n: step.n })}
+                         disabled={step.done}
+                         title={step.done ? 'Recorded in the repository — tick it there, not here' : undefined} />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <label htmlFor={`setup-${step.n}`}>
                     <span className="check-title">{step.n}. {step.title}</span>
-                    {step.note && <span className="check-meta"> · {step.note}</span>}
+                    {step.note && <span className="check-meta"> · <MdInline md={step.note} /></span>}
                   </label>
                   {/* What the repository already knows about this step. The
                       box is for the part the repository cannot answer, not for

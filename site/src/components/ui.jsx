@@ -67,7 +67,7 @@ export function Callout({ kind = 'info', icon, title, children, as: Heading = 'h
 export function CalloutStack({ children, keep = 2 }) {
   const items = React.Children.toArray(children).filter(Boolean);
   const [open, setOpen] = useState(false);
-  if (items.length <= keep + 1) return <>{items}</>;
+  if (items.length <= keep) return <>{items}</>;
   const rest = items.length - keep;
   return (
     <>

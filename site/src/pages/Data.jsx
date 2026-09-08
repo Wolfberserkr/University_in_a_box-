@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useStore, KEY } from '../lib/store.js';
-import { buildPatch, patchText } from '../lib/patch.js';
+import { buildPatch, patchText, patchSummary } from '../lib/patch.js';
 import { fmtLong, toDate, DAY_NAMES } from '../lib/calendar.js';
 import { Card, Callout, Copy } from '../components/ui.jsx';
 
@@ -13,6 +13,7 @@ export default function Data() {
   const blocks = useMemo(() => buildPatch(data, state, today), [data, state, today]);
   const patch = useMemo(() => patchText(blocks, today), [blocks, today]);
   const edits = blocks.reduce((s, b) => s + b.edits.length, 0);
+  const audit = useMemo(() => patchSummary(blocks), [blocks]);
   const rows = blocks.reduce((s, b) => s + b.edits.reduce((t, e) => t + (e.rows ? e.rows.length : 0) + (e.find ? 1 : 0), 0), 0);
   const notes = blocks.reduce((s, b) => s + b.notes.length, 0);
   const isSunday = DAY_NAMES[toDate(today).getDay()] === 'Sun';
@@ -86,6 +87,21 @@ export default function Data() {
                         announce(`Close recorded: ${edits} edit${edits === 1 ? '' : 's'} across ${blocks.length} file${blocks.length === 1 ? '' : 's'}. Re-run the build so the site reads the new files.`);
                       }}>I have applied this</button>
             </div>
+
+            {audit.problems.length === 0 ? (
+              <p className="verify-line">
+                <span className="verify-mark" aria-hidden="true">✓</span>
+                {audit.edits} edit{audit.edits === 1 ? '' : 's'} across {audit.files} file{audit.files === 1 ? '' : 's'}
+                {audit.rows > 0 && <>, {audit.rows} appended row{audit.rows === 1 ? '' : 's'}</>}
+                {' '}— each targets a distinct line, and none makes another impossible to find.
+              </p>
+            ) : (
+              <Callout kind="bad" icon="!" title="This patch contradicts itself — do not paste it">
+                <ul>{audit.problems.map((pr, i) => <li key={i}>{pr}</li>)}</ul>
+                <p>This is a bug in the site, not in your work. The repository is unchanged
+                  and your progress is safe; report it rather than applying anything above.</p>
+              </Callout>
+            )}
 
             {notes > 0 && blocks.flatMap((b) => b.notes.map((n, i) => (
               <Callout key={`${b.path}-${i}`} kind="warn" icon="!" title={`${b.path} — read this before pasting`}>

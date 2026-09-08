@@ -23,13 +23,17 @@
   --accent-ink:  #8c3319;
   --accent-soft: #f6e9e4;
   --on-accent:   #ffffff;
+  /* ink for text sitting on a filled status colour */
+  --on-ok:       #ffffff;
+  --on-warn:     #241a05;
+  --on-bad:      #ffffff;
 
   /* charts — categorical (2 series), validated on #ffffff */
   --series-psy:  #a63c22;
   --series-sta:  #0b6ea8;
   /* charts — sequential, one hue light→dark: recalled → verified → in hand */
-  --ramp-r:      #f2ded6;
-  --ramp-v:      #d08e75;
+  --ramp-r:      #cf9781;
+  --ramp-v:      #c06a4f;
   --ramp-h:      #a63c22;
   /* charts — status, reserved; always shipped with an icon and a label */
   --ok:          #2f7d4f;
@@ -77,11 +81,14 @@
     --accent-ink:  #f0a186;
     --accent-soft: #33221b;
     --on-accent:   #241a15;
+    --on-ok:       #10231a;
+    --on-warn:     #251d08;
+    --on-bad:      #2a100c;
 
     --series-psy:  #d9714c;
     --series-sta:  #3f96c8;
-    --ramp-r:      #5c453c;
-    --ramp-v:      #b06a4c;
+    --ramp-r:      #7d5d51;
+    --ramp-v:      #b8704f;
     --ramp-h:      #ec8a67;
     --ok:          #6cbe8b;
     --ok-ink:      #6cbe8b;
@@ -89,7 +96,7 @@
     --warn:        #e0ad3a;
     --warn-ink:    #e0ad3a;
     --warn-soft:   #2e2718;
-    --bad:         #f2836f;
+    --bad:         #e0574a;
     --bad-ink:     #f2836f;
     --bad-soft:    #33201d;
 
@@ -470,15 +477,23 @@ label { font-family: var(--sans); font-size: .8rem; color: var(--ink-2); }
 
 .legend { display: flex; flex-wrap: wrap; gap: .3rem .9rem; font-family: var(--sans); font-size: .74rem; color: var(--muted); margin: .5rem 0 0; align-items: center; }
 .legend span { display: inline-flex; align-items: center; gap: .3rem; }
-.swatch { width: .7rem; height: .7rem; border-radius: 2px; border: 1px solid var(--rule-ui); display: inline-block; flex: none; }
+/* A swatch carries its mark as well as its colour. Red and a rust accent cannot
+   be pulled 15 ΔE apart without leaving the brand, so "slipped" and "this week"
+   are told apart by the glyph, exactly as the cells themselves are. */
+.swatch {
+  display: inline-grid; place-items: center; flex: none;
+  width: .82rem; height: .82rem; border-radius: 2px;
+  border: 1px solid var(--rule-ui);
+  font-family: var(--sans); font-size: .56rem; line-height: 1; font-weight: 700;
+}
 .swatch-H { background: var(--ramp-h); border-color: var(--ramp-h); }
 .swatch-V { background: var(--ramp-v); border-color: var(--ramp-v); }
 .swatch-R { background: var(--ramp-r); }
-.sw-pass     { background: var(--ok); border-color: var(--ok); }
-.sw-baseline { background: var(--surface-3); border-color: var(--accent); }
-.sw-rewrite  { background: var(--warn); border-color: var(--warn); }
-.sw-slipped  { background: var(--bad); border-color: var(--bad); }
-.sw-current  { border: 2px solid var(--accent); }
+.sw-pass     { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.sw-baseline { background: var(--surface-3); border-color: var(--accent); color: var(--accent-ink); }
+.sw-rewrite  { background: var(--warn); border-color: var(--warn); color: var(--on-warn); }
+.sw-slipped  { background: var(--bad); border-color: var(--bad); color: var(--on-bad); }
+.sw-current  { border: 2px solid var(--accent); color: var(--accent-ink); }
 .sw-future   { border-style: dashed; }
 .sw-band     { background: var(--surface-3); border-color: var(--rule-strong); }
 
@@ -692,3 +707,14 @@ details.week[open] > .week-body { animation: reveal 160ms var(--ease-out); }
   }
   .btn:active, .cell:hover { transform: none !important; }
 }
+
+/* The patch's own verification line. It is not decoration: the write-back is
+   the one moment the site touches the record, and "18 edits, all distinct" is
+   the difference between a patch you paste and a patch you re-read. */
+.verify-line {
+  display: flex; gap: .45rem; align-items: baseline;
+  font-family: var(--sans); font-size: .8rem; color: var(--ink-2);
+  border-left: 3px solid var(--ok); background: var(--ok-soft);
+  border-radius: var(--radius); padding: .5rem .7rem; margin: .7rem 0;
+}
+.verify-mark { color: var(--ok); font-weight: 700; }

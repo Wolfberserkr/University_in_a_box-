@@ -142,14 +142,17 @@ export function reducer(state, action) {
     case 'week:close': {
       const { code, n } = action;
       const week = getWeek(state, code, n);
-      const { full } = rubricScore(week);
+      const { full, graded } = rubricScore(week);
       const course = {
         ...(state.weeks[code] || {}),
         [n]: {
           ...week,
           closed: true,
           closedOn: todayISO(),
-          verdict: week.verdict || (full ? 'PASS' : 'REWRITE'),
+          // A verdict is the Editor's, and it grades against Part A. Closing a
+          // week nobody graded records no verdict rather than inventing a
+          // REWRITE - the strip already calls that state "closed, ungraded".
+          verdict: week.verdict || (graded > 0 ? (full ? 'PASS' : 'REWRITE') : ''),
         },
       };
       return stamp({ ...state, weeks: { ...state.weeks, [code]: course } });

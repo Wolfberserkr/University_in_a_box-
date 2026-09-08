@@ -108,12 +108,12 @@ export default function WeekStrip({ compact = false }) {
       </div>
 
       <p className="legend">
-        <span><i className="swatch sw-pass" />closed 5/5</span>
-        <span><i className="swatch sw-baseline" />baseline measured</span>
-        <span><i className="swatch sw-rewrite" />rewrite owed</span>
-        <span><i className="swatch sw-slipped" />slipped</span>
-        <span><i className="swatch sw-current" />this week</span>
-        <span><i className="swatch sw-future" />ahead</span>
+        <span><i className="swatch sw-pass" aria-hidden="true">✓</i>closed 5/5</span>
+        <span><i className="swatch sw-baseline" aria-hidden="true">◎</i>baseline measured</span>
+        <span><i className="swatch sw-rewrite" aria-hidden="true">↻</i>rewrite owed</span>
+        <span><i className="swatch sw-slipped" aria-hidden="true">!</i>slipped</span>
+        <span><i className="swatch sw-current" aria-hidden="true">•</i>this week</span>
+        <span><i className="swatch sw-future" aria-hidden="true" />ahead</span>
       </p>
 
       {!compact && (

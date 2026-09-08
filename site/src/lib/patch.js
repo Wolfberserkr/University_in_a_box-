@@ -264,60 +264,77 @@ export function buildPatch(data, state, today) {
     }
   });
 
-  /* Pass rate excludes PSY-101 week 1: the Priors Sheet is expected to fail A2
-     and A4, enrolled/PSY-101.md logs it as baseline measured, and the transcript
-     is permanent. Naming the exclusion in the cell keeps the diagnostic honest. */
+  /* One edit per transcript row.
+   *
+   * The pass-rate cell and the Result cell sit on the same line, so emitting
+   * them as two edits built from the same `row.raw` makes the second find stale
+   * the instant the first is applied: the "complete" edit is then dropped in
+   * silence, and the credits line counts a course the table still calls in
+   * progress. Both cell changes are composed onto one line and compared once.
+   *
+   * Pass rate excludes PSY-101 week 1: the Priors Sheet is expected to fail A2
+   * and A4, enrolled/PSY-101.md logs it as baseline measured, and the transcript
+   * is permanent. Naming the exclusion in the cell keeps the diagnostic honest.
+   */
+  const isComplete = (m) =>
+    m.closed >= m.total && rubricScore(getWeek(state, m.code, m.total)).full;
+
+  /* A course the file already records as complete is finished business.
+     Counting it again is how the credits line walks up by three every Sunday
+     for the rest of the year - the same failure the §C/§D/§E dedupe exists to
+     prevent, one table lower down. */
+  const newlyComplete = perCourse.filter((m) => {
+    if (!isComplete(m)) return false;
+    const row = data.registrar.transcript.find((t) => t.code === m.code);
+    return !!row && !/complete/i.test(row.result || '');
+  });
+
   data.registrar.transcript.forEach((row) => {
     const m = perCourse.find((c) => c.code === row.code);
     if (!m || !row.raw) return;
+    let next = row.raw;
+    const reasons = [];
+
     const graded = m.attempted - (isBaselineWeek(row.code, 1) && m.attempted ? 1 : 0);
-    if (m.passRateExBaseline === null || graded <= 0) return;
-    const excl = m.attempted !== graded ? '; wk 1 excluded — baseline measured' : '';
-    const value = `${pct(m.passRateExBaseline)} (${m.exBaselineFull}/${graded} graded${excl})`;
-    const next = setCell(row.raw, 6, value);
+    if (m.passRateExBaseline !== null && graded > 0) {
+      const excl = m.attempted !== graded ? '; wk 1 excluded — baseline measured' : '';
+      const value = `${pct(m.passRateExBaseline)} (${m.exBaselineFull}/${graded} graded${excl})`;
+      next = setCell(next, 6, value);
+      reasons.push('weekly pass rate');
+    }
+    if (newlyComplete.includes(m)) {
+      next = setCell(next, 8, '**complete**');
+      reasons.push('14 weeks closed and the week-14 paper at 5/5');
+    }
+
     if (next === row.raw) return;
     regEdits.push({
       kind: 'line',
       section: 'Transcript',
       find: row.raw,
       replace: next,
-      why: `${row.code}: weekly pass rate cell`,
+      why: `${row.code}: ${reasons.join(' · ')}`,
     });
   });
 
-  /* Credits and Result move only when a course is actually finished: all its
-     weeks closed and the week-14 paper at 5/5. Until then the tile is honest
-     about being a recorded figure that the site cannot change. */
-  const completed = perCourse.filter((m) => {
-    if (m.closed < m.total) return false;
-    const last = getWeek(state, m.code, m.total);
-    return rubricScore(last).full;
-  });
-  completed.forEach((m) => {
-    const row = data.registrar.transcript.find((t) => t.code === m.code);
-    if (!row || !row.raw || /complete/i.test(row.result)) return;
-    regEdits.push({
-      kind: 'line',
-      section: 'Transcript',
-      find: row.raw,
-      replace: setCell(row.raw, 8, '**complete**'),
-      why: `${m.code}: 14 weeks closed and the week-14 paper at 5/5`,
-    });
-  });
   const c = data.registrar.credits;
-  const projectedCredits = c.earned + completed.length * c.perCourse;
-  if (completed.length && c.raw && projectedCredits !== c.earned) {
-    regEdits.push({
-      kind: 'line',
-      section: 'Transcript',
-      find: c.raw,
-      replace: c.raw
-        .replace(`**Credits earned:** ${c.earned} / ${c.total}`,
-                 `**Credits earned:** ${projectedCredits} / ${c.total}`)
-        .replace(`**Courses complete:** ${c.coursesComplete} / ${c.coursesPlanned}`,
-                 `**Courses complete:** ${c.coursesComplete + completed.length} / ${c.coursesPlanned}`),
-      why: `${completed.map((m) => m.code).join(' · ')} complete — ${c.perCourse} credits each`,
-    });
+  if (newlyComplete.length && c.raw) {
+    const credits = c.earned + newlyComplete.length * c.perCourse;
+    const courses = c.coursesComplete + newlyComplete.length;
+    const replace = c.raw
+      .replace(`**Credits earned:** ${c.earned} / ${c.total}`,
+               `**Credits earned:** ${credits} / ${c.total}`)
+      .replace(`**Courses complete:** ${c.coursesComplete} / ${c.coursesPlanned}`,
+               `**Courses complete:** ${courses} / ${c.coursesPlanned}`);
+    if (replace !== c.raw) {
+      regEdits.push({
+        kind: 'line',
+        section: 'Transcript',
+        find: c.raw,
+        replace,
+        why: `${newlyComplete.map((m) => m.code).join(' · ')} complete — ${c.perCourse} credits each`,
+      });
+    }
   }
 
   if (totalSlipped !== data.registrar.slippedRecorded && data.registrar.slippedRaw) {
@@ -333,9 +350,17 @@ export function buildPatch(data, state, today) {
   }
 
   const regNotes = [];
-  perCourse.filter((x) => x.scopeCut).forEach((x) => {
-    regNotes.push(`${x.code} has hit ${x.slipped} slipped weeks. REGISTRAR.md standing rules: the Advisor executes a scope cut in that course and the calendar does not move. Open the Advisor before writing anything else.`);
-  });
+  /* One note per rule, naming every course it fires for. The same 40 words
+     twice, differing only in a course code, is the duplication the callout
+     stack exists to prevent - and this is the page where it is loudest. */
+  const cut = perCourse.filter((x) => x.scopeCut);
+  if (cut.length) {
+    regNotes.push(`${cut.map((x) => `${x.code} ${x.slipped}/${x.slipLimit}`).join(' · ')}. `
+      + 'REGISTRAR.md standing rules: three slips in one course triggers a scope cut in that '
+      + 'course, the Advisor executes it without renegotiating, and the calendar does not move. '
+      + 'Open the Advisor before writing anything else.');
+  }
+
   perCourse.filter((x) => x.editorSoft).forEach((x) => {
     regNotes.push(`${x.code} is passing at ${pct(x.passRateExBaseline)} across ${x.attempted} graded weeks. REGISTRAR.md: a rate near 100% by week 6 means the Editor has gone soft, and the Advisor should say so.`);
   });
@@ -379,4 +404,46 @@ export function patchText(blocks, today, only = null) {
     b.notes.forEach((n) => out.push(`> ${n}`, ''));
   });
   return out.join('\n');
+}
+
+/* Does this patch contradict itself?
+ *
+ * Two edits built from the same line is how the transcript's "complete" cell
+ * was silently dropped: apply the first and the second's find no longer exists.
+ * A find that is a substring of another is how §C's placeholder edited §D. Both
+ * are visible from the patch alone, without the file, so the page checks its own
+ * output before offering it rather than waiting for the repository to be wrong.
+ */
+export function auditPatch(blocks) {
+  const problems = [];
+  blocks.forEach((b) => {
+    const finds = b.edits.filter((e) => e.find).map((e) => ({ find: String(e.find), why: e.why }));
+
+    finds.forEach((a, i) => {
+      finds.slice(i + 1).forEach((c) => {
+        if (a.find === c.find) {
+          problems.push(`${b.path}: two edits target the same line — "${a.why}" and "${c.why}". `
+            + 'Applying the first would make the second impossible to find.');
+        } else if (a.find.includes(c.find) || c.find.includes(a.find)) {
+          const [inner, outer] = a.find.includes(c.find) ? [c, a] : [a, c];
+          problems.push(`${b.path}: the find for "${inner.why}" is contained in the find for `
+            + `"${outer.why}", so a plain find-and-replace could edit the wrong one.`);
+        }
+      });
+    });
+
+    const headers = b.edits.filter((e) => e.rows && e.rows.length).map((e) => String(e.appendTo));
+    headers.forEach((h, i) => {
+      if (headers.indexOf(h) !== i) {
+        problems.push(`${b.path}: two appends share the header ${h} — merge them into one block.`);
+      }
+    });
+  });
+  return problems;
+}
+
+export function patchSummary(blocks) {
+  const edits = blocks.reduce((n, b) => n + b.edits.length, 0);
+  const rows = blocks.reduce((n, b) => n + b.edits.reduce((m, e) => m + ((e.rows && e.rows.length) || 0), 0), 0);
+  return { files: blocks.length, edits, rows, problems: auditPatch(blocks) };
 }

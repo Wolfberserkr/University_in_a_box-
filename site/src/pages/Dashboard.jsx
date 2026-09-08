@@ -36,22 +36,26 @@ export default function Dashboard() {
   const maxLedger = Math.max(...ledgers.map((l) => l.total), 1);
   const totalSlipped = courses.reduce((s, c) => s + c.slipped, 0);
   const rewrites = courses.flatMap((c) => c.rewritesOwed.map((n) => ({ code: c.code, n })));
-  const queue = acquireQueue(data, state, here.week ? here.week.n : 1);
+  const queue = acquireQueue(data, state,
+    here.week ? here.week.n : here.phase === 'post' ? weeks.length : 1);
   const scopeCuts = courses.filter((c) => c.scopeCut);
   const soft = courses.filter((c) => c.editorSoft);
   const rate = passRateBand(courses);
   const hours = courses.reduce((s, c) => s + c.hours, 0);
 
+  const open = setup.steps.filter((st) => !(state.setup[st.n] || st.done));
+  const priorsOpen = open.some((st) => /priors/i.test(st.title));
+
   const access = data.registrar.accessCheck;
-  const accessDue = access && access.date && access.date > today
-    && here.phase === 'in' && here.week.n >= 10;
+  const accessDays = access && access.date ? daysBetween(today, access.date) : null;
+  const accessDue = access && access.date && accessDays > 0 && accessDays <= 70;
 
   /* The first morning. Six tiles reading zero and twenty-eight dashed squares
      is not a briefing, it is an empty database. Until something is closed, the
      page opens with the one thing that is true on day one: here is the week,
      here is what each course wants, and here is the step that cannot be
      recovered if it is done in the wrong order. */
-  const firstMorning = here.phase === 'in' && progress.closed === 0
+  const firstMorning = here.phase !== 'post' && progress.closed === 0
     && courses.every((c) => c.attempted === 0);
 
   return (
@@ -114,12 +118,15 @@ export default function Dashboard() {
           </Callout>
         )}
 
-        {here.phase === 'pre' && setup.done < setup.total && (
+        {here.phase === 'pre' && open.length > 0 && (
           <Callout key="setup" kind="info" icon="→"
-                   title={`${setup.total - setup.done} setup step${setup.total - setup.done === 1 ? '' : 's'} left before Monday`}>
-            <p>Step 2, the Priors Sheet, is the one with an order dependency you cannot undo:
-              the moment you open a Term A source, that measurement is gone for good.{' '}
-              <a href="#/now">Open the checklist →</a></p>
+                   title={`${open.length} setup step${open.length === 1 ? '' : 's'} left before Monday`}>
+            <p>
+              {open.map((st) => `${st.n}. ${st.title}`).join(' · ')}.
+              {' '}{priorsOpen
+                ? 'The Priors Sheet is the one with an order dependency you cannot undo: the moment you open a Term A source, that measurement is gone for good.'
+                : 'The Priors Sheet is written and sealed, so nothing left here is order-dependent — but the seal only holds while no Term A source is opened.'}
+              {' '}<a href="#/now">Open the checklist →</a></p>
           </Callout>
         )}
 
@@ -286,17 +293,26 @@ export default function Dashboard() {
    milestones, one primary move — and the Advisor brief already bound to the
    course, which is the thing you actually have to do first on a Monday. */
 function FirstMorning({ here, setup }) {
-  const { data, state } = useStore();
-  const week = here.week;
+  const { data, state, today } = useStore();
+  // Before week 1 there is no current week, and the week that matters is the
+  // one about to open: the same card, read as a countdown instead of a day.
+  const pre = here.phase === 'pre';
+  const week = here.week || data.termA.weeks[0];
+  const days = pre ? daysBetween(today, week.start) : 0;
   const advisor = data.agents.find((a) => a.name === 'advisor');
   const [copyFor, setCopyFor] = useState(week.entries[0] ? week.entries[0].code : null);
   const owed = setup.steps.filter((s) => !s.done);
 
   return (
-    <Card title={`Week ${week.n} · ${here.weekday} · nothing closed yet`} className="first-morning">
+    <Card
+      title={pre
+        ? `Week ${week.n} opens in ${days} day${days === 1 ? '' : 's'} · ${fmt(week.start)}`
+        : `Week ${week.n} · ${here.weekday} · nothing closed yet`}
+      className="first-morning">
       <p className="fm-lede">
-        Two courses, one milestone each. Nothing is late and nothing is graded, so there is
-        no number on this page worth reading yet — there is only the week.
+        {pre
+          ? 'Two courses, one milestone each, and nothing has started. There is no number on this page worth reading yet — there is what the first week wants, and the steps that have to happen before it.'
+          : 'Two courses, one milestone each. Nothing is late and nothing is graded, so there is no number on this page worth reading yet — there is only the week.'}
       </p>
       <ol className="fm-list">
         {week.entries.map((entry) => (

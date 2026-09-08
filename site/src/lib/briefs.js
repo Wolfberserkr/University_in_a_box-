@@ -16,7 +16,7 @@ const TASK = {
   roommate: 'One cross-domain collision this fortnight. Do not reach for a domain already spent, and check whether the best available collision is between the two live courses before reaching outside. Log to §E.',
 };
 
-export function agentBrief({ data, state, agent, code, weekNo }) {
+export function agentBrief({ data, state, agent, code, weekNo, metrics = null }) {
   const week = data.termA.weeks[weekNo - 1];
   const entry = week ? week.entries.find((e) => e.code === code) : null;
   const enrolled = data.enrolled[code] || {};
@@ -43,7 +43,7 @@ export function agentBrief({ data, state, agent, code, weekNo }) {
 
   if (entry) {
     lines.push(`Milestone:   ${strip(entry.milestone)}`);
-    lines.push(`Source:      ${strip(entry.source)}${entry.sourceTag ? ` [${entry.sourceTag}]` : ''}`);
+    lines.push(`Source:      ${strip(entry.source)}${(entry.sourceTags || []).length ? ` ${entry.sourceTags.map((t) => `[${t}]`).join(' ')}` : ''}`);
     lines.push(`Output:      ${strip(entry.output)}`);
     if (entry.unblocks) lines.push(`Unblocks:    ${strip(entry.unblocks)}`);
     lines.push('');
@@ -59,7 +59,16 @@ export function agentBrief({ data, state, agent, code, weekNo }) {
   if (score.graded > 0) {
     lines.push(`This week so far: ${score.passes}/5${failList(rec)}${rec.closed ? ', closed' : ', open'}`);
   }
-  lines.push(`Slipped in this course: ${enrolled.slipped ?? 0} / ${enrolled.slipLimit ?? 3}. The calendar does not move.`);
+  // The Advisor is the agent that executes a scope cut and this is the only
+  // number that triggers one, so the brief carries the live count. When it has
+  // moved ahead of the file, say both - the gap is itself the thing to act on.
+  const limit = enrolled.slipLimit ?? 3;
+  const recorded = enrolled.slipped ?? 0;
+  const live = metrics ? metrics.slipped : recorded;
+  lines.push(`Slipped in this course: ${live} / ${limit}`
+    + (live !== recorded ? ` (REGISTRAR.md still records ${recorded} — the close has not been written back)` : '')
+    + `.${live >= limit ? ' That is a scope cut, and the Advisor executes it without renegotiating.' : ''}`
+    + ' The calendar does not move.');
   lines.push('', TASK[agent.name]);
 
   if (agent.name === 'librarian') {

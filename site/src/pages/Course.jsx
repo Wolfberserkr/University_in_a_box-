@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '../lib/store.js';
-import { courseMetrics } from '../lib/metrics.js';
+import { courseMetrics, passRateBand } from '../lib/metrics.js';
 import { Card, Tile, Tag, Chip, Callout } from '../components/ui.jsx';
 import Markdown, { MdInline } from '../lib/markdown.jsx';
 
@@ -30,10 +30,14 @@ export default function Course({ code }) {
       {m && (
         <div className="tiles">
           <Tile label="Weeks closed" value={m.closed} of={m.total} meter={m.closed / m.total} />
-          <Tile label="At 5/5" value={m.full} of={m.attempted}
-                note={m.attempted ? `${Math.round(m.passRate * 100)}% pass rate` : 'not graded yet'} />
+          <Tile label="At 5/5" value={m.exBaselineFull} of={m.exBaselineAttempted}
+                state={passRateBand([m]).state}
+                note={m.exBaselineAttempted
+                  ? `${Math.round(m.passRateExBaseline * 100)}% — a diagnostic, not a grade`
+                    + (m.attempted !== m.exBaselineAttempted ? ' · wk 1 excluded, baseline measured' : '')
+                  : 'not graded yet'} />
           <Tile label="Slipped" value={m.slipped} of={m.slipLimit}
-                state={m.slipped === 0 ? 'ok' : m.scopeCut ? 'bad' : 'warn'}
+                state={m.slipped === 0 ? undefined : m.scopeCut ? 'bad' : 'warn'}
                 note={m.scopeCut ? 'scope cut triggered' : 'the calendar does not move'} />
           <Tile label="Hours logged" value={m.hours || 0} note="against ~5 h/week" />
         </div>
