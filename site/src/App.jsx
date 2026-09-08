@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import data from './data/curriculum.json';
 import { StoreContext, reducer, load, save, storageAvailable } from './lib/store.js';
-import { todayISO, fmtLong } from './lib/calendar.js';
+import { todayISO, fmtLong, locate } from './lib/calendar.js';
 import { Callout } from './components/ui.jsx';
 
 import Dashboard from './pages/Dashboard.jsx';
@@ -58,6 +58,30 @@ function useMidnight() {
   }, []);
 }
 
+/* A render that throws must not take the Reset button down with it: /data is
+ * the only route that can recover a broken state, so a crash shows a way out
+ * rather than a blank page. */
+class Boundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <Callout kind="bad" icon="!" title="This page could not be rendered">
+        <p>Your progress data is probably malformed — an imported file, or a
+          half-written record. The repository is untouched.</p>
+        <p><code>{String(this.state.error.message || this.state.error)}</code></p>
+        <p className="btn-row">
+          <button type="button" className="btn btn-danger" onClick={() => {
+            try { window.localStorage.removeItem('uib.v2'); } catch { /* nothing to clear */ }
+            window.location.reload();
+          }}>Clear this browser's progress and reload</button>
+        </p>
+      </Callout>
+    );
+  }
+}
+
 export default function App() {
   const route = useHashRoute();
   const [state, dispatch] = useReducer(reducer, undefined, load);
@@ -105,6 +129,9 @@ export default function App() {
   }
 
   const term = data.termA.term;
+  // Name the block today is in, not the one the site was built around.
+  const at = locate(data.termA.weeks, today, data.registrar.terms);
+  const blockLabel = at.block ? at.block.label : at.nextBlock ? `before ${at.nextBlock.label}` : term.label;
 
   return (
     <StoreContext.Provider value={ctx}>
@@ -112,7 +139,7 @@ export default function App() {
       <header className="masthead">
         <div className="masthead-inner">
           <h1><a href="#/">University in a Box</a><span className="sep">·</span>
-            <span style={{ fontWeight: 400 }}>{term.label} {data.registrar.programStart.slice(0, 4)}</span></h1>
+            <span style={{ fontWeight: 400 }}>{blockLabel}</span></h1>
           <p className="mast-meta">
             <span className="mast-who">{data.registrar.student} · {term.enrolled.join(' + ')} · </span>
             {fmtLong(today)}{previewDate && ' — previewed'}
@@ -143,7 +170,7 @@ export default function App() {
               <button type="button" className="btn btn-sm" onClick={() => setPreviewDate(null)}>Back to today</button></p>
           </Callout>
         )}
-        {page}
+        <Boundary key={route}>{page}</Boundary>
       </main>
 
       {/* One polite live region for the whole site: what changed, in words, for

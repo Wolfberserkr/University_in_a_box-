@@ -7,7 +7,7 @@ import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Agents() {
   const { data, state, today } = useStore();
-  const here = locate(data.termA.weeks, today);
+  const here = locate(data.termA.weeks, today, data.registrar.terms);
   const weekNo = here.phase === 'in' ? here.week.n : 1;
   const codes = Object.keys(data.enrolled);
 

@@ -47,19 +47,30 @@ export function fmtRange(a, b) {
  *   phase 'in'   - inside the term; week is 1..14
  *   phase 'post' - after week 14
  */
-export function locate(weeks, iso) {
-  if (!weeks.length) return { phase: 'pre', week: null, dayIndex: 0 };
+export function locate(weeks, iso, terms = []) {
+  if (!weeks.length) return { phase: 'pre', week: null, dayIndex: 0, block: null };
   const first = weeks[0];
   const last = weeks[weeks.length - 1];
+
+  /* Which of the year's six blocks today falls in. REGISTRAR.md's calendar
+     carries all of them; the site used to read only Term A, so from 14 December
+     onward every page rendered a term that had ended - a scope-cut warning about
+     closed weeks, an acquisition list from September, and a masthead naming the
+     wrong term for thirty-eight of the fifty-two weeks. */
+  const dated = terms.filter((t) => t.start && t.end);
+  const block = dated.find((t) => iso >= t.start && iso <= t.end)
+    || (dated.length && iso > dated[dated.length - 1].end ? null : null);
+  const nextBlock = dated.find((t) => t.start > iso) || null;
+
   if (iso < first.start) {
-    return { phase: 'pre', week: null, daysUntil: daysBetween(iso, first.start), next: first };
+    return { phase: 'pre', week: null, daysUntil: daysBetween(iso, first.start), next: first, block, nextBlock };
   }
   if (iso > last.end) {
-    return { phase: 'post', week: null, daysSince: daysBetween(last.end, iso) };
+    return { phase: 'post', week: null, daysSince: daysBetween(last.end, iso), block, nextBlock };
   }
   const week = weeks.find((w) => iso >= w.start && iso <= w.end) || first;
   const dayIndex = daysBetween(week.start, iso); // 0 = Monday
-  return { phase: 'in', week, dayIndex, weekday: DAY_NAMES[toDate(iso).getDay()] };
+  return { phase: 'in', week, dayIndex, weekday: DAY_NAMES[toDate(iso).getDay()], block, nextBlock };
 }
 
 /* Weeks whose Sunday is already past, relative to `iso`. These are the weeks

@@ -9,7 +9,7 @@ import WeekPanel from '../components/WeekPanel.jsx';
 export default function Now() {
   const { data, state, dispatch, today, previewDate, setPreviewDate } = useStore();
   const weeks = data.termA.weeks;
-  const here = locate(weeks, today);
+  const here = locate(weeks, today, data.registrar.terms);
   const setup = setupMetrics(data, state);
   const sh = data.startHere;
 
@@ -68,8 +68,8 @@ export default function Now() {
               <div className="check-row">
                 <input type="checkbox" id={`setup-${step.n}`} checked={step.done}
                        onChange={() => dispatch({ type: 'setup:toggle', n: step.n })}
-                         disabled={step.done}
-                         title={step.done ? 'Recorded in the repository — tick it there, not here' : undefined} />
+                         disabled={step.repoDone}
+                         title={step.repoDone ? 'Recorded in the repository — tick it there, not here' : undefined} />
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <label htmlFor={`setup-${step.n}`}>
                     <span className="check-title">{step.n}. {step.title}</span>

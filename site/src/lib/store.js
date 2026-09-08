@@ -83,9 +83,40 @@ export function save(state) {
 }
 
 /* v1 was the single-page Term A reader: flat tick ids, closed-week list, tags. */
+/* Anything imported may be the wrong shape - the Import JSON control takes a
+ * file the user pastes. A null where an object belongs used to blank every
+ * route including /data, which is the only page carrying Reset, so the user got
+ * a white screen from a control that promises nothing was changed. */
+const asObject = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+const asArray = (v) => (Array.isArray(v) ? v.filter((x) => x && typeof x === 'object') : []);
+
+export function normalise(raw) {
+  const base = emptyState();
+  const r = asObject(raw);
+  return {
+    ...base,
+    v: 2,
+    setup: asObject(r.setup),
+    weeks: Object.fromEntries(
+      Object.entries(asObject(r.weeks)).map(([code, wk]) => [
+        code,
+        Object.fromEntries(Object.entries(asObject(wk)).map(([n, w]) => [
+          n, { ...emptyWeek(), ...asObject(w), rubric: asObject(asObject(w).rubric) },
+        ])),
+      ])
+    ),
+    tags: asObject(r.tags),
+    tagNotes: asObject(r.tagNotes),
+    gaps: asArray(r.gaps),
+    cross: asArray(r.cross),
+    closes: asArray(r.closes),
+    updated: typeof r.updated === 'string' ? r.updated : null,
+  };
+}
+
 export function migrate(raw) {
   if (!raw || typeof raw !== 'object') return emptyState();
-  if (raw.v === 2) return { ...emptyState(), ...raw };
+  if (raw.v === 2) return normalise(raw);
 
   const next = emptyState();
   if (raw.setup && typeof raw.setup === 'object') next.setup = { ...raw.setup };
@@ -102,7 +133,7 @@ export function migrate(raw) {
     next.weeks[code][n] = { ...emptyWeek(), closed: true };
   });
   next.updated = raw.updated || null;
-  return next;
+  return normalise(next);
 }
 
 /* crypto.randomUUID is not available on every file:// origin in every browser,

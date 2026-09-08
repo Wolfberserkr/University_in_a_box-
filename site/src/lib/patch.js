@@ -29,6 +29,7 @@ const BOX = '☐';
 /* One table cell, safe to paste into a Markdown row. */
 export function cell(s) {
   const t = String(s ?? '')
+    .replace(/\\/g, '\\\\')   // escape the escape first, or `a\|b` round-trips as `a\\|b`
     .replace(/\|/g, '\\|')
     .replace(/\s*\n+\s*/g, ' ')
     .trim();
@@ -78,7 +79,11 @@ function fileBlock(path, edits, notes = []) {
  * table comes first in the file. `placeholder` arrives from the parser as those
  * three lines verbatim.
  */
-function appendEdit({ section, header, placeholder, rows, why }) {
+function appendEdit({ section, header, placeholder, rows: incoming, why }) {
+  // Two clicks of "Add to §C" with the same concept produced two identical rows,
+  // and once applied the next close could not tell them apart. Identity is the
+  // row text, so the same row is never appended twice in one patch.
+  const rows = (incoming || []).filter((r, i, all) => all.indexOf(r) === i);
   if (!rows.length) return null;
   if (placeholder) {
     const keep = placeholder.split('\n').slice(0, -1);   // header + divider
@@ -189,7 +194,8 @@ export function buildPatch(data, state, today) {
     const filedVerdicts = new Map((enrolled.verdicts || []).map((v) => [v.week, v]));
     const newVerdicts = [];
     m.records
-      .filter(({ r }) => r.closed && rubricScore(r).graded > 0)
+      // the week-7 midterm is the Tutor's oral exam, not a Part A artifact
+      .filter(({ w, r }) => !w.midterm && r.closed && rubricScore(r).graded > 0)
       .forEach(({ w, r }) => {
         const s = rubricScore(r);
         const fails = RUBRIC_IDS.filter((id) => r.rubric[id] === 'fail');
@@ -303,6 +309,10 @@ export function buildPatch(data, state, today) {
       reasons.push('weekly pass rate');
     }
     if (newlyComplete.includes(m)) {
+      // REGISTRAR.md: complete when its term paper passes AND its weekly pass
+      // rate is recorded. Writing the result without the paper cell states half
+      // of a definition the same file spells out three lines below.
+      next = setCell(next, 7, '**pass**');
       next = setCell(next, 8, '**complete**');
       reasons.push('14 weeks closed and the week-14 paper at 5/5');
     }
@@ -362,7 +372,7 @@ export function buildPatch(data, state, today) {
   }
 
   perCourse.filter((x) => x.editorSoft).forEach((x) => {
-    regNotes.push(`${x.code} is passing at ${pct(x.passRateExBaseline)} across ${x.attempted} graded weeks. REGISTRAR.md: a rate near 100% by week 6 means the Editor has gone soft, and the Advisor should say so.`);
+    regNotes.push(`${x.code} is passing at ${pct(x.passRateExBaseline)} across ${x.exBaselineAttempted} graded weeks. REGISTRAR.md: a rate near 100% by week 6 means the Editor has gone soft, and the Advisor should say so.`);
   });
 
   const regBlock = fileBlock('REGISTRAR.md', regEdits, regNotes);
@@ -373,6 +383,13 @@ export function buildPatch(data, state, today) {
 
 /* Render the blocks as a paste-ready plain-text patch. `only` narrows it to one
    file, which is what the per-file copy buttons hand over. */
+/* Everything interpolated into the patch is flattened to one line first.
+ * The grammar is line-prefixed - `- ` is a find, `+ ` is a replacement - so a
+ * newline inside a tag note or a gap concept, both of which reach here from an
+ * imported progress file, would otherwise inject find/replace pairs the
+ * generator never built. */
+const oneLine = (v) => String(v ?? '').replace(/[\r\n]+/g, ' ').trim();
+
 export function patchText(blocks, today, only = null) {
   const list = only ? blocks.filter((b) => b.path === only) : blocks;
   if (!list.length) {
@@ -387,7 +404,7 @@ export function patchText(blocks, today, only = null) {
   list.forEach((b) => {
     out.push('', `## ${b.path}`, '');
     b.edits.forEach((e) => {
-      out.push(`### ${e.section} — ${e.why}`, '');
+      out.push(`### ${oneLine(e.section)} — ${oneLine(e.why)}`, '');
       if (e.find) {
         // a find may span several lines (a table header, its divider and the
         // placeholder row) - prefix every one of them, so the block stays
@@ -401,49 +418,83 @@ export function patchText(blocks, today, only = null) {
       }
       out.push('');
     });
-    b.notes.forEach((n) => out.push(`> ${n}`, ''));
+    b.notes.forEach((n) => out.push(`> ${oneLine(n)}`, ''));
   });
   return out.join('\n');
 }
 
-/* Does this patch contradict itself?
+/* Does this patch actually apply?
  *
- * Two edits built from the same line is how the transcript's "complete" cell
- * was silently dropped: apply the first and the second's find no longer exists.
- * A find that is a substring of another is how §C's placeholder edited §D. Both
- * are visible from the patch alone, without the file, so the page checks its own
- * output before offering it rather than waiting for the repository to be wrong.
+ * Comparing the edits against each other is not the property that matters, and
+ * saying so over a patch that is wrong is worse than saying nothing: a duplicated
+ * §C row and a line injected through an imported progress file both passed that
+ * check. So the audit does the only thing that settles it - it applies the patch
+ * to the file text the parser read, in memory, and asserts that every find
+ * matched exactly once before and matches zero times after.
  */
-export function auditPatch(blocks) {
-  const problems = [];
-  blocks.forEach((b) => {
-    const finds = b.edits.filter((e) => e.find).map((e) => ({ find: String(e.find), why: e.why }));
+function countOf(haystack, needle) {
+  if (!needle) return 0;
+  let n = 0;
+  let i = haystack.indexOf(needle);
+  while (i !== -1) { n += 1; i = haystack.indexOf(needle, i + needle.length); }
+  return n;
+}
 
-    finds.forEach((a, i) => {
-      finds.slice(i + 1).forEach((c) => {
-        if (a.find === c.find) {
-          problems.push(`${b.path}: two edits target the same line — "${a.why}" and "${c.why}". `
-            + 'Applying the first would make the second impossible to find.');
-        } else if (a.find.includes(c.find) || c.find.includes(a.find)) {
-          const [inner, outer] = a.find.includes(c.find) ? [c, a] : [a, c];
-          problems.push(`${b.path}: the find for "${inner.why}" is contained in the find for `
-            + `"${outer.why}", so a plain find-and-replace could edit the wrong one.`);
+export function auditPatch(blocks, targets = {}) {
+  const problems = [];
+
+  blocks.forEach((b) => {
+    const original = targets[b.path];
+    if (original === undefined) {
+      problems.push(`${b.path}: the site has no copy of this file to check the patch against.`);
+      return;
+    }
+    let working = original;
+
+    b.edits.forEach((e) => {
+      if (e.find) {
+        const before = countOf(working, e.find);
+        if (before === 0) {
+          problems.push(`${b.path}: "${e.why}" targets a line that is not in the file as the site read it.`);
+          return;
         }
-      });
+        if (before > 1) {
+          problems.push(`${b.path}: "${e.why}" targets a line that appears ${before} times — a find-and-replace would edit the wrong one.`);
+          return;
+        }
+        working = working.replace(e.find, e.replace);
+      }
+
+      if (e.rows && e.rows.length) {
+        const header = String(e.appendTo || '');
+        if (countOf(working, header) !== 1) {
+          problems.push(`${b.path}: "${e.why}" appends under a header that appears ${countOf(working, header)} times.`);
+        }
+        e.rows.forEach((row, n) => {
+          if (countOf(working, row) > 0) {
+            problems.push(`${b.path}: "${e.why}" appends a row the file already contains — ${row.slice(0, 70)}…`);
+          }
+          if (e.rows.indexOf(row) !== n) {
+            problems.push(`${b.path}: "${e.why}" appends the same row twice — ${row.slice(0, 70)}…`);
+          }
+        });
+        working = working.replace(header, `${header}\n${e.rows.join('\n')}`);
+      }
     });
 
-    const headers = b.edits.filter((e) => e.rows && e.rows.length).map((e) => String(e.appendTo));
-    headers.forEach((h, i) => {
-      if (headers.indexOf(h) !== i) {
-        problems.push(`${b.path}: two appends share the header ${h} — merge them into one block.`);
+    // nothing the patch claims to change may still be there afterwards
+    b.edits.forEach((e) => {
+      if (e.find && countOf(working, e.find) > 0) {
+        problems.push(`${b.path}: applying the patch leaves "${e.why}" unapplied — a later edit puts its line back.`);
       }
     });
   });
+
   return problems;
 }
 
-export function patchSummary(blocks) {
+export function patchSummary(blocks, targets = {}) {
   const edits = blocks.reduce((n, b) => n + b.edits.length, 0);
   const rows = blocks.reduce((n, b) => n + b.edits.reduce((m, e) => m + ((e.rows && e.rows.length) || 0), 0), 0);
-  return { files: blocks.length, edits, rows, problems: auditPatch(blocks) };
+  return { files: blocks.length, edits, rows, problems: auditPatch(blocks, targets) };
 }

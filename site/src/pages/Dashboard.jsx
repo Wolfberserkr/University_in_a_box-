@@ -20,7 +20,7 @@ export default function Dashboard() {
   const { data, state, today } = useStore();
   const weeks = data.termA.weeks;
   const codes = useMemo(() => Object.keys(data.enrolled), [data]);
-  const here = locate(weeks, today);
+  const here = locate(weeks, today, data.registrar.terms);
 
   const courses = useMemo(() => codes.map((c) => courseMetrics(data, state, c, today)),
     [data, state, today, codes]);
@@ -48,7 +48,8 @@ export default function Dashboard() {
 
   const access = data.registrar.accessCheck;
   const accessDays = access && access.date ? daysBetween(today, access.date) : null;
-  const accessDue = access && access.date && accessDays > 0 && accessDays <= 70;
+  const accessDue = access && access.date && accessDays <= 70;
+  const accessLate = access && access.date && accessDays <= 0;
 
   /* The first morning. Six tiles reading zero and twenty-eight dashed squares
      is not a briefing, it is an empty database. Until something is closed, the
@@ -82,7 +83,7 @@ export default function Dashboard() {
       {/* ---------- things that need a decision, most severe first ---------- */}
 
       <CalloutStack>
-        {scopeCuts.length > 0 && (
+        {here.phase === 'in' && scopeCuts.length > 0 && (
           <Callout key="cut" kind="bad" icon="!"
                    title={`Scope cut triggered — ${scopeCuts.map((c) => c.code).join(' and ')}`}>
             <p>{scopeCuts.map((c) => `${c.code} ${c.slipped}/${c.slipLimit}`).join(' · ')}.
@@ -92,7 +93,7 @@ export default function Dashboard() {
           </Callout>
         )}
 
-        {soft.length > 0 && (
+        {here.phase === 'in' && soft.length > 0 && (
           <Callout key="soft" kind="warn" icon="?"
                    title={`Check the Editor — ${soft.map((c) => `${c.code} at ${pct(c.passRateExBaseline)}`).join(', ')}`}>
             <p>A pass rate near 100% by week 6 means the Editor has drifted toward the standard
@@ -101,7 +102,7 @@ export default function Dashboard() {
           </Callout>
         )}
 
-        {totalSlipped > 0 && scopeCuts.length === 0 && (
+        {here.phase === 'in' && totalSlipped > 0 && scopeCuts.length === 0 && (
           <Callout key="slip" kind="warn" icon="!"
                    title={`${totalSlipped} slipped week${totalSlipped === 1 ? '' : 's'}`}>
             <p>{courses.filter((c) => c.slipped).map((c) =>
@@ -131,8 +132,10 @@ export default function Dashboard() {
         )}
 
         {accessDue && (
-          <Callout key="access" kind="info" icon="◷"
-                   title={`Access check owed in ${daysBetween(today, access.date)} days — before ${access.term}`}>
+          <Callout key="access" kind={accessLate ? 'bad' : accessDays <= 14 ? 'warn' : 'info'} icon="◷"
+                   title={accessLate
+                     ? `Access check is ${Math.abs(accessDays)} day${Math.abs(accessDays) === 1 ? '' : 's'} overdue — it was owed before ${access.term}`
+                     : `Access check owed in ${accessDays} days — before ${access.term}`}>
             <p>{access.why} <a href="#/program">Standing rules →</a></p>
           </Callout>
         )}
@@ -197,7 +200,14 @@ export default function Dashboard() {
         </Card>
 
         {/* --------------------------- acquire ----------------------------- */}
-        <Card title={`To get${queue.length ? ` — ${queue.length} due within four weeks` : ''}`}>
+        {/* After the term, nothing is "due within four weeks" - what is left is
+            what the term closed without. Saying it the other way makes September
+            sources read as this month's work. */}
+        <Card title={`To get${queue.length
+          ? here.phase === 'post'
+            ? ` — ${queue.length} never acquired before the term closed`
+            : ` — ${queue.length} due within four weeks`
+          : ''}`}>
           {queue.length === 0 ? (
             <p className="small">Nothing outstanding inside the next four weeks. Buy what the
               current three weeks need and nothing further: a folder of sixty unread PDFs by

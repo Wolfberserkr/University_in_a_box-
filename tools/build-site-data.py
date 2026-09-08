@@ -987,6 +987,15 @@ def main():
         "major": parse_major(),
         "agents": parse_agents(),
         "logs": {"files": logs, "count": len(logs)},
+        # The exact text of every file the write-back edits. The site's patch
+        # audit applies its own edits to these in memory and asserts each find
+        # matches exactly once before and zero times after - a claim it cannot
+        # make by comparing edits against each other, which is how a duplicated
+        # gap row and an injected line both passed a clean audit.
+        "patchTargets": {
+            path: read(path)
+            for path in ["REGISTRAR.md"] + ["enrolled/%s.md" % c for c in sorted(enrolled)]
+        },
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

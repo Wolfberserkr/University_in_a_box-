@@ -7,6 +7,8 @@
  * week's live state, so a session opens already bound.
  */
 import { getWeek, rubricScore, RUBRIC_IDS } from './store.js';
+import { courseMetrics } from './metrics.js';
+import { todayISO } from './calendar.js';
 
 const TASK = {
   advisor: 'Open the week. Read last week\'s gaps (§C) and verdicts (§D) first, then set this week\'s milestone in §A. Refuse anything that unblocks no later week, and price any change against the calendar rather than moving it.',
@@ -16,7 +18,7 @@ const TASK = {
   roommate: 'One cross-domain collision this fortnight. Do not reach for a domain already spent, and check whether the best available collision is between the two live courses before reaching outside. Log to §E.',
 };
 
-export function agentBrief({ data, state, agent, code, weekNo, metrics = null }) {
+export function agentBrief({ data, state, agent, code, weekNo, today }) {
   const week = data.termA.weeks[weekNo - 1];
   const entry = week ? week.entries.find((e) => e.code === code) : null;
   const enrolled = data.enrolled[code] || {};
@@ -64,7 +66,10 @@ export function agentBrief({ data, state, agent, code, weekNo, metrics = null })
   // moved ahead of the file, say both - the gap is itself the thing to act on.
   const limit = enrolled.slipLimit ?? 3;
   const recorded = enrolled.slipped ?? 0;
-  const live = metrics ? metrics.slipped : recorded;
+  // Computed here rather than accepted as an argument: the previous version
+  // took `metrics` with a null default, no call site passed it, and the brief
+  // quietly reported the file's slip count on a page showing a scope cut.
+  const live = courseMetrics(data, state, code, today || todayISO()).slipped;
   lines.push(`Slipped in this course: ${live} / ${limit}`
     + (live !== recorded ? ` (REGISTRAR.md still records ${recorded} — the close has not been written back)` : '')
     + `.${live >= limit ? ' That is a scope cut, and the Advisor executes it without renegotiating.' : ''}`

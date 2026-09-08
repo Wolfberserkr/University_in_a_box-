@@ -52,7 +52,12 @@ export function Inline({ text }) {
 }
 
 const isDivider = (l) => /^\s*\|?[\s|:-]+\|[\s|:-]*$/.test(l) && l.includes('-');
-const cells = (l) => l.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map((c) => c.trim());
+/* Split on unescaped pipes only, then unescape - the site writes `\|` into the
+   files it reads back, so a renderer that splits on every pipe would show its
+   own output as two cells. */
+const cells = (l) => l.replace(/^\s*\|/, '').replace(/\|\s*$/, '')
+  .split(/(?<!\\)\|/)
+  .map((c) => c.trim().replace(/\\\|/g, '|').replace(/\\\\/g, '\\'));
 
 function Table({ lines }) {
   const headers = cells(lines[0]);

@@ -13,7 +13,7 @@ export default function Data() {
   const blocks = useMemo(() => buildPatch(data, state, today), [data, state, today]);
   const patch = useMemo(() => patchText(blocks, today), [blocks, today]);
   const edits = blocks.reduce((s, b) => s + b.edits.length, 0);
-  const audit = useMemo(() => patchSummary(blocks), [blocks]);
+  const audit = useMemo(() => patchSummary(blocks, data.patchTargets), [blocks, data]);
   const rows = blocks.reduce((s, b) => s + b.edits.reduce((t, e) => t + (e.rows ? e.rows.length : 0) + (e.find ? 1 : 0), 0), 0);
   const notes = blocks.reduce((s, b) => s + b.notes.length, 0);
   const isSunday = DAY_NAMES[toDate(today).getDay()] === 'Sun';
@@ -93,7 +93,7 @@ export default function Data() {
                 <span className="verify-mark" aria-hidden="true">✓</span>
                 {audit.edits} edit{audit.edits === 1 ? '' : 's'} across {audit.files} file{audit.files === 1 ? '' : 's'}
                 {audit.rows > 0 && <>, {audit.rows} appended row{audit.rows === 1 ? '' : 's'}</>}
-                {' '}— each targets a distinct line, and none makes another impossible to find.
+                {' '}— applied to the files as the site read them, every one matched exactly once and nothing was left over.
               </p>
             ) : (
               <Callout kind="bad" icon="!" title="This patch contradicts itself — do not paste it">

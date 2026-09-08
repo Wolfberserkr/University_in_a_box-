@@ -28,8 +28,20 @@ export function courseMetrics(data, state, code, today) {
   const records = weeks.map((w) => ({ w, r: getWeek(state, code, w.n) }));
 
   const closed = records.filter(({ r }) => r.closed);
-  const graded = records.filter(({ r }) => rubricScore(r).graded > 0);
-  const attempted = records.filter(({ r }) => r.closed || rubricScore(r).graded > 0);
+
+  /* Week 7 is the midterm: oral, cold, run by the Tutor. ASSESSMENT.md Part A
+     grades weekly written output, so the midterm is not a Part A artifact and
+     does not belong in a pass rate built out of Part A verdicts. */
+  const gradeable = records.filter(({ w }) => !w.midterm);
+
+  /* A pass rate is `weeks at 5/5 / weeks attempted` (REGISTRAR.md). A week you
+     closed without the Editor grading it is not a failed week - nobody read it.
+     Counting it knocks the rate down on the strength of an absent verdict, so
+     attempted means graded, and the closed-but-ungraded weeks are reported
+     separately rather than folded in. */
+  const graded = gradeable.filter(({ r }) => rubricScore(r).graded > 0);
+  const ungraded = gradeable.filter(({ r }) => r.closed && rubricScore(r).graded === 0);
+  const attempted = graded;
   const full = attempted.filter(({ r }) => rubricScore(r).full);
 
   const slipped = elapsed.filter((w) => !getWeek(state, code, w.n).closed);
@@ -50,6 +62,7 @@ export function courseMetrics(data, state, code, today) {
     elapsed: elapsed.length,
     closed: closed.length,
     attempted: attempted.length,
+    ungraded: ungraded.length,
     graded: graded.length,
     full: full.length,
     passRate,
@@ -173,7 +186,11 @@ export function setupMetrics(data, state) {
   const rows = steps.map((step) => {
     const e = evidence(step);
     const ticked = !!state.setup[step.n];
-    return { ...step, ...e, ticked, done: e.done || ticked };
+    // repoDone is the repository's answer and is not yours to change here.
+    // `done` folds in your own tick, which must stay undoable - conflating the
+    // two latched the one tickable step forever under a tooltip claiming the
+    // repository had recorded it.
+    return { ...step, ...e, ticked, repoDone: e.done, done: e.done || ticked };
   });
   return { done: rows.filter((r) => r.done).length, total: rows.length, steps: rows };
 }

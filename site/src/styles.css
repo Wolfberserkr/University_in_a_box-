@@ -27,6 +27,8 @@
   --on-ok:       #ffffff;
   --on-warn:     #241a05;
   --on-bad:      #ffffff;
+  --ok-ink:      #256841;
+  --sta-ink:     #0a5f91;
 
   /* charts — categorical (2 series), validated on #ffffff */
   --series-psy:  #a63c22;
@@ -84,6 +86,8 @@
     --on-ok:       #10231a;
     --on-warn:     #251d08;
     --on-bad:      #2a100c;
+    --ok-ink:      #7ec99a;
+    --sta-ink:     #5aa9d8;
 
     --series-psy:  #d9714c;
     --series-sta:  #3f96c8;
@@ -718,3 +722,9 @@ details.week[open] > .week-body { animation: reveal 160ms var(--ease-out); }
   border-radius: var(--radius); padding: .5rem .7rem; margin: .7rem 0;
 }
 .verify-mark { color: var(--ok); font-weight: 700; }
+
+/* Contrast corrections, each measured against its own surface rather than
+   assumed: the separator and the small pass/fail and chip labels sat under
+   4.5:1 at the sizes they are actually rendered. */
+.pf-pass, .chip-ok { color: var(--ok-ink); border-color: var(--ok-ink); }
+.chip-sta { color: var(--sta-ink); border-color: var(--sta-ink); }

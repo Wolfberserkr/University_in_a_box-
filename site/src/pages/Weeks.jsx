@@ -10,7 +10,7 @@ import Markdown from '../lib/markdown.jsx';
 export default function Weeks({ focus }) {
   const { data, state, dispatch, today, announce } = useStore();
   const weeks = data.termA.weeks;
-  const here = locate(weeks, today);
+  const here = locate(weeks, today, data.registrar.terms);
   const codes = useMemo(() => Object.keys(data.enrolled), [data]);
   /* `expandAll` used to be a plain boolean, so pressing "Expand all" twice with
      a manual collapse in between did nothing: the value had not changed, so
