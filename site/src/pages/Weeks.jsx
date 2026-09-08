@@ -5,7 +5,7 @@ import { courseMetrics, gapMetrics } from '../lib/metrics.js';
 import { Card, Callout, Chip, courseKind } from '../components/ui.jsx';
 import WeekPanel from '../components/WeekPanel.jsx';
 import WeekStrip from '../components/WeekStrip.jsx';
-import Markdown from '../lib/markdown.jsx';
+import Markdown, { MdInline } from '../lib/markdown.jsx';
 
 export default function Weeks({ focus }) {
   const { data, state, dispatch, today, announce } = useStore();
@@ -47,10 +47,11 @@ export default function Weeks({ focus }) {
         <WeekStrip />
       </Card>
 
-      <Callout kind="info" icon="→" title="Term A interlocks one way">
-        <p>STA-101 wk 2 → PSY-101 wk 3 · STA-101 wk 3 → PSY-101 wk 4 · STA-101 wk 6 → PSY-101 wk 5.
-          If something has to slip, slip PSY-101 — never STA-101 weeks 2 or 3.</p>
-      </Callout>
+      {data.registrar.interlock && (
+        <Callout kind="info" icon="→" title="The term interlocks one way">
+          <p><MdInline md={data.registrar.interlock.replace(/^\*\*[^*]+\*\*\s*/, '')} /></p>
+        </Callout>
+      )}
 
       <div className="btn-row">
         <button type="button" className="btn btn-quiet"

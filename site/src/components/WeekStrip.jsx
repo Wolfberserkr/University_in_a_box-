@@ -51,7 +51,7 @@ export default function WeekStrip({ compact = false }) {
     const score = rubricScore(getWeek(after, code, n));
     const verdict = score.graded === 0 ? 'ungraded'
       : score.full ? 'PASS'
-      : isBaselineWeek(code, n) ? 'REWRITE · baseline measured, none owed'
+      : isBaselineWeek(data, code, n) ? 'REWRITE · baseline measured, none owed'
       : 'REWRITE';
     announce(`${code} week ${n} closed · ${verdict} · ${edits} edit${edits === 1 ? '' : 's'} to write back`);
   };
@@ -94,7 +94,7 @@ export default function WeekStrip({ compact = false }) {
                 <div className="strip-cells">
                   {weeks.map((w) => (
                     <Cell key={w.n} code={code} week={w}
-                          status={weekStatus(state, code, w, today)}
+                          status={weekStatus(data, state, code, w, today)}
                           selected={sel.code === code && sel.n === w.n}
                           onSelect={() => setSel({ code, n: w.n })}
                           onHover={setHover}
@@ -144,7 +144,7 @@ function Cell({ code, week, status, selected, onSelect, onHover, onKeyDown }) {
 
 /* Fixed-height so hovering the strip never moves the page under the pointer. */
 function WeekDetail({ week, pinned, onClose, onReopen }) {
-  const { state, today } = useStore();
+  const { data, state, today } = useStore();
   const isNow = today >= week.start && today <= week.end;
 
   return (
@@ -160,7 +160,7 @@ function WeekDetail({ week, pinned, onClose, onReopen }) {
       </p>
       {week.entries.map((entry) => {
         const rec = getWeek(state, entry.code, week.n);
-        const status = weekStatus(state, entry.code, week, today);
+        const status = weekStatus(data, state, entry.code, week, today);
         return (
           <div key={entry.code} className={`strip-detail-row ${courseKind(entry.code)}`}>
             <span className="strip-detail-code">{entry.code}</span>

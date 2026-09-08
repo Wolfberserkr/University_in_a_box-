@@ -10,7 +10,7 @@ import { MdInline } from '../lib/markdown.jsx';
 const WeekPanel = React.memo(function WeekPanel({ week, open = false }) {
   const { data, state, today } = useStore();
   const codes = Object.keys(data.enrolled);
-  const statuses = codes.map((c) => weekStatus(state, c, week, today));
+  const statuses = codes.map((c) => weekStatus(data, state, c, week, today));
 
   return (
     <details className="week" open={open} id={`week-${week.n}`}>
@@ -46,8 +46,8 @@ const CourseWeek = React.memo(function CourseWeek({ entry, week }) {
   const { code } = entry;
   const rec = getWeek(state, code, week.n);
   const score = rubricScore(rec);
-  const status = weekStatus(state, code, week, today);
-  const baseline = isBaselineWeek(code, week.n);
+  const status = weekStatus(data, state, code, week, today);
+  const baseline = isBaselineWeek(data, code, week.n);
   const [showAgents, setShowAgents] = useState(false);
   const [gap, setGap] = useState({ concept: '', gap: '' });
 
@@ -95,6 +95,13 @@ const CourseWeek = React.memo(function CourseWeek({ entry, week }) {
       </div>
 
       {/* --------------------------- Part A grading -------------------------- */}
+      {week.midterm ? (
+        <p className="small">
+          Week 7 is the midterm: oral, cold, run by the Tutor. ASSESSMENT.md Part A grades
+          weekly written output, so there is nothing here for the Editor to mark — the
+          verdict is the Tutor's and it goes to §C, not §D.
+        </p>
+      ) : (
       <details className="disclose">
         <summary className="small">
           Editor — Part A, {score.graded ? `${score.passes}/5 so far` : 'not graded'}
@@ -139,6 +146,7 @@ const CourseWeek = React.memo(function CourseWeek({ entry, week }) {
           )}
         </div>
       </details>
+      )}
 
       {/* ------------------------------ the close ---------------------------- */}
       <div className="btn-row">

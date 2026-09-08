@@ -31,7 +31,8 @@ export function cell(s) {
   const t = String(s ?? '').normalize('NFC')
     .replace(/\\/g, '\\\\')   // escape the escape first, or `a\|b` round-trips as `a\\|b`
     .replace(/\|/g, '\\|')
-    .replace(/\s*\n+\s*/g, ' ')
+    .replace(/[\r\n\u0085\u2028\u2029]+/g, ' ')   // every line terminator, not just \n
+    .replace(/\s+/g, ' ')
     .trim();
   return t || '—';
 }
@@ -83,7 +84,17 @@ function appendEdit({ section, header, placeholder, rows: incoming, why }) {
   // Two clicks of "Add to §C" with the same concept produced two identical rows,
   // and once applied the next close could not tell them apart. Identity is the
   // row text, so the same row is never appended twice in one patch.
-  const rows = (incoming || []).filter((r, i, all) => all.indexOf(r) === i);
+  // key(), not string equality: identity is case- and space-insensitive
+  // everywhere else in this file, so "Effect size" and "effect  size" are one
+  // row. Two spellings appended once each produced an ambiguous find the moment
+  // either was edited.
+  const seen = new Set();
+  const rows = (incoming || []).filter((r) => {
+    const k = key(r);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
   if (!rows.length) return null;
   if (placeholder) {
     const keep = placeholder.split('\n').slice(0, -1);   // header + divider
@@ -202,7 +213,7 @@ export function buildPatch(data, state, today) {
         const entry = (data.termA.weeks[w.n - 1].entries.find((e) => e.code === code) || {});
         const verdict = s.full ? 'PASS' : 'REWRITE';
         const rewrite = s.full ? '—'
-          : isBaselineWeek(code, w.n) ? 'none owed — baseline measured'
+          : isBaselineWeek(data, code, w.n) ? 'none owed — baseline measured'
           : (r.rewriteDone ? 'done' : 'owed');
         const filed = filedVerdicts.get(w.n);
         if (filed) {
@@ -301,7 +312,7 @@ export function buildPatch(data, state, today) {
     let next = row.raw;
     const reasons = [];
 
-    const graded = m.attempted - (isBaselineWeek(row.code, 1) && m.attempted ? 1 : 0);
+    const graded = m.attempted - (isBaselineWeek(data, row.code, 1) && m.attempted ? 1 : 0);
     if (m.passRateExBaseline !== null && graded > 0) {
       const excl = m.attempted !== graded ? '; wk 1 excluded — baseline measured' : '';
       const value = `${pct(m.passRateExBaseline)} (${m.exBaselineFull}/${graded} graded${excl})`;
@@ -388,7 +399,7 @@ export function buildPatch(data, state, today) {
  * newline inside a tag note or a gap concept, both of which reach here from an
  * imported progress file, would otherwise inject find/replace pairs the
  * generator never built. */
-const oneLine = (v) => String(v ?? '').replace(/[\r\n]+/g, ' ').trim();
+const oneLine = (v) => String(v ?? '').replace(/[\r\n\u0085\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 export function patchText(blocks, today, only = null) {
   const list = only ? blocks.filter((b) => b.path === only) : blocks;
@@ -483,7 +494,17 @@ export function auditPatch(blocks, targets = {}) {
             problems.push(`${b.path}: "${e.why}" appends the same row twice — ${row.slice(0, 70)}…`);
           }
         });
-        working = working.replace(header, () => `${header}\n${e.rows.join('\n')}`);
+        // after the divider, and after any rows already there - a row inserted
+        // between header and divider is not a table any more, and the parser
+        // drops the whole block
+        working = working.replace(header, () => header);
+        const at = working.indexOf(header);
+        if (at !== -1) {
+          let nl = working.indexOf('\n', at) + 1;          // past the header
+          nl = working.indexOf('\n', nl) + 1;              // past the divider
+          while (nl > 0 && working[nl] === '|') nl = working.indexOf('\n', nl) + 1;
+          working = working.slice(0, nl) + e.rows.join('\n') + '\n' + working.slice(nl);
+        }
       }
     });
 

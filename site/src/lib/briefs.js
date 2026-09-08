@@ -45,7 +45,11 @@ export function agentBrief({ data, state, agent, code, weekNo, today }) {
 
   if (entry) {
     lines.push(`Milestone:   ${strip(entry.milestone)}`);
-    lines.push(`Source:      ${strip(entry.source)}${(entry.sourceTags || []).length ? ` ${entry.sourceTags.map((t) => `[${t}]`).join(' ')}` : ''}`);
+    // strip() keeps the [H]/[V] markers that are already in the source text;
+    // appending the parsed tags as well printed each one three times over
+    const src = strip(entry.source);
+    const missing = (entry.sourceTags || []).filter((t) => !src.includes(`[${t}]`));
+    lines.push(`Source:      ${src}${missing.length ? ` ${missing.map((t) => `[${t}]`).join(' ')}` : ''}`);
     lines.push(`Output:      ${strip(entry.output)}`);
     if (entry.unblocks) lines.push(`Unblocks:    ${strip(entry.unblocks)}`);
     lines.push('');

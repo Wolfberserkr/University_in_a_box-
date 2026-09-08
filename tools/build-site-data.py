@@ -252,6 +252,7 @@ def parse_registrar():
     band = re.search(r"(\d+)\s*[–-]\s*(\d+)\s*h/week", capacity.group(1) if capacity else "")
 
     intake = []
+    intake_raw = []
     for t in parse_tables(find_section(md, "Student")):
         if "Question" in t["headers"]:
             for r in t["rows"]:
@@ -264,6 +265,9 @@ def parse_registrar():
                     "declined": "declined" in r.get("Answer", "").casefold(),
                     "effect": r.get("Effect", ""),
                 })
+                # kept out of the emitted document; used only to redact these
+                # strings from patchTargets and to assert none of them ship
+                intake_raw.append(r.get("Answer", ""))
 
     cal = find_section(md, "Calendar")
     terms = []
@@ -354,6 +358,7 @@ def parse_registrar():
         "capacityBand": ({"low": int(band.group(1)), "high": int(band.group(2)),
                           "unit": "h/week"} if band else None),
         "intake": intake,
+        "intakeRaw": intake_raw,
         "terms": terms,
         "calendarNote": drop_tables(cal),
         "enrolment": enrolment,
@@ -373,6 +378,9 @@ def parse_registrar():
         "slippedRaw": raw_line(rules, "**Slipped weeks:**"),
         "rulesMd": rules,
         "agents": {"stoodUp": stood_up, "total": len(agent_names), "names": agent_names},
+        "interlock": next(
+            (l.strip() for l in find_section(md, "Enrolment").splitlines()
+             if l.startswith("**Term A interlock")), ""),
         "accessCheck": {
             "raw": access,
             "term": plain(access_term.group(1)).strip() if access_term else "",
@@ -445,6 +453,16 @@ def parse_enrolled(code):
 
     slipped = re.search(r"\*\*Slipped:\*\*\s*(\d+)\s*/\s*(\d+)", board_md)
 
+    # Which week, if any, the Advisor has declared a measurement rather than a
+    # performance. enrolled/PSY-101.md says of week 1: "logs it as baseline
+    # measured, not a slipped week ... No rewrite is owed." The site used to
+    # hard-code `code === 'PSY-101' && n === 1`, which is curriculum knowledge
+    # typed into the source of a site whose whole claim is that it holds none.
+    baseline_week = None
+    m = re.search(r"Week (\d+) grading note", board_md)
+    if m and "baseline measured" in board_md:
+        baseline_week = int(m.group(1))
+
     def week_of(cell):
         m = re.search(r"\d+", plain(cell))
         return int(m.group(0)) if m else None
@@ -478,6 +496,7 @@ def parse_enrolled(code):
         "board": rows,
         "boardNote": drop_tables(board_md),
         "slipped": int(slipped.group(1)) if slipped else 0,
+        "baselineWeek": baseline_week,
         "slipLimit": int(slipped.group(2)) if slipped else 3,
         "slippedRaw": raw_line(board_md, "**Slipped:**"),
         "ledger": ledger,
@@ -950,6 +969,45 @@ def source_stamp():
     return datetime.fromtimestamp(newest, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+
+# --------------------------------------------------------------------------
+# Personal work never leaves the repository
+# --------------------------------------------------------------------------
+
+def personal_strings(registrar):
+    """Everything the site must never publish, taken from what it just parsed."""
+    out = []
+    for q in registrar.get("intakeRaw", []):
+        answer = q.strip()
+        if len(answer) > 12 and answer.lower() not in ("declined", "—", "-"):
+            out.append(answer)
+    return out
+
+
+def redact_personal(text, registrar):
+    """Blank the personal cells, keeping the line and its shape intact.
+
+    The audit counts occurrences of whole lines the patch targets. No patch
+    targets an intake row, so replacing the answer with a marker of the same
+    role changes nothing the audit relies on and removes the only content in
+    these files that is the student's rather than the curriculum's.
+    """
+    for answer in personal_strings(registrar):
+        text = text.replace(answer, "[recorded in the repository — not published]")
+    return text
+
+
+def assert_no_personal(blob, registrar):
+    """Fail the build rather than ship a personal answer in docs/."""
+    leaked = [a[:60] for a in personal_strings(registrar) if a in blob]
+    if leaked:
+        raise SystemExit(
+            "REFUSING TO WRITE: the site data contains intake answers.\n"
+            + "\n".join("  " + l + "..." for l in leaked)
+            + "\nPersonal work stays in the repository. See README.md and Data.jsx."
+        )
+
+
 def main():
     registrar = parse_registrar()
 
@@ -987,19 +1045,32 @@ def main():
         "major": parse_major(),
         "agents": parse_agents(),
         "logs": {"files": logs, "count": len(logs)},
-        # The exact text of every file the write-back edits. The site's patch
-        # audit applies its own edits to these in memory and asserts each find
-        # matches exactly once before and zero times after - a claim it cannot
-        # make by comparing edits against each other, which is how a duplicated
-        # gap row and an injected line both passed a clean audit.
+        # The text of every file the write-back edits, so the patch audit can
+        # apply its own edits and assert each find matches exactly once before
+        # and zero times after - a claim it cannot make by comparing edits
+        # against each other.
+        #
+        # REDACTED FIRST. These are whole repository files and REGISTRAR.md
+        # carries the intake answers; shipping them verbatim put the student's
+        # own words into a public bundle on the page that promises it publishes
+        # none of them. The audit only ever counts occurrences of lines the
+        # patch targets, and no patch targets a personal cell, so redacting them
+        # costs the audit nothing. assert_no_personal below fails the build if
+        # any survives.
         "patchTargets": {
-            path: read(path)
+            path: redact_personal(read(path), registrar)
             for path in ["REGISTRAR.md"] + ["enrolled/%s.md" % c for c in sorted(enrolled)]
         },
     }
 
+    # the needles are for the build only - they must not ship either
+    needles = dict(registrar)
+    data["registrar"] = {k: v for k, v in registrar.items() if k != "intakeRaw"}
+    blob = json.dumps(data, ensure_ascii=False, indent=1)
+    assert_no_personal(blob, needles)
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    OUT.write_text(blob, encoding="utf-8")
 
     counts = {
         "courses": len(courses),

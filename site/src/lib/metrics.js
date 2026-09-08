@@ -14,8 +14,13 @@ import { elapsedWeeks } from './calendar.js';
 export const TAGS = ['R', 'V', 'H'];
 export const TAG_LABEL = { R: 'Recalled', V: 'Verified', H: 'In hand' };
 
-export function isBaselineWeek(code, n) {
-  return code === 'PSY-101' && n === 1;
+/* Which week the Advisor has declared a measurement rather than a performance.
+ * Declared in the board note in enrolled/<CODE>.md and parsed out of it - the
+ * site holds no curriculum of its own, and "PSY-101 week 1" typed here would be
+ * exactly that. */
+export function isBaselineWeek(data, code, n) {
+  const enrolled = data.enrolled[code];
+  return !!enrolled && enrolled.baselineWeek === n;
 }
 
 export function effectiveTag(state, row) {
@@ -46,9 +51,9 @@ export function courseMetrics(data, state, code, today) {
 
   const slipped = elapsed.filter((w) => !getWeek(state, code, w.n).closed);
   const rewrites = attempted.filter(({ w, r }) =>
-    !rubricScore(r).full && !r.rewriteDone && !isBaselineWeek(code, w.n));
+    !rubricScore(r).full && !r.rewriteDone && !isBaselineWeek(data, code, w.n));
 
-  const exBaseline = attempted.filter(({ w }) => !isBaselineWeek(code, w.n));
+  const exBaseline = attempted.filter(({ w }) => !isBaselineWeek(data, code, w.n));
   const exBaselineFull = exBaseline.filter(({ r }) => rubricScore(r).full);
 
   const hours = records.reduce((sum, { r }) => sum + (parseFloat(r.hours) || 0), 0);
@@ -232,11 +237,11 @@ export function termProgress(courses) {
  * bold: the Priors Sheet fails A2 and A4, it is logged as baseline measured,
  * and no rewrite is owed. courseMetrics already excludes it; the strip has to
  * agree, or the dashboard contradicts itself on one screen. */
-export function weekStatus(state, code, week, today) {
+export function weekStatus(data, state, code, week, today) {
   const r = getWeek(state, code, week.n);
   const score = rubricScore(r);
   if (r.closed && score.full) return 'pass';
-  if (r.closed && score.graded > 0 && isBaselineWeek(code, week.n)) return 'baseline';
+  if (r.closed && score.graded > 0 && isBaselineWeek(data, code, week.n)) return 'baseline';
   if (r.closed && score.graded > 0) return 'rewrite';
   if (r.closed) return 'closed';
   if (week.end < today) return 'slipped';
