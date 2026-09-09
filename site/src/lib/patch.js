@@ -31,7 +31,12 @@ export function cell(s) {
   const t = String(s ?? '').normalize('NFC')
     .replace(/\\/g, '\\\\')   // escape the escape first, or `a\|b` round-trips as `a\\|b`
     .replace(/\|/g, '\\|')
-    .replace(/[\r\n\u0085\u2028\u2029]+/g, ' ')   // every line terminator, not just \n
+    // Every control character and line/paragraph separator, by Unicode category
+    // rather than by name. Three rounds of blacklisting specific codepoints
+    // (\n, then \r and U+2028, then U+001C-1E) each shipped a patch that could
+    // still forge a find/replace pair; the category is the property that
+    // matters, so match on it.
+    .replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   return t || '—';
@@ -55,9 +60,16 @@ function setTagInRow(row, tag) {
    is parts[n]. */
 function setCell(raw, n, value) {
   const parts = raw.split('|');
-  if (parts.length <= n) return raw;
+  // n + 1: a `| a | b |` row splits to ['', ' a ', ' b ', ''] and the trailing
+  // empty element is the closing pipe. Guarding on `length <= n` let a short
+  // row be written one cell past its end, producing a row with no closing pipe
+  // - and because that still differs from the input, the caller's "did the
+  // write land" check saw success and the credits line counted the course.
+  if (parts.length <= n + 1) return raw;
   parts[n] = ` ${value} `;
-  return parts.join('|');
+  const out = parts.join('|');
+  // structural assertion: a cell edit may never change the shape of the row
+  return (out.match(/\|/g) || []).length === (raw.match(/\|/g) || []).length ? out : raw;
 }
 
 function pct(x) {
@@ -175,7 +187,18 @@ export function buildPatch(data, state, today) {
       + `${g.status === 'closed' ? 'closed' : 'open'} | ${cell(g.closedBy)} |`;
 
     const newGaps = [];
-    state.gaps.filter((g) => g.course === code).forEach((g) => {
+    // Collapse by the same identity the file is matched on, before any row is
+    // built. Two entries sharing a key produced two rows the next close could
+    // not tell apart, and closing one then silently rewrote the other.
+    const seenGap = new Set();
+    const uniqueGaps = state.gaps.filter((g) => {
+      if (g.course !== code) return false;
+      const k = gapKey(g);
+      if (seenGap.has(k)) return false;
+      seenGap.add(k);
+      return true;
+    });
+    uniqueGaps.forEach((g) => {
       const filed = filedGapBy.get(gapKey(g));
       if (!filed) { newGaps.push(g); return; }
       // already in the file: only a changed status is worth an edit, and it is
@@ -240,7 +263,10 @@ export function buildPatch(data, state, today) {
     const crossKey = (c) => `${c.week || '—'}|${key(c.domain)}`;
     const filedCross = new Set((enrolled.crossDomain || []).map(crossKey));
     const newCross = state.cross
-      .filter((c) => c.course === code && !filedCross.has(crossKey(c)));
+      .filter((c) => c.course === code && !filedCross.has(crossKey(c)))
+      // a spent domain is spent once: the Roommate refuses to reach for it
+      // again, and the ledger must not record it twice either
+      .filter((c, i, all) => all.findIndex((o) => crossKey(o) === crossKey(c)) === i);
     const crossAppend = appendEdit({
       section: '§E CROSS-DOMAIN LEDGER',
       header: enrolled.crossHeader,
@@ -313,9 +339,14 @@ export function buildPatch(data, state, today) {
     let next = row.raw;
     const reasons = [];
 
-    const graded = m.attempted - (isBaselineWeek(data, row.code, 1) && m.attempted ? 1 : 0);
+    const bw = (data.enrolled[row.code] || {}).baselineWeek;
+    const graded = m.attempted - (bw && m.attempted ? 1 : 0);
     if (m.passRateExBaseline !== null && graded > 0) {
-      const excl = m.attempted !== graded ? '; wk 1 excluded — baseline measured' : '';
+      // name every exclusion the number carries, not just the first
+      const excluded = [];
+      if (m.attempted !== graded) excluded.push(`wk ${bw} excluded — baseline measured`);
+      if (m.midtermWeek) excluded.push(`wk ${m.midtermWeek} is the Tutor's oral midterm, not a Part A week`);
+      const excl = excluded.length ? `; ${excluded.join('; ')}` : '';
       const value = `${pct(m.passRateExBaseline)} (${m.exBaselineFull}/${graded} graded${excl})`;
       next = setCell(next, 6, value);
       reasons.push('weekly pass rate');
@@ -406,7 +437,7 @@ export function buildPatch(data, state, today) {
  * newline inside a tag note or a gap concept, both of which reach here from an
  * imported progress file, would otherwise inject find/replace pairs the
  * generator never built. */
-const oneLine = (v) => String(v ?? '').replace(/[\r\n\u0085\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim();
+const oneLine = (v) => String(v ?? '').replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\s+/g, ' ').trim();
 
 export function patchText(blocks, today, only = null) {
   const list = only ? blocks.filter((b) => b.path === only) : blocks;
@@ -504,7 +535,6 @@ export function auditPatch(blocks, targets = {}) {
         // after the divider, and after any rows already there - a row inserted
         // between header and divider is not a table any more, and the parser
         // drops the whole block
-        working = working.replace(header, () => header);
         const at = working.indexOf(header);
         if (at !== -1) {
           let nl = working.indexOf('\n', at) + 1;          // past the header
@@ -526,8 +556,42 @@ export function auditPatch(blocks, targets = {}) {
   return problems;
 }
 
-export function patchSummary(blocks, targets = {}) {
+export function patchSummary(blocks, targets = {}, today = '') {
   const edits = blocks.reduce((n, b) => n + b.edits.length, 0);
   const rows = blocks.reduce((n, b) => n + b.edits.reduce((m, e) => m + ((e.rows && e.rows.length) || 0), 0), 0);
-  return { files: blocks.length, edits, rows, problems: auditPatch(blocks, targets) };
+  const problems = [
+    ...auditPatch(blocks, targets),
+    ...auditEmitted(blocks, patchText(blocks, today)),
+  ];
+  return { files: blocks.length, edits, rows, problems };
+}
+
+/* Re-read the emitted patch with the grammar a reader applies.
+ *
+ * The audit checks the edits it was handed; this checks the text that was
+ * printed. Any find/replace pair in the output that the generator did not
+ * build - forged by a control character in user text, or by a `- ` at the
+ * start of a wrapped line - shows up here as a count mismatch, whatever
+ * codepoint spelled it. That is the property, rather than the list of
+ * characters that have been tried so far.
+ */
+export function auditEmitted(blocks, text) {
+  const problems = [];
+  const expected = blocks.reduce((n, b) => n + b.edits.reduce(
+    (m, e) => m + (e.find ? String(e.find).split('\n').length : 0), 0), 0);
+  const expectedPlus = blocks.reduce((n, b) => n + b.edits.reduce(
+    (m, e) => m + (e.find ? String(e.replace).split('\n').length : 0)
+             + ((e.rows && e.rows.length) || 0), 0), 0);
+
+  const lines = String(text).split('\n');
+  const minus = lines.filter((l) => l.startsWith('- ')).length;
+  const plus = lines.filter((l) => l.startsWith('+ ')).length;
+
+  if (minus !== expected) {
+    problems.push(`the printed patch has ${minus} find lines where the checked edits account for ${expected}. Something in the text is being read as an edit that the site did not build.`);
+  }
+  if (plus !== expectedPlus) {
+    problems.push(`the printed patch has ${plus} replacement lines where the checked edits account for ${expectedPlus}.`);
+  }
+  return problems;
 }

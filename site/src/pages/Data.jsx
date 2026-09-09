@@ -13,7 +13,7 @@ export default function Data() {
   const blocks = useMemo(() => buildPatch(data, state, today), [data, state, today]);
   const patch = useMemo(() => patchText(blocks, today), [blocks, today]);
   const edits = blocks.reduce((s, b) => s + b.edits.length, 0);
-  const audit = useMemo(() => patchSummary(blocks, data.patchTargets), [blocks, data]);
+  const audit = useMemo(() => patchSummary(blocks, data.patchTargets, today), [blocks, data]);
   const rows = blocks.reduce((s, b) => s + b.edits.reduce((t, e) => t + (e.rows ? e.rows.length : 0) + (e.find ? 1 : 0), 0), 0);
   const notes = blocks.reduce((s, b) => s + b.notes.length, 0);
   const isSunday = DAY_NAMES[toDate(today).getDay()] === 'Sun';

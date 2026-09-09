@@ -48,8 +48,15 @@ export default function Dashboard() {
 
   const access = data.registrar.accessCheck;
   const accessDays = access && access.date ? daysBetween(today, access.date) : null;
-  const accessDue = access && access.date && accessDays <= 70;
-  const accessLate = access && access.date && accessDays <= 0;
+  // Owed before a named block. Once that block has started the question is
+  // settled one way or the other, so the countdown stops rather than shouting
+  // "264 days overdue" under a masthead reading "programme complete".
+  const accessBlock = access && access.term
+    ? data.registrar.terms.find((t) => t.label && t.label.includes(access.term))
+    : null;
+  const accessMoot = !!(accessBlock && accessBlock.start && today > accessBlock.start);
+  const accessDue = access && access.date && accessDays <= 70 && !accessMoot;
+  const accessLate = accessDue && accessDays <= 0;
 
   /* The first morning. Six tiles reading zero and twenty-eight dashed squares
      is not a briefing, it is an empty database. Until something is closed, the
@@ -154,8 +161,9 @@ export default function Dashboard() {
                 note={rate.attempted
                   ? `${rate.full} of ${rate.attempted} graded weeks at 5/5 · a diagnostic, not a grade`
                   : 'no week graded yet'} />
-          <Tile label="Slipped weeks" value={totalSlipped}
-                state={totalSlipped === 0 ? undefined : scopeCuts.length ? 'bad' : 'warn'}
+          <Tile label={here.phase === 'post' ? 'Weeks that slipped' : 'Slipped weeks'} value={totalSlipped}
+                state={here.phase === 'post' || totalSlipped === 0 ? undefined
+                  : scopeCuts.length ? 'bad' : 'warn'}
                 note={totalSlipped === 0
                   ? 'nothing late · three in one course cuts scope'
                   : courses.map((c) => `${c.code} ${c.slipped}/${c.slipLimit}`).join(' · ')} />

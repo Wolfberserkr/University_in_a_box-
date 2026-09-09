@@ -269,7 +269,12 @@ def parse_registrar():
                 })
                 # kept out of the emitted document; used only to redact these
                 # strings from patchTargets and to assert none of them ship
+                # the raw cell: split_cells has already unescaped `\|`, and the
+                # assertion needs the string as it appears on disk
                 intake_raw.append(r.get("Answer", ""))
+                on_disk = r.get("_raw", "")
+                if on_disk:
+                    intake_raw.append(on_disk)
 
     cal = find_section(md, "Calendar")
     terms = []
@@ -382,7 +387,7 @@ def parse_registrar():
         "agents": {"stoodUp": stood_up, "total": len(agent_names), "names": agent_names},
         "interlock": next(
             (l.strip() for l in find_section(md, "Enrolment").splitlines()
-             if l.startswith("**Term A interlock")), ""),
+             if re.match(r"\*\*[^*]*interlock", l, re.I)), ""),
         "accessCheck": {
             "raw": access,
             "term": plain(access_term.group(1)).strip() if access_term else "",
@@ -976,27 +981,62 @@ def source_stamp():
 # Personal work never leaves the repository
 # --------------------------------------------------------------------------
 
+def strip_personal_tables(text):
+    """Remove the intake table's body rows outright.
+
+    The previous version substring-matched each answer and replaced it, which is
+    a blacklist: an answer under thirteen characters slipped the length floor,
+    and an answer containing a pipe never matched because the parser had already
+    unescaped it. Both shipped with the build reporting success.
+
+    Structure does not have those holes. The intake table is identified by its
+    header, and every data row under it is dropped whole - no needle, nothing to
+    spell around. Nothing the write-back targets lives in that table, so the
+    audit, which only counts occurrences of lines the patch edits, is unaffected.
+    """
+    out, i = [], 0
+    lines = text.splitlines(keepends=True)
+    while i < len(lines):
+        line = lines[i]
+        cells = [c.strip() for c in line.split("|")]
+        is_intake_header = (
+            line.lstrip().startswith("|")
+            and "Question" in cells
+            and "Answer" in cells
+        )
+        if not is_intake_header:
+            out.append(line)
+            i += 1
+            continue
+        out.append(line)                       # header
+        i += 1
+        if i < len(lines) and is_divider(lines[i]):
+            out.append(lines[i])               # divider
+            i += 1
+        dropped = 0
+        while i < len(lines) and lines[i].lstrip().startswith("|"):
+            i += 1
+            dropped += 1
+        out.append("| — | (recorded in REGISTRAR.md — %d row%s not published) | | |\n"
+                   % (dropped, "" if dropped == 1 else "s"))
+    return "".join(out)
+
+
 def personal_strings(registrar):
-    """Everything the site must never publish, taken from what it just parsed."""
+    """Needles for the build-time assertion, taken from the file as written.
+
+    Raw, not parsed: split_cells unescapes `\\|` on the way in, so a parsed
+    answer containing a pipe is a different string from the one on disk and
+    would never be found in the emitted document. No length floor either - a
+    one-word answer is as personal as a paragraph.
+    """
     out = []
     for q in registrar.get("intakeRaw", []):
-        answer = q.strip()
-        if len(answer) > 12 and answer.lower() not in ("declined", "—", "-"):
+        answer = str(q).strip()
+        if answer and answer.lower() not in ("declined", "—", "-", "**declined**"):
             out.append(answer)
+            out.append(answer.replace("|", "\\|"))   # as it appears on disk
     return out
-
-
-def redact_personal(text, registrar):
-    """Blank the personal cells, keeping the line and its shape intact.
-
-    The audit counts occurrences of whole lines the patch targets. No patch
-    targets an intake row, so replacing the answer with a marker of the same
-    role changes nothing the audit relies on and removes the only content in
-    these files that is the student's rather than the curriculum's.
-    """
-    for answer in personal_strings(registrar):
-        text = text.replace(answer, "[recorded in the repository — not published]")
-    return text
 
 
 def assert_no_personal(blob, registrar):
@@ -1060,7 +1100,7 @@ def main():
         # costs the audit nothing. assert_no_personal below fails the build if
         # any survives.
         "patchTargets": {
-            path: redact_personal(read(path), registrar)
+            path: strip_personal_tables(read(path))
             for path in ["REGISTRAR.md"] + ["enrolled/%s.md" % c for c in sorted(enrolled)]
         },
     }

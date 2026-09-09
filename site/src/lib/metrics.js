@@ -38,6 +38,7 @@ export function courseMetrics(data, state, code, today) {
      grades weekly written output, so the midterm is not a Part A artifact and
      does not belong in a pass rate built out of Part A verdicts. */
   const gradeable = records.filter(({ w }) => !w.midterm);
+  const midtermWeek = (records.find(({ w }) => w.midterm) || {}).w?.n || null;
 
   /* A pass rate is `weeks at 5/5 / weeks attempted` (REGISTRAR.md). A week you
      closed without the Editor grading it is not a failed week - nobody read it.
@@ -68,6 +69,7 @@ export function courseMetrics(data, state, code, today) {
     closed: closed.length,
     attempted: attempted.length,
     ungraded: ungraded.length,
+    midtermWeek,
     graded: graded.length,
     full: full.length,
     passRate,
@@ -238,6 +240,16 @@ export function termProgress(courses) {
  * and no rewrite is owed. courseMetrics already excludes it; the strip has to
  * agree, or the dashboard contradicts itself on one screen. */
 export function weekStatus(data, state, code, week, today) {
+  // The week-7 midterm is the Tutor's oral exam. A Part A score left over from
+  // an earlier build must not paint it as a graded pass - the form that would
+  // let you clear it is gone, and §D excludes it either way.
+  if (week.midterm) {
+    const m = getWeek(state, code, week.n);
+    if (m.closed) return 'closed';
+    if (week.end < today) return 'slipped';
+    if (today >= week.start && today <= week.end) return 'current';
+    return 'future';
+  }
   const r = getWeek(state, code, week.n);
   const score = rubricScore(r);
   if (r.closed && score.full) return 'pass';
